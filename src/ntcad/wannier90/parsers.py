@@ -5,12 +5,13 @@
 """
 
 from datetime import datetime
+from xmlrpc.client import Boolean
 from matplotlib.pyplot import axis
 
 import numpy as np
 
 
-def read_hr_dat(path: str) -> np.ndarray:
+def read_hr_dat(path: str, full: bool = False) -> np.ndarray:
     """Parses the contents of a `seedname_hr.dat` file.
 
     The first line gives the date and time at which the file was
@@ -23,21 +24,27 @@ def read_hr_dat(path: str) -> np.ndarray:
 
     Finally, the remaining `num_wann**2 * nrpts` lines each contain,
     respectively, the components of the vector `R` in terms of the
-    lattice vectors A_i, the indices m and n, and the real and imaginary
+    lattice vectors `A_i`, the indices m and n, and the real and imaginary
     parts of the Hamiltonian matrix element `H_R_mn` in the WF basis.
 
     Parameters
     ----------
     path
         Path to `seedname_hr.dat`.
+    full
+        Switch determining nature of return value. When it is `False`
+        (the default) just `r_R` is returned, when `True`, the
+        Wigner-Seitz cell indices `R_R` and degeneracy info are also
+        returned.
 
     Returns
     -------
-    H_R, degen
+    H_R, R_R, deg
         The Hamiltonian elements (`N_1` x `N_2` x `N_3` x `num_wann` x
-        `num_wann`), and the degeneracies (`nrpts`), where `N_i`
-        correspond to the number of Wigner-Seitz cells along the lattice
-        vectors `A_i`.
+        `num_wann`), where `N_i` correspond to the number of
+        Wigner-Seitz cells along the lattice vectors `A_i`.
+        Additionally, if `full = True`, Wigner-Seitz cell indices `R_R`
+        (`N_1` x `N_2` x `N_3` x 3), and degeneracy info (`nrpts`).
 
     """
     with open(path, "r") as f:
@@ -49,15 +56,15 @@ def read_hr_dat(path: str) -> np.ndarray:
     num_elements = num_wann**2 * nrpts
 
     # Read degeneracy info.
-    degen = np.ndarray([])
-    degen_rows = int(np.ceil(nrpts / 15.0))
-    for i in range(degen_rows):
-        np.append(degen, list(map(int, lines[i + 3].split())))
+    deg = np.ndarray([])
+    deg_rows = int(np.ceil(nrpts / 15.0))
+    for i in range(deg_rows):
+        np.append(deg, list(map(int, lines[i + 3].split())))
 
     # Preliminary pass to find number of Wigner-Seitz cells.
     R_mn = np.zeros((num_elements, 3), dtype=np.int8)
     for i in range(num_elements):
-        entries = lines[3 + degen_rows + i].split()
+        entries = lines[3 + deg_rows + i].split()
         R_mn[i, :] = list(map(int, entries[:3]))
 
     # Shift the `R` vector such that it can be used to index H_R.
@@ -67,16 +74,20 @@ def read_hr_dat(path: str) -> np.ndarray:
 
     # Obtain Hamiltonian elements.
     H_R = np.zeros((N_1, N_2, N_3, num_wann, num_wann), dtype=np.complex64)
+    R_R = np.zeros((N_1, N_2, N_3, 3), dtype=np.int8)
     for i in range(num_elements):
-        entries = lines[3 + degen_rows + i].split()
+        entries = lines[3 + deg_rows + i].split()
+        R_R[R_1[i], R_2[i], R_3[i], :] = list(map(int, entries[:3]))
         m, n = tuple(map(int, entries[3:5]))
         H_R_mn_real, H_R_mn_imag = tuple(map(float, entries[5:]))
         H_R[R_1[i], R_2[i], R_3[i], m - 1, n - 1] = H_R_mn_real + 1j * H_R_mn_imag
 
-    return H_R, degen
+    if full:
+        return H_R, R_R, deg
+    return H_R
 
 
-def read_r_dat(path: str) -> np.ndarray:
+def read_r_dat(path: str, full: bool = False) -> np.ndarray:
     """Parses the contents of a `seedname_r.dat` file.
 
     The first line gives the date and time at which the file was
@@ -93,13 +104,19 @@ def read_r_dat(path: str) -> np.ndarray:
     ----------
     path
         Path to `seedname_r.dat`.
+    full
+        Switch determining nature of return value. When it is `False`
+        (the default) just `r_R` is returned, when `True`, the
+        Wigner-Seitz cell indices `R_R` are also returned.
 
     Returns
     -------
-    r_R
+    r_R, R_R
         The position matrix elements (`N_1` x `N_2` x `N_3` x `num_wann`
         x `num_wann`x 3), where `N_i` correspond to the number of
         Wigner-Seitz cells along the lattice vectors `A_i`.
+        Additionally, if `full = True`, the Wigner-Seitz cell indices
+        `R_R` (`N_1` x `N_2` x `N_3` x 3).
 
     """
 
@@ -123,8 +140,10 @@ def read_r_dat(path: str) -> np.ndarray:
 
     # Obtain position matrix elements.
     r_R = np.zeros((N_1, N_2, N_3, num_wann, num_wann, 3), dtype=np.complex64)
+    R_R = np.zeros((N_1, N_2, N_3, 3), dtype=np.int8)
     for i in range(num_elements):
         entries = lines[3 + i].split()
+        R_R[R_1[i], R_2[i], R_3[i], :] = list(map(int, entries[:3]))
         m, n = tuple(map(int, entries[3:5]))
         x_R_mn_real, x_R_mn_imag = tuple(map(float, entries[5:7]))
         y_R_mn_real, y_R_mn_imag = tuple(map(float, entries[7:9]))
@@ -138,6 +157,8 @@ def read_r_dat(path: str) -> np.ndarray:
         )
         r_R[R_1[i], R_2[i], R_3[i], m - 1, n - 1, :] = r_R_mn
 
+    if full:
+        return r_R, R_R
     return r_R
 
 
@@ -273,7 +294,7 @@ def _parse_wout_disentangle(lines: list[str]) -> dict:
         _description_
     """
 
-    for ind, line in enumerate(lines):
+    for line in lines:
         if "Outer:" in line:
             __, __, dis_win_min, __, dis_win_max, *__ = line.split()
         elif "Inner:" in line:
