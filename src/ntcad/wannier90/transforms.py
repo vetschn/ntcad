@@ -3,15 +3,85 @@
 """ TODO: Docstrings.
 
 """
+import numpy as np
 from scipy import constants
 
-import numpy as np
-
-hbar, *__ = constants.physical_constants["Planck constant over 2 pi in eV s"]
-m_0 = constants.m_e
+hbar, *__ = constants.physical_constants["reduced Planck constant in eV s"]
+m_e, *__ = constants.physical_constants["electron mass"]
 
 
-def momentum_operator(H_R: np.ndarray, r_R: np.ndarray) -> np.ndarray:
+def _approx_momentum_operator(
+    H_R: np.ndarray,
+    Ai: np.ndarray,
+    Ra: np.ndarray = None,
+    tau_ij: bool = False,
+    centers: np.ndarray = None,
+) -> np.ndarray:
+    """Approximates the momentum operator elements `p_R`.
+
+    This function just takes the
+
+    Note
+    ----
+    `N_i` correspond to the number of Wigner-Seitz cells along the
+    lattice vectors `A_i`
+
+    Parameters
+    ----------
+    H_R
+        Hamiltonian elements (`N_1` x `N_2` x `N_3` x `num_wann` x
+        `num_wann`).
+    Ai
+        Real-Space lattice vectors (3 x 3).
+    Ra
+        Allowed Wigner-Seitz cell indices. If not given, this assumes
+        that all completely zero Hamiltonian blocks are not allowed.
+    tau_ij
+        Whether to include the contributions between Wannier centers.
+    centers
+        Wannier centers (`num_wann` x 3). Needed to include the `tau_ij`
+        contributions.
+
+    Returns
+    -------
+    p_R
+        The approximated momentum operator elements (`N_1` x `N_2` x
+        `N_3` x `num_wann` x `num_wann` x 3). The indices are chosen
+        such that (0, 0, 0) actually gets you the center Wigner-Seitz
+        cell distance matrix.
+
+    """
+    # Midpoint of the Wigner-Seitz cell indices.
+    midpoint = np.floor_divide(np.subtract(H_R.shape[:3], 1), 2)
+
+    p_R = np.zeros(H_R.shape + (3,), dtype=np.complex64)
+    for i in range(p_R.shape[-1]):
+        d_0_i = np.zeros(H_R.shape[-2:])
+        if tau_ij:
+            d_0_i = centers[:, i].reshape(-1, 1) - centers[:, i]
+        p_R_i = np.zeros_like(H_R)
+        for Rs in np.ndindex(p_R.shape[:3]):
+            R = Rs - midpoint
+            allowed = np.any(H_R[(*R,)])
+            if Ra is not None:
+                allowed = np.any(np.all(Ra == R, axis=1))
+            if allowed:
+                p_R_i[(*R,)] += H_R[(*R,)] * (R @ Ai)[i] + d_0_i
+                p_R[..., i] += p_R_i
+
+    # TODO: Not sure about the 1e-10 factor.
+    return 1j * 1e10 * m_e / hbar * p_R
+
+
+def momentum_operator(
+    H_R: np.ndarray,
+    Ai: np.ndarray,
+    r_R: np.ndarray = None,
+    approx: bool = False,
+    Ra: np.ndarray = None,
+    tau_ij: bool = False,
+    centers: np.ndarray = None,
+) -> np.ndarray:
     """Calculates the momentum operator elements `p_R`.
 
     The momentum operator `p_R` is the commutator between Hamiltonian
@@ -27,82 +97,130 @@ def momentum_operator(H_R: np.ndarray, r_R: np.ndarray) -> np.ndarray:
     H_R
         Hamiltonian elements (`N_1` x `N_2` x `N_3` x `num_wann` x
         `num_wann`).
+    Ai
+        Real-Space lattice vectors (3 x 3).
     r_R
         Position matrix elements (`N_1` x `N_2` x `N_3` x `num_wann` x
-        `num_wann` x 3).
+        `num_wann` x 3). Not needed if the momentum operator should
+        merely be approximated.
+    approx
+        Whether to approximate the momentum operator. Defaults to
+        `False`.
+    Ra
+        Allowed Wigner-Seitz Cell indices. If not given, this assumes
+        that all completely zero Hamiltonian blocks are not allowed.
+    tau_ij
+        Whether to include the contributions between Wannier centers.
+    centers
+        Wannier centers (`num_wann` x 3). Needed to include the `tau_ij`
+        contributions.
+
 
     Returns
     -------
     p_R
         Momentum matrix elements (`N_1` x `N_2` x `N_3` x `num_wann` x
-        `num_wann` x 3).
+        `num_wann` x 3). The indices are chosen such that (0, 0, 0)
+        actually gets you the center Wigner-Seitz cell distance matrix.
+
+    Raises
+    ------
 
     """
-    # Constant prefactor.
-    c = 1j * m_0 / hbar
+    if tau_ij and centers is None:
+        raise ValueError("Wannier centers needed if `tau_ij` is `True`.")
+    if approx:
+        return _approx_momentum_operator(
+            H_R=H_R, Ai=Ai, Ra=Ra, tau_ij=tau_ij, centers=centers
+        )
+    elif r_R is None:
+        raise ValueError("Position Matrix elements needed if `approx` is `False`.")
 
-    # Iterate over R, R' and 3 spatial dimensions and populate the
-    # momentum operator matrix with the commutator elements.
-    # (Unfortunately ugly).
-    p_R = np.zeros_like(r_R)
-    for R_1, R_2, R_3 in np.ndindex(p_R.shape[:3]):
-        for R_1_p, R_2_p, R_3_p in np.ndindex(R_1 + 1, R_2 + 1, R_3 + 1):
-            for i in range(p_R.shape[-1]):
-                H_R_R_p = H_R[R_1 - R_1_p, R_2 - R_2_p, R_3 - R_3_p]
-                H_R_p = H_R[R_1_p, R_2_p, R_3_p]
-                r_R_R_p_i = r_R[R_1 - R_1_p, R_2 - R_2_p, R_3 - R_3_p, ..., i]
-                r_R_p_i = H_R[R_1_p, R_2_p, R_3_p, ..., i]
-                p_R[R_1, R_2, R_3, ..., i] += c * (
-                    H_R_R_p @ r_R_p_i - r_R_R_p_i @ H_R_p
+    # Midpoint of the Wigner-Seitz cell indices.
+    midpoint = np.floor_divide(np.subtract(H_R.shape[:3], 1), 2)
+
+    # Iterate over R, Rp (R') and 3 spatial dimensions and
+    # populate the momentum operator matrix.
+    p_R = np.zeros(H_R.shape + (3,), dtype=np.complex64)
+    for Rs in np.ndindex(p_R.shape[:3]):
+        R = Rs - midpoint
+        for Rps in np.ndindex(p_R.shape[:3]):
+            Rp = Rps - midpoint
+            in_bounds_lower = (np.abs(R - Rp) <= midpoint).all()
+            in_bounds_upper = (np.abs(R + Rp) <= midpoint).all()
+            allowed = (
+                np.any(H_R[(*R,)]) and np.any(H_R[(*Rp,)]) and np.any(H_R[(*(R - Rp),)])
+            )
+            if Ra is not None:
+                allowed = (
+                    np.any(np.all(Ra == R, axis=1))
+                    or np.any(np.all(Ra == Rp, axis=1))
+                    or np.any(np.all(Ra == (R - Rp), axis=1))
                 )
-    return p_R
+            if allowed and in_bounds_lower and in_bounds_upper:
+                for i in range(p_R.shape[-1]):
+                    d_0_i = np.zeros(H_R.shape[-2:])
+                    if tau_ij:
+                        d_0_i = centers[:, i].reshape(-1, 1) - centers[:, i]
+                    r_R_i = r_R[..., i]
+                    p_R_i = np.zeros_like(r_R_i)
+                    p_R_i[(*R,)] += H_R[(*R,)] * (R @ Ai)[i] + d_0_i
+                    p_R_i[(*R,)] += H_R[(*Rp,)] @ r_R_i[(*(R - Rp),)]
+                    p_R_i[(*R,)] -= r_R_i[(*Rp,)] @ H_R[(*(R - Rp),)]
+                    p_R[..., i] += p_R_i
 
-
-def approx_momentum_matrix():
-    """_summary_
-    TODO
-    """
-    pass
+    # TODO: Not sure about the 1e-10 factor.
+    return 1j * 1e10 * m_e / hbar * p_R
 
 
 def distance_matrix(
-    R_R: np.ndarray, A_i: np.ndarray, centers: np.ndarray
+    Ai: np.ndarray,
+    centers: np.ndarray,
+    Ra: np.ndarray,
 ) -> np.ndarray:
     """Computes the Wannier center distance matrix.
 
     Parameters
     ----------
-    R_R
-        Wigner-Seitz cell indices (`N_1` x `N_2` x `N_3` x 3).
-    A_i
+    Ai
         Real-Space lattice vectors (3 x 3).
     centers
         List of `num_wann` Wannier centers (`num_wann` x 3) in real
         space.
+    Ra
+        The allowed Wigner-Seitz cells to calculate the distance matrix
+        for (`R_1`, `R_2`, `R_3`).
 
     Returns
     -------
     d_R
         Matrix (`N_1` x `N_2` x `N_3` x `num_wann` x `num_wann`)
-        containing distances between Wannier centers for all Wigner
-        Seitz cells stored given by `R_R`.
+        containing distances between Wannier centers for all the
+        requested Wigner Seitz cells. The indices are chosen such that
+        (0, 0, 0) actually gets you the center Wigner-Seitz cell
+        distance matrix.
 
     """
-    num_wann = len(centers)
+    Ras = np.subtract(Ra, Ra.min(axis=0))
+    N_1, N_2, N_3 = Ras.max(axis=0) + 1
 
     # Trickery: Wannier center distances within cell from transposed
     # version of the Wannier centers themselves.
     d_0 = centers[:, np.newaxis] - centers
 
-    d_R = np.zeros(R_R.shape[:-1] + (num_wann, num_wann))
-    for R_1, R_2, R_3 in np.ndindex(R_R.shape[:-1]):
-        R = R_R[R_1, R_2, R_3]
-        d_R[R_1, R_2, R_3] = np.linalg.norm(d_0 + (A_i.T @ R), axis=2)
+    # Midpoint of the Wigner-Seitz cell indices.
+    midpoint = np.floor_divide(np.subtract((N_1, N_2, N_3), 1), 2)
+    num_wann = len(centers)
+    d_R = np.zeros((N_1, N_2, N_3, num_wann, num_wann))
+    for Rs in np.ndindex((N_1, N_2, N_3)):
+        R = Rs - midpoint
+        if np.any(np.all(Ra == R, axis=1)):
+            d_R[(*R,)] = np.linalg.norm(d_0 + (R @ Ai), axis=2)
 
     return d_R
 
 
-def k_sample(O_R: np.ndarray, R_R: np.ndarray, kpts: np.ndarray) -> np.ndarray:
+def k_sample(O_R: np.ndarray, kpts: np.ndarray) -> np.ndarray:
     """Samples the given operator `O_R` at given `kpts`.
 
     Parameters
@@ -110,8 +228,6 @@ def k_sample(O_R: np.ndarray, R_R: np.ndarray, kpts: np.ndarray) -> np.ndarray:
     O_R
         Operator elements (`N_1` x `N_2` x `N_3` x `num_wann` x
         `num_wann`).
-    R_R
-        Wigner-Seitz cell indices (`N_1` x `N_2` x `N_3` x 3).
     kpts
         Reciprocal-space points in fractional coordinates (`N_k` x 3).
 
@@ -121,6 +237,13 @@ def k_sample(O_R: np.ndarray, R_R: np.ndarray, kpts: np.ndarray) -> np.ndarray:
         Operator at the specified `kpts`.
 
     """
+    # TODO: This here could definitely be done in a nicer / more concise
+    # way.
+    midpoint = np.floor_divide(np.subtract(O_R.shape[:3], 1), 2)
+    R = list(np.ndindex(O_R.shape[:3])) - midpoint
+    R_R = np.zeros(O_R.shape[:3] + (3,))
+    for Ri in R:
+        R_R[(*Ri,)] = Ri
     phase = np.exp(2j * np.pi * np.einsum("ijkr,lr->ijkl", R_R, kpts))
-    O_k = np.einsum("ijkmn,ijkr->rmn", O_R, phase)
+    O_k = np.einsum("ijkmn,ijkl->lmn", O_R, phase)
     return O_k

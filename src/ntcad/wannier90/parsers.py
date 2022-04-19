@@ -3,10 +3,7 @@
 """ TODO: Docstrings.
 
 """
-
 from datetime import datetime
-from xmlrpc.client import Boolean
-from matplotlib.pyplot import axis
 
 import numpy as np
 
@@ -34,17 +31,19 @@ def read_hr_dat(path: str, full: bool = False) -> np.ndarray:
     full
         Switch determining nature of return value. When it is `False`
         (the default) just `r_R` is returned, when `True`, the
-        Wigner-Seitz cell indices `R_R` and degeneracy info are also
-        returned.
+        degeneracy info and the allowed Wigner-Seitz cell indices are
+        also returned.
 
     Returns
     -------
-    H_R, R_R, deg
+    H_R, deg, Ra
         The Hamiltonian elements (`N_1` x `N_2` x `N_3` x `num_wann` x
         `num_wann`), where `N_i` correspond to the number of
-        Wigner-Seitz cells along the lattice vectors `A_i`.
-        Additionally, if `full = True`, Wigner-Seitz cell indices `R_R`
-        (`N_1` x `N_2` x `N_3` x 3), and degeneracy info (`nrpts`).
+        Wigner-Seitz cells along the lattice vectors `A_i`. The indices
+        are chose such that (0, 0, 0) actually gets you the center
+        Wigner-Seitz cell. Additionally, if `full` is `True`, the
+        degeneracy info and the allowed Wigner-Seitz cell indices are
+        also returned.
 
     """
     with open(path, "r") as f:
@@ -61,29 +60,28 @@ def read_hr_dat(path: str, full: bool = False) -> np.ndarray:
     for i in range(deg_rows):
         np.append(deg, list(map(int, lines[i + 3].split())))
 
-    # Preliminary pass to find number of Wigner-Seitz cells.
+    # Preliminary pass to find number of Wigner-Seitz cells in all
+    # directions.
     R_mn = np.zeros((num_elements, 3), dtype=np.int8)
     for i in range(num_elements):
         entries = lines[3 + deg_rows + i].split()
         R_mn[i, :] = list(map(int, entries[:3]))
 
-    # Shift the `R` vector such that it can be used to index H_R.
-    R_mn_index = np.subtract(R_mn, R_mn.min(axis=0))
-    R_1, R_2, R_3 = R_mn_index.T
-    N_1, N_2, N_3 = R_mn_index.max(axis=0) + 1
+    R_mn_s = np.subtract(R_mn, R_mn.min(axis=0))
+    N_1, N_2, N_3 = R_mn_s.max(axis=0) + 1
 
     # Obtain Hamiltonian elements.
     H_R = np.zeros((N_1, N_2, N_3, num_wann, num_wann), dtype=np.complex64)
-    R_R = np.zeros((N_1, N_2, N_3, 3), dtype=np.int8)
+    # R_R = np.zeros((N_1, N_2, N_3, 3), dtype=np.int8)
     for i in range(num_elements):
         entries = lines[3 + deg_rows + i].split()
-        R_R[R_1[i], R_2[i], R_3[i], :] = list(map(int, entries[:3]))
+        R_1, R_2, R_3 = tuple(map(int, entries[:3]))
         m, n = tuple(map(int, entries[3:5]))
         H_R_mn_real, H_R_mn_imag = tuple(map(float, entries[5:]))
-        H_R[R_1[i], R_2[i], R_3[i], m - 1, n - 1] = H_R_mn_real + 1j * H_R_mn_imag
+        H_R[R_1, R_2, R_3, m - 1, n - 1] = H_R_mn_real + 1j * H_R_mn_imag
 
     if full:
-        return H_R, R_R, deg
+        return H_R, deg, np.unique(R_mn, axis=0)
     return H_R
 
 
@@ -106,20 +104,20 @@ def read_r_dat(path: str, full: bool = False) -> np.ndarray:
         Path to `seedname_r.dat`.
     full
         Switch determining nature of return value. When it is `False`
-        (the default) just `r_R` is returned, when `True`, the
-        Wigner-Seitz cell indices `R_R` are also returned.
+        (the default) just `r_R` is returned, when `True`, the allowed
+        Wigner-Seitz cell indices are also returned.
 
     Returns
     -------
-    r_R, R_R
+    r_R, Ra
         The position matrix elements (`N_1` x `N_2` x `N_3` x `num_wann`
-        x `num_wann`x 3), where `N_i` correspond to the number of
-        Wigner-Seitz cells along the lattice vectors `A_i`.
-        Additionally, if `full = True`, the Wigner-Seitz cell indices
-        `R_R` (`N_1` x `N_2` x `N_3` x 3).
+        x `num_wann` x 3), where `N_i` correspond to the number of
+        Wigner-Seitz cells along the lattice vectors `A_i`. The indices
+        are chosen such that (0, 0, 0) actually gets you the center
+        Wigner-Seitz cell. Additionally, if `full` is `True`, the
+        allowed Wigner-Seitz cell indices are also returned.
 
     """
-
     with open(path, "r") as f:
         lines = f.readlines()
 
@@ -133,17 +131,14 @@ def read_r_dat(path: str, full: bool = False) -> np.ndarray:
         entries = lines[3 + i].split()
         R_mn[i, :] = list(map(int, entries[:3]))
 
-    # Shift the `R` vector such that it can be used to index H_R.
-    R_mn_index = np.subtract(R_mn, R_mn.min(axis=0))
-    R_1, R_2, R_3 = R_mn_index.T
-    N_1, N_2, N_3 = R_mn_index.max(axis=0) + 1
+    R_mn_s = np.subtract(R_mn, R_mn.min(axis=0))
+    N_1, N_2, N_3 = R_mn_s.max(axis=0) + 1
 
     # Obtain position matrix elements.
     r_R = np.zeros((N_1, N_2, N_3, num_wann, num_wann, 3), dtype=np.complex64)
-    R_R = np.zeros((N_1, N_2, N_3, 3), dtype=np.int8)
     for i in range(num_elements):
         entries = lines[3 + i].split()
-        R_R[R_1[i], R_2[i], R_3[i], :] = list(map(int, entries[:3]))
+        R_1, R_2, R_3 = list(map(int, entries[:3]))
         m, n = tuple(map(int, entries[3:5]))
         x_R_mn_real, x_R_mn_imag = tuple(map(float, entries[5:7]))
         y_R_mn_real, y_R_mn_imag = tuple(map(float, entries[7:9]))
@@ -155,10 +150,10 @@ def read_r_dat(path: str, full: bool = False) -> np.ndarray:
                 z_R_mn_real + 1j * z_R_mn_imag,
             ]
         )
-        r_R[R_1[i], R_2[i], R_3[i], m - 1, n - 1, :] = r_R_mn
+        r_R[R_1, R_2, R_3, m - 1, n - 1, :] = r_R_mn
 
     if full:
-        return r_R, R_R
+        return r_R, np.unique(R_mn, axis=0)
     return r_R
 
 
@@ -167,7 +162,7 @@ def _parse_wout_header(lines: list[str]) -> dict:
 
     The header provides some basic information about wannier90, the
     authors, the code version and release, and the execution time of the
-    current run
+    current run.
 
     Parameters
     ----------
@@ -176,7 +171,10 @@ def _parse_wout_header(lines: list[str]) -> dict:
 
     Returns
     -------
-        _description_
+    header
+        Dictionary containing version, version release date and
+        Wannier90 run POSIX timestamp.
+
     """
     for line in lines:
         if "Release" in line:
@@ -190,7 +188,6 @@ def _parse_wout_header(lines: list[str]) -> dict:
         "release_date": f"{day} {month} {year}",
         "timestamp": execution_dt.timestamp(),
     }
-
     return header
 
 
@@ -208,22 +205,26 @@ def _parse_wout_system(lines: list[str]) -> dict:
 
     Returns
     -------
-        _description_
+    system
+        Dictionary containing the lattice vectors in real and reciprocal
+        space, the atomic sites, the utilized k-grid, the number of
+        bands and the number of Wannier functions, as well as the
+        "parameters" section as a raw string.
 
     """
-    A_i = np.zeros((3, 3))
-    B_i = np.zeros((3, 3))
+    Ai = np.zeros((3, 3))
+    Bi = np.zeros((3, 3))
     for ind, line in enumerate(lines):
         if line.strip().startswith("a_"):
             # Lattice Vectors
             entries = line.split()
             i = int(entries[0][-1]) - 1
-            A_i[i, :] = list(map(float, entries[1:]))
+            Ai[i, :] = list(map(float, entries[1:]))
         elif line.strip().startswith("b_"):
             # Reciprocal-Space Vectors
             entries = line.split()
             i = int(entries[0][-1]) - 1
-            B_i[i, :] = list(map(float, entries[1:]))
+            Bi[i, :] = list(map(float, entries[1:]))
         elif "Site" in line:
             # Have to save indices here again because there is no way to
             # know how many atomic sites to expect.
@@ -242,15 +243,15 @@ def _parse_wout_system(lines: list[str]) -> dict:
     sites_lines = lines[sites_start_ind:sites_stop_ind]
     sites = {}
     for line in sites_lines:
-        __, kind, num, R_x, R_y, R_z, __, F_x, F_y, F_z, __ = line.split()
+        __, kind, num, Rx, Ry, Rz, __, Fx, Fy, Fz, __ = line.split()
         sites[f"{kind}_{num}"] = {
-            "F": np.array(list(map(float, [F_x, F_y, F_z]))),
-            "R": np.array(list(map(float, [R_x, R_y, R_z]))),
+            "F": np.array(list(map(float, [Fx, Fy, Fz]))),
+            "R": np.array(list(map(float, [Rx, Ry, Rz]))),
         }
 
     system = {
-        "A_i": A_i,
-        "B_i": B_i,
+        "Ai": Ai,
+        "Bi": Bi,
         "sites": sites,
         "k_grid": np.array(list(map(int, [k_grid_x, k_grid_y, k_grid_z]))),
         "num_wann": int(num_wann),
@@ -260,10 +261,9 @@ def _parse_wout_system(lines: list[str]) -> dict:
     return system
 
 
+# TODO
 def _parse_wout_k_mesh(lines: list[str]) -> dict:
     """Parses the k-mesh section of a `seedname.wout` file.
-
-    TODO
 
     This part of the output files provides information on the b-vectors
     and weights chosen.
@@ -291,7 +291,10 @@ def _parse_wout_disentangle(lines: list[str]) -> dict:
 
     Returns
     -------
-        _description_
+    disentangle
+        Dictionary containing information on disentanglement windows and
+        the final `Omega_I`.
+
     """
 
     for line in lines:
@@ -322,7 +325,10 @@ def _parse_wout_wannierise(lines: list[str]) -> dict:
 
     Returns
     -------
-        _description_
+    wannierise
+        Dictionary containing the number of iterations, as well as the
+        centers and spreads at each iteration.
+
     """
     wann_inds = []
     centers = []
@@ -337,7 +343,6 @@ def _parse_wout_wannierise(lines: list[str]) -> dict:
 
     num_iter = wann_inds.count(1)
     num_wann = max(wann_inds)
-
     centers = np.reshape(centers, (num_iter, num_wann, 3))
     spreads = np.reshape(spreads, (num_iter, num_wann))
 
@@ -347,10 +352,10 @@ def _parse_wout_wannierise(lines: list[str]) -> dict:
         "centers": centers,
         "spreads": spreads,
     }
-
     return wannierise
 
 
+# TODO
 def _parse_wout_plotting(lines: list) -> dict:
     """_summary_
 
@@ -368,6 +373,7 @@ def _parse_wout_plotting(lines: list) -> dict:
     pass
 
 
+# TODO
 def _parse_wout_timing(lines: list[str]) -> dict:
     """Parses the summary timings section of a `seedname.wout` file.
 
@@ -395,7 +401,10 @@ def read_wout(path: str) -> dict:
 
     Returns
     -------
-        _description_
+    wout
+        A dictionary representing the contents of the `seedname.wout`
+        file from a Wannier90 run.
+
     """
 
     with open(path, "r") as f:
