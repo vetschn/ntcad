@@ -157,6 +157,106 @@ def read_r_dat(path: str, full: bool = False) -> np.ndarray:
     return r_R
 
 
+def read_band_dat(path: str) -> np.ndarray:
+    """Parses the contents of a `seedname_band.dat` file.
+
+    This file contains the raw data for the interpolated band structure.
+
+    Parameters
+    ----------
+    path
+        Path to `seedname_band.dat`
+
+    Returns
+    -------
+    bands
+        The bandstructure along the `kpoint_path` specified in the
+        `seedname.win` file (`num_wann` x `bands_num_points`).
+
+    """
+    with open(path, "r") as f:
+        contents = f.read()
+
+    sections = contents.split("\n  \n")[:-1]
+    num_wann = len(sections)
+    bands_num_points = len(sections[0].split("\n"))
+
+    bands = np.zeros((num_wann, bands_num_points))
+    for i, section in enumerate(sections):
+        lines = section.split("\n")
+        for j, line in enumerate(lines):
+            bands[i, j] = float(line.split()[-1])
+
+    return bands
+
+
+def read_band_kpt(path: str) -> np.ndarray:
+    """Parses the contents of a `seedname_band.kpt` file
+
+    The k-points used for the interpolated band structure, in units of
+    the reciprocal lattice vectors. This file can be used to generate a
+    comparison band structure from a first-principles code.
+
+    Parameters
+    ----------
+    path
+        Path to `seedname_band.kpt`
+
+    Returns
+    -------
+    kpt
+        The k-points used for the interpolated band structure
+        (`num_kpts` x 3)
+
+    """
+    with open(path, "r") as f:
+        lines = f.readlines()
+
+    num_kpts = lines[0].strip()
+
+    kpt = np.zeros((num_kpts, 3))
+    for i, line in enumerate(lines[1:]):
+        kpt[i, :] = list(map(float, line.split()))
+
+    return kpt
+
+
+def read_eig(path: str) -> np.ndarray:
+    """Parses the contents of a `seedname.eig` file.
+
+    The file `seedname.eig` contains the Kohn-Sham eigenvalues [eV] at
+    each point in the Monkhorst-Pack mesh.
+
+    Each line consist of two integers and a real number. The first
+    integer is the band index, the second integer gives the ordinal
+    corresponding to the k-point in the list of k-points in
+    `seedname.win`, and the real number is the eigenvalue.
+
+    Parameters
+    ----------
+    path
+        Path to `seedname.eig`.
+
+    Returns
+    -------
+    eig
+        The Kohn-Sham eigenvalues by band number and k-point number
+        (`num_bands` x `num_kpoints`).
+
+    """
+    with open(path, "r") as f:
+        lines = f.readlines()
+
+    num_bands, num_kpoints = lines[-1].split()
+
+    eig = np.zeros((num_bands, num_kpoints))
+    for line in lines:
+        band, kpoint, value = line.split()
+        eig[int(band) - 1, int(kpoint) - 1] = float(value)
+
+    return eig
+
+
 def _parse_wout_header(lines: list[str]) -> dict:
     """Parses the header section of a `seedname.wout` file.
 
