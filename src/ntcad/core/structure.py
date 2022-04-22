@@ -186,9 +186,9 @@ class Structure:
         cartesian, optional
             _description_, by default True
         """
-        # TODO: Checks whether the atoms ared valid, whether the
+        # TODO: Checks whether the atoms are valid, whether the
         # positions are valid, whether the cell is valid, convert
-        # negative positions to positiive positions in cell, actually
+        # negative positions to positive positions in cell, actually
         # check whether cartesian or not.
 
         self.sites = np.array(list(zip(kinds, positions)), dtype=_sites_dtype)
