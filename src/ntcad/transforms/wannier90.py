@@ -19,7 +19,7 @@ def _approx_momentum_operator(
 ) -> np.ndarray:
     """Approximates the momentum operator elements `p_R`.
 
-    This function just takes the
+    This function just takes the on-site terms into account.
 
     Note
     ----
