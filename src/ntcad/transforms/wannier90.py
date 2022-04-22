@@ -1,10 +1,12 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """ TODO: Docstrings.
 
 """
+import logging
+
 import numpy as np
 from scipy import constants
+
+logger = logging.Logger(__name__)
 
 hbar, *__ = constants.physical_constants["reduced Planck constant in eV s"]
 m_e, *__ = constants.physical_constants["electron mass"]

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """ TODO
 
 """
@@ -19,7 +17,7 @@ def read_bin(path: str) -> csr_matrix:
     Returns
     -------
     csr_matrix
-        The matrix stored in the file as `scipy.sparse.csr_matrix`.
+        The matrix stored in the file as ``scipy.sparse.csr_matrix``.
 
     """
     with open(path, "rb") as f:
