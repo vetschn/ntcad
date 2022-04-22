@@ -14,7 +14,7 @@ def plot_operator(
     indices: int = 0,
     mod: Callable = np.abs,
     norm: Normalize = LogNorm(),
-    **kwargs: dict
+    **kwargs: dict,
 ) -> None:
     """Plots an operator.
 
@@ -47,7 +47,7 @@ def plot_operator(
     # Shift the operator to the center.
     O_ = np.zeros_like(O_R)
     for R in np.ndindex(O_R.shape[:3]):
-        O_[(*R,)] = O_R[(*(R-midpoint),)]
+        O_[(*R,)] = O_R[(*(R - midpoint),)]
 
     # Take operator blocks along one axis and apply modifier.
     O_ = np.take(mod(O_), indices=indices, axis=axis)
@@ -62,11 +62,11 @@ def plot_operator(
     # The extent keyword here is used to set the ticks "correctly" and
     # to compensate for the fact that ax.matshow plots the pixels *on
     # top of* the index / coordinate.
-    ax.matshow(O, norm=norm, extent=(0,O_.shape[0],O_.shape[1],0), **kwargs)
-    
+    ax.matshow(O, norm=norm, extent=(0, O_.shape[0], O_.shape[1], 0), **kwargs)
+
     ax.set_xticks(np.arange(O_.shape[0]))
     ax.set_yticks(np.arange(O_.shape[0]))
     midpoint = np.floor_divide(np.subtract(O_.shape[:2], 1), 2)
-    ax.set_xticklabels(np.arange(-midpoint[0], midpoint[0]+1))
-    ax.set_yticklabels(np.arange(-midpoint[1], midpoint[1]+1))
+    ax.set_xticklabels(np.arange(-midpoint[0], midpoint[0] + 1))
+    ax.set_yticklabels(np.arange(-midpoint[1], midpoint[1] + 1))
     ax.grid(which="both")

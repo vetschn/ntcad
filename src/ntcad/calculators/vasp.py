@@ -5,20 +5,52 @@ output files.
 
 """
 
-from ntcad.core.structure import Structure
-from ntcad.calculators.calculator import Calculator
 import os
 
-class VASP(Calculator):
+import numpy as np
+from ntcad.calculators.calculator import Calculator
+from ntcad.core.structure import Structure
 
-    def __init__(self, directory: os.PathLike, structure: Structure, **kwargs: dict) -> None:
+
+class VASP(Calculator):
+    def __init__(
+        self,
+        directory: os.PathLike,
+        structure: Structure,
+        kpoints: np.ndarray,
+        **kwargs: dict,
+    ) -> None:
+        """_summary_
+
+        Parameters
+        ----------
+        directory
+            _description_
+        structure
+            _description_
+        kpoints
+            _description_
+        """
         super().__init__(directory, structure, **kwargs)
 
     def calculate(self, command: str) -> None:
+        """_summary_
+
+        Parameters
+        ----------
+        command
+            _description_
+
+        Returns
+        -------
+            _description_
+        """
         return super().calculate(command)
-    
+
     def _write_input(self) -> None:
-        return super()._write_input()
+        """_summary_"""
+        pass
 
     def _read_output(self) -> None:
-        return super()._read_output()
+        """_summary_"""
+        pass
