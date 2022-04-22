@@ -5,7 +5,7 @@ import setuptools
 
 setuptools.setup(
     name="ntcad",
-    version="0.0.1a1",
+    version=open("VERSION").read(),
     author="Nicolas Vetsch",
     author_email="vetschn@iis.ee.ethz.ch",
     description="Useful Nano-TCAD tools.",
@@ -16,7 +16,7 @@ setuptools.setup(
     classifiers=[
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3 :: Only",
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering",

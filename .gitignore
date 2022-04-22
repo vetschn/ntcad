@@ -66,3 +66,6 @@ ipython_config.py
 
 # Cython debug symbols
 cython_debug/
+
+# Sphinx documentation
+docs/src/_build

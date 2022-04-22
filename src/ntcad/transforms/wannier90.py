@@ -17,20 +17,20 @@ def _approx_momentum_operator(
     tau_ij: bool = False,
     centers: np.ndarray = None,
 ) -> np.ndarray:
-    """Approximates the momentum operator elements `p_R`.
+    """Approximates the momentum operator elements ``p_R``.
 
     This function just takes the on-site terms into account.
 
     Note
     ----
-    `N_i` correspond to the number of Wigner-Seitz cells along the
-    lattice vectors `A_i`
+    ``N_i`` correspond to the number of Wigner-Seitz cells along the
+    lattice vectors ``A_i``
 
     Parameters
     ----------
     H_R
-        Hamiltonian elements (`N_1` x `N_2` x `N_3` x `num_wann` x
-        `num_wann`).
+        Hamiltonian elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
+        ``num_wann``).
     Ai
         Real-Space lattice vectors (3 x 3).
     Ra
@@ -39,14 +39,14 @@ def _approx_momentum_operator(
     tau_ij
         Whether to include the contributions between Wannier centers.
     centers
-        Wannier centers (`num_wann` x 3). Needed to include the `tau_ij`
+        Wannier centers (``num_wann`` x 3). Needed to include the ``tau_ij``
         contributions.
 
     Returns
     -------
     p_R
-        The approximated momentum operator elements (`N_1` x `N_2` x
-        `N_3` x `num_wann` x `num_wann` x 3). The indices are chosen
+        The approximated momentum operator elements (``N_1`` x ``N_2`` x
+        ``N_3`` x ``num_wann`` x ``num_wann`` x 3). The indices are chosen
         such that (0, 0, 0) actually gets you the center Wigner-Seitz
         cell distance matrix.
 
@@ -82,45 +82,45 @@ def momentum_operator(
     tau_ij: bool = False,
     centers: np.ndarray = None,
 ) -> np.ndarray:
-    """Calculates the momentum operator elements `p_R`.
+    """Calculates the momentum operator elements ``p_R``.
 
-    The momentum operator `p_R` is the commutator between Hamiltonian
-    `H_R` and position operator `r_R` in the same Wannier basis.
+    The momentum operator ``p_R`` is the commutator between Hamiltonian
+    ``H_R`` and position operator ``r_R`` in the same Wannier basis.
 
     Note
     ----
-    `N_i` correspond to the number of Wigner-Seitz cells along the
-    lattice vectors `A_i`
+    ``N_i`` correspond to the number of Wigner-Seitz cells along the
+    lattice vectors ``A_i``
 
     Parameters
     ----------
     H_R
-        Hamiltonian elements (`N_1` x `N_2` x `N_3` x `num_wann` x
-        `num_wann`).
+        Hamiltonian elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
+        ``num_wann``).
     Ai
         Real-Space lattice vectors (3 x 3).
     r_R
-        Position matrix elements (`N_1` x `N_2` x `N_3` x `num_wann` x
-        `num_wann` x 3). Not needed if the momentum operator should
+        Position matrix elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
+        ``num_wann`` x 3). Not needed if the momentum operator should
         merely be approximated.
     approx
         Whether to approximate the momentum operator. Defaults to
-        `False`.
+        ``False``.
     Ra
         Allowed Wigner-Seitz Cell indices. If not given, this assumes
         that all completely zero Hamiltonian blocks are not allowed.
     tau_ij
         Whether to include the contributions between Wannier centers.
     centers
-        Wannier centers (`num_wann` x 3). Needed to include the `tau_ij`
+        Wannier centers (``num_wann`` x 3). Needed to include the ``tau_ij``
         contributions.
 
 
     Returns
     -------
     p_R
-        Momentum matrix elements (`N_1` x `N_2` x `N_3` x `num_wann` x
-        `num_wann` x 3). The indices are chosen such that (0, 0, 0)
+        Momentum matrix elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
+        ``num_wann`` x 3). The indices are chosen such that (0, 0, 0)
         actually gets you the center Wigner-Seitz cell distance matrix.
 
     Raises
@@ -128,13 +128,13 @@ def momentum_operator(
 
     """
     if tau_ij and centers is None:
-        raise ValueError("Wannier centers needed if `tau_ij` is `True`.")
+        raise ValueError("Wannier centers needed if ``tau_ij`` is ``True``.")
     if approx:
         return _approx_momentum_operator(
             H_R=H_R, Ai=Ai, Ra=Ra, tau_ij=tau_ij, centers=centers
         )
     elif r_R is None:
-        raise ValueError("Position Matrix elements needed if `approx` is `False`.")
+        raise ValueError("Position Matrix elements needed if ``approx`` is ``False``.")
 
     # Midpoint of the Wigner-Seitz cell indices.
     midpoint = np.floor_divide(np.subtract(H_R.shape[:3], 1), 2)
@@ -185,16 +185,16 @@ def distance_matrix(
     Ai
         Real-Space lattice vectors (3 x 3).
     centers
-        List of `num_wann` Wannier centers (`num_wann` x 3) in real
+        List of ``num_wann`` Wannier centers (``num_wann`` x 3) in real
         space.
     Ra
         The allowed Wigner-Seitz cells to calculate the distance matrix
-        for (`R_1`, `R_2`, `R_3`).
+        for (``R_1``, ``R_2``, ``R_3``).
 
     Returns
     -------
     d_R
-        Matrix (`N_1` x `N_2` x `N_3` x `num_wann` x `num_wann`)
+        Matrix (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x ``num_wann``)
         containing distances between Wannier centers for all the
         requested Wigner Seitz cells. The indices are chosen such that
         (0, 0, 0) actually gets you the center Wigner-Seitz cell
@@ -221,20 +221,20 @@ def distance_matrix(
 
 
 def k_sample(O_R: np.ndarray, kpts: np.ndarray) -> np.ndarray:
-    """Samples the given operator `O_R` at given `kpts`.
+    """Samples the given operator ``O_R`` at given ``kpts``.
 
     Parameters
     ----------
     O_R
-        Operator elements (`N_1` x `N_2` x `N_3` x `num_wann` x
-        `num_wann`).
+        Operator elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
+        ``num_wann``).
     kpts
-        Reciprocal-space points in fractional coordinates (`N_k` x 3).
+        Reciprocal-space points in fractional coordinates (``N_k`` x 3).
 
     Returns
     -------
     O_k
-        Operator at the specified `kpts`.
+        Operator at the specified ``kpts``.
 
     """
     # TODO: This here could definitely be done in a nicer / more concise

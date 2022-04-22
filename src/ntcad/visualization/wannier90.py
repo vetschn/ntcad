@@ -23,9 +23,9 @@ def plot_operator(
     Parameters
     ----------
     O_R
-        The operator to plot (`N_1` x `N_2` x `N_3` x `num_wann` x
-        `num_wann`), where `N_i` correspond to the number of
-        Wigner-Seitz cells along the lattice vectors `A_i`. The indices
+        The operator to plot (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
+        ``num_wann``), where ``N_i`` correspond to the number of
+        Wigner-Seitz cells along the lattice vectors ``A_i``. The indices
         are chosen such that (0, 0, 0) actually gets you the center
         Wigner-Seitz cell.
     axis, optional
@@ -62,7 +62,7 @@ def plot_operator(
         __, ax = plt.subplots()
 
     # The extent keyword here is used to set the ticks "correctly" and
-    # to compensate for the fact that `ax.matshow` plots the pixels *on
+    # to compensate for the fact that ax.matshow plots the pixels *on
     # top of* the index / coordinate.
     ax.matshow(O, norm=norm, extent=(0,O_.shape[0],O_.shape[1],0), **kwargs)
     

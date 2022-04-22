@@ -9,39 +9,39 @@ import numpy as np
 
 
 def read_hr_dat(path: str, full: bool = False) -> np.ndarray:
-    """Parses the contents of a `seedname_hr.dat` file.
+    """Parses the contents of a ``seedname_hr.dat`` file.
 
     The first line gives the date and time at which the file was
     created. The second line states the number of Wannier functions
     num_wann. The third line gives the number of Wigner-Seitz
-    grid-points `nrpts`.
+    grid-points ``nrpts``.
 
-    The next block of `nrpts` integers gives the degeneracy of each
+    The next block of ``nrpts`` integers gives the degeneracy of each
     Wigner-Seitz grid point, with 15 entries per line.
 
-    Finally, the remaining `num_wann**2 * nrpts` lines each contain,
-    respectively, the components of the vector `R` in terms of the
-    lattice vectors `A_i`, the indices m and n, and the real and imaginary
-    parts of the Hamiltonian matrix element `H_R_mn` in the WF basis.
+    Finally, the remaining ``num_wann**2 * nrpts`` lines each contain,
+    respectively, the components of the vector ``R`` in terms of the
+    lattice vectors ``A_i``, the indices m and n, and the real and imaginary
+    parts of the Hamiltonian matrix element ``H_R_mn`` in the WF basis.
 
     Parameters
     ----------
     path
-        Path to `seedname_hr.dat`.
+        Path to ``seedname_hr.dat``.
     full
-        Switch determining nature of return value. When it is `False`
-        (the default) just `r_R` is returned, when `True`, the
+        Switch determining nature of return value. When it is ``False``
+        (the default) just ``r_R`` is returned, when ``True``, the
         degeneracy info and the allowed Wigner-Seitz cell indices are
         also returned.
 
     Returns
     -------
     H_R, deg, Ra
-        The Hamiltonian elements (`N_1` x `N_2` x `N_3` x `num_wann` x
-        `num_wann`), where `N_i` correspond to the number of
-        Wigner-Seitz cells along the lattice vectors `A_i`. The indices
+        The Hamiltonian elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
+        ``num_wann``), where ``N_i`` correspond to the number of
+        Wigner-Seitz cells along the lattice vectors ``A_i``. The indices
         are chose such that (0, 0, 0) actually gets you the center
-        Wigner-Seitz cell. Additionally, if `full` is `True`, the
+        Wigner-Seitz cell. Additionally, if ``full`` is ``True``, the
         degeneracy info and the allowed Wigner-Seitz cell indices are
         also returned.
 
@@ -86,35 +86,35 @@ def read_hr_dat(path: str, full: bool = False) -> np.ndarray:
 
 
 def read_r_dat(path: str, full: bool = False) -> np.ndarray:
-    """Parses the contents of a `seedname_r.dat` file.
+    """Parses the contents of a ``seedname_r.dat`` file.
 
     The first line gives the date and time at which the file was
     created. The second line states the number of Wannier functions
-    num_wann. The third line states the number of `R` vectors `nrpts`.
+    num_wann. The third line states the number of ``R`` vectors ``nrpts``.
 
     Similar to the case of the Hamiltonian matrix above, the remaining
-    `num_wann**2 * nrpts` lines each contain, respectively, the
-    components of the vector `R` in terms of the lattice vectors `A_i`,
+    ``num_wann**2 * nrpts`` lines each contain, respectively, the
+    components of the vector ``R`` in terms of the lattice vectors ``A_i``,
     the indices m and n, and the real and imaginary parts of the
     position matrix element in the WF basis.
 
     Parameters
     ----------
     path
-        Path to `seedname_r.dat`.
+        Path to ``seedname_r.dat``.
     full
-        Switch determining nature of return value. When it is `False`
-        (the default) just `r_R` is returned, when `True`, the allowed
+        Switch determining nature of return value. When it is ``False``
+        (the default) just ``r_R`` is returned, when ``True``, the allowed
         Wigner-Seitz cell indices are also returned.
 
     Returns
     -------
     r_R, Ra
-        The position matrix elements (`N_1` x `N_2` x `N_3` x `num_wann`
-        x `num_wann` x 3), where `N_i` correspond to the number of
-        Wigner-Seitz cells along the lattice vectors `A_i`. The indices
+        The position matrix elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann``
+        x ``num_wann`` x 3), where ``N_i`` correspond to the number of
+        Wigner-Seitz cells along the lattice vectors ``A_i``. The indices
         are chosen such that (0, 0, 0) actually gets you the center
-        Wigner-Seitz cell. Additionally, if `full` is `True`, the
+        Wigner-Seitz cell. Additionally, if ``full`` is ``True``, the
         allowed Wigner-Seitz cell indices are also returned.
 
     """
@@ -158,20 +158,20 @@ def read_r_dat(path: str, full: bool = False) -> np.ndarray:
 
 
 def read_band_dat(path: str) -> np.ndarray:
-    """Parses the contents of a `seedname_band.dat` file.
+    """Parses the contents of a ``seedname_band.dat`` file.
 
     This file contains the raw data for the interpolated band structure.
 
     Parameters
     ----------
     path
-        Path to `seedname_band.dat`
+        Path to ``seedname_band.dat``
 
     Returns
     -------
     bands
-        The bandstructure along the `kpoint_path` specified in the
-        `seedname.win` file (`num_wann` x `bands_num_points`).
+        The bandstructure along the ``kpoint_path`` specified in the
+        ``seedname.win`` file (``num_wann`` x ``bands_num_points``).
 
     """
     with open(path, "r") as f:
@@ -191,7 +191,7 @@ def read_band_dat(path: str) -> np.ndarray:
 
 
 def read_band_kpt(path: str) -> np.ndarray:
-    """Parses the contents of a `seedname_band.kpt` file
+    """Parses the contents of a ``seedname_band.kpt`` file
 
     The k-points used for the interpolated band structure, in units of
     the reciprocal lattice vectors. This file can be used to generate a
@@ -200,13 +200,13 @@ def read_band_kpt(path: str) -> np.ndarray:
     Parameters
     ----------
     path
-        Path to `seedname_band.kpt`
+        Path to ``seedname_band.kpt``
 
     Returns
     -------
     kpt
         The k-points used for the interpolated band structure
-        (`num_kpts` x 3)
+        (``num_kpts`` x 3)
 
     """
     with open(path, "r") as f:
@@ -222,26 +222,26 @@ def read_band_kpt(path: str) -> np.ndarray:
 
 
 def read_eig(path: str) -> np.ndarray:
-    """Parses the contents of a `seedname.eig` file.
+    """Parses the contents of a ``seedname.eig`` file.
 
-    The file `seedname.eig` contains the Kohn-Sham eigenvalues [eV] at
+    The file ``seedname.eig`` contains the Kohn-Sham eigenvalues [eV] at
     each point in the Monkhorst-Pack mesh.
 
     Each line consist of two integers and a real number. The first
     integer is the band index, the second integer gives the ordinal
     corresponding to the k-point in the list of k-points in
-    `seedname.win`, and the real number is the eigenvalue.
+    ``seedname.win``, and the real number is the eigenvalue.
 
     Parameters
     ----------
     path
-        Path to `seedname.eig`.
+        Path to ``seedname.eig``.
 
     Returns
     -------
     eig
         The Kohn-Sham eigenvalues by band number and k-point number
-        (`num_bands` x `num_kpoints`).
+        (``num_bands`` x ``num_kpoints``).
 
     """
     with open(path, "r") as f:
@@ -258,7 +258,7 @@ def read_eig(path: str) -> np.ndarray:
 
 
 def _parse_wout_header(lines: list[str]) -> dict:
-    """Parses the header section of a `seedname.wout` file.
+    """Parses the header section of a ``seedname.wout`` file.
 
     The header provides some basic information about wannier90, the
     authors, the code version and release, and the execution time of the
@@ -267,7 +267,7 @@ def _parse_wout_header(lines: list[str]) -> dict:
     Parameters
     ----------
     lines
-        Lines of the `seedname.wout` file.
+        Lines of the ``seedname.wout`` file.
 
     Returns
     -------
@@ -292,7 +292,7 @@ def _parse_wout_header(lines: list[str]) -> dict:
 
 
 def _parse_wout_system(lines: list[str]) -> dict:
-    """Parses the system information section of a `seedname.wout` file.
+    """Parses the system information section of a ``seedname.wout`` file.
 
     This section includes real and reciprocal lattice vectors, atomic
     positions, k-points, parameters for job control, disentanglement,
@@ -301,7 +301,7 @@ def _parse_wout_system(lines: list[str]) -> dict:
     Parameters
     ----------
     lines
-        Lines of the `seedname.wout` file.
+        Lines of the ``seedname.wout`` file.
 
     Returns
     -------
@@ -363,7 +363,7 @@ def _parse_wout_system(lines: list[str]) -> dict:
 
 # TODO
 def _parse_wout_k_mesh(lines: list[str]) -> dict:
-    """Parses the k-mesh section of a `seedname.wout` file.
+    """Parses the k-mesh section of a ``seedname.wout`` file.
 
     This part of the output files provides information on the b-vectors
     and weights chosen.
@@ -371,7 +371,7 @@ def _parse_wout_k_mesh(lines: list[str]) -> dict:
     Parameters
     ----------
     lines
-        Lines of the `seedname.wout` file.
+        Lines of the ``seedname.wout`` file.
 
     Returns
     -------
@@ -382,18 +382,18 @@ def _parse_wout_k_mesh(lines: list[str]) -> dict:
 
 
 def _parse_wout_disentangle(lines: list[str]) -> dict:
-    """Parses the disentanglement section of a `seedname.wout` file.
+    """Parses the disentanglement section of a ``seedname.wout`` file.
 
     Parameters
     ----------
     lines
-        Lines of the `seedname.wout` file.
+        Lines of the ``seedname.wout`` file.
 
     Returns
     -------
     disentangle
         Dictionary containing information on disentanglement windows and
-        the final `Omega_I`.
+        the final ``Omega_I``.
 
     """
 
@@ -416,12 +416,12 @@ def _parse_wout_disentangle(lines: list[str]) -> dict:
 
 
 def _parse_wout_wannierise(lines: list[str]) -> dict:
-    """Parses the wannierisation section of a `seedname.wout` file.
+    """Parses the wannierisation section of a ``seedname.wout`` file.
 
     Parameters
     ----------
     lines
-        Lines of the `seedname.wout` file.
+        Lines of the ``seedname.wout`` file.
 
     Returns
     -------
@@ -475,14 +475,14 @@ def _parse_wout_plotting(lines: list) -> dict:
 
 # TODO
 def _parse_wout_timing(lines: list[str]) -> dict:
-    """Parses the summary timings section of a `seedname.wout` file.
+    """Parses the summary timings section of a ``seedname.wout`` file.
 
     Parameters
     ----------
     ind
         Index at the section start.
     lines
-        Lines of the `seedname.wout` file.
+        Lines of the ``seedname.wout`` file.
 
     Returns
     -------
@@ -492,17 +492,17 @@ def _parse_wout_timing(lines: list[str]) -> dict:
 
 
 def read_wout(path: str) -> dict:
-    """Parses the contents of a `seedname.wout` file.
+    """Parses the contents of a ``seedname.wout`` file.
 
     Parameters
     ----------
     path
-        Path to `seedname.wout`.
+        Path to ``seedname.wout``.
 
     Returns
     -------
     wout
-        A dictionary representing the contents of the `seedname.wout`
+        A dictionary representing the contents of the ``seedname.wout``
         file from a Wannier90 run.
 
     """
