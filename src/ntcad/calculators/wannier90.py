@@ -2,7 +2,6 @@
 This module implements a Wannier90 calculator class that can be used as
 an interface to run Wannier90 jobs and read the resulting output files.
 
-Generating Wannier90 input files is left for another time.
 """
 
 import os
@@ -12,6 +11,21 @@ from ntcad.core.structure import Structure
 
 
 class Wannier90(Calculator):
+    """_summary_
+
+    NOTE: This should take the output of a DFT calculation as input,
+    probably easiest to just get the directory of the DFT -> Wannier90
+    calculation. This calculator does not write input files per se
+    (everything in seedname.win can be set via vasp-wannier incar tags.)
+
+    Attributes
+    ----------
+
+
+    Methods
+    -------
+
+   """
     def __init__(
         self, directory: os.PathLike, structure: Structure, **kwargs: dict
     ) -> None:
