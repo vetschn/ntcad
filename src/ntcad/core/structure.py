@@ -4,7 +4,10 @@ atoms in a unit cell together with some useful methods.
 
 """
 
+import os
+
 import numpy as np
+# from ntcad.io.vasp import read_poscar, write_poscar
 
 # All allowed atomic symbols including a ``None`` kind.
 _symbols = [
@@ -158,11 +161,20 @@ class Structure:
     ----------
     sites
         The atomic kinds and positions.
-    cell
+    positions
+        The atomic positions
+    sites
+        The atomic sites and positions in one structure numpy array.
 
     Methods
     -------
+    to_poscar
 
+    to_cif
+
+    from_poscar
+
+    from_cif
 
     """
 
@@ -190,6 +202,71 @@ class Structure:
         # positions are valid, whether the cell is valid, convert
         # negative positions to positive positions in cell, actually
         # check whether cartesian or not.
-
+        self.kinds = np.array(kinds)
+        self.positions = np.array(positions)
         self.sites = np.array(list(zip(kinds, positions)), dtype=_sites_dtype)
-        self.cell = cell
+        self.cell = np.array(cell)
+
+    def __str__(self) -> str:
+        """_summary_
+
+        Returns
+        -------
+            _description_
+        """
+        #  TODO
+        pass
+
+    def to_poscar(self, path: os.PathLike) -> None:
+        """_summary_
+
+        Parameters
+        ----------
+        path
+            _description_
+        """
+        #  TODO
+        pass
+
+    def to_cif(self, path: os.PathLike) -> None:
+        """_summary_
+
+        Parameters
+        ----------
+        path
+            _description_
+        """
+        #  TODO
+        pass
+
+    @classmethod
+    def from_poscar(cls, path: os.PathLike) -> "Structure":
+        """_summary_
+
+        Parameters
+        ----------
+        path
+            _description_
+
+        Returns
+        -------
+            _description_
+        """
+        # TODO
+        pass
+
+    @classmethod
+    def from_cif(cls, path: os.PathLike) -> "Structure":
+        """_summary_
+
+        Parameters
+        ----------
+        path
+            _description_
+
+        Returns
+        -------
+            _description_
+        """
+        # TODO
+        pass

@@ -6,18 +6,55 @@ output files.
 """
 
 import os
+import subprocess
+from sys import stdout
 
 import numpy as np
 from ntcad.calculators.calculator import Calculator
 from ntcad.core.structure import Structure
+from ntcad.io.vasp import write_incar, write_kpoints, write_poscar, write_potcar
 
 
 class VASP(Calculator):
+    """_summary_
+
+    Attributes
+    ----------
+    directory
+        _description_
+    incar_tags
+        _description_
+    structure
+        _description_
+    kpoints
+        _description_
+    shift, optional
+        _description_, by default None
+    potentials, optional
+        _description_, by default None
+    recommended_potentials, optional
+        _description_, by default False
+
+    Methods
+    -------
+    calculate
+        _description_
+    read_output
+        _description_
+    write_input
+        _description_
+
+
+    """
+
     def __init__(
         self,
         directory: os.PathLike,
         structure: Structure,
         kpoints: np.ndarray,
+        shift: dict = None,
+        potentials: dict = None,
+        recommended_potentials: bool = False,
         **kwargs: dict,
     ) -> None:
         """_summary_
@@ -30,10 +67,22 @@ class VASP(Calculator):
             _description_
         kpoints
             _description_
+        shift, optional
+            _description_, by default None
+        potentials, optional
+            _description_, by default None
+        recommended_potentials, optional
+            _description_, by default False
         """
-        super().__init__(directory, structure, **kwargs)
+        super().__init__(directory, **kwargs)
+        self.structure = structure
+        self.kpoints = kpoints
+        self.shift = shift
+        self.potentials = potentials
+        self.recommended_potentials = recommended_potentials
+        self.incar_tags = kwargs
 
-    def calculate(self, command: str) -> None:
+    def calculate(self, command: str) -> int:
         """_summary_
 
         Parameters
@@ -43,14 +92,42 @@ class VASP(Calculator):
 
         Returns
         -------
+        retcode
             _description_
         """
-        return super().calculate(command)
+        # Check if input is written.
+        paths = [
+            os.path.join(self.directory, file)
+            for file in ("INCAR" "POSCAR" "KPOINTS" "POTCAR")
+        ]
+        files_exist = [os.path.exists(path) for path in paths]
+        if not all(files_exist):
+            self.write_input()
 
-    def _write_input(self) -> None:
+        with open("vasp.out", "a") as vasp_out:
+            # NOTE: Don't really like the shell=True here.
+            retcode = subprocess.call(
+                command, shell=True, stdout=vasp_out, cwd=self.directory
+            )
+        return retcode
+
+    def write_input(self) -> None:
+        """Writes all the inputs file necessary for a VASP run.
+
+        This includes INCAR, POSCAR, KPOINTS, and POTCAR.
+
+        """
+        write_incar(self.directory, **self.incar_tags)
+        write_poscar(self.directory, self.structure)
+        write_kpoints(self.directory, self.kpoints, self.shift)
+        write_potcar(
+            self.directory, self.structure, self.potentials, self.recommended_potentials
+        )
+
+    def read_output(self) -> None:
         """_summary_"""
         pass
 
-    def _read_output(self) -> None:
-        """_summary_"""
+    def reset(self) -> None:
+        """Clears all outputs of a VASP run."""
         pass

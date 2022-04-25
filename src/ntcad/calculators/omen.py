@@ -16,15 +16,15 @@ from ntcad.core.structure import Structure
 
 class OMEN(Calculator):
     def __init__(
-        self, directory: os.PathLike, structure: Structure, **kwargs: dict
+        self, directory: os.PathLike, **kwargs: dict
     ) -> None:
-        super().__init__(directory, structure, **kwargs)
+        pass
 
     def calculate(self, command: str) -> None:
-        return super().calculate(command)
+        pass
 
     def _write_input(self) -> None:
-        return super()._write_input()
+        pass
 
     def _read_output(self) -> None:
-        return super()._read_output()
+        pass

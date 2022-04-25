@@ -4,10 +4,8 @@ specific calculator implementations.
 
 """
 
-from abc import ABC, abstractmethod
 import os
-
-from ntcad.core.structure import Structure
+from abc import ABC, abstractmethod
 
 
 class Calculator(ABC):
@@ -52,9 +50,7 @@ class Calculator(ABC):
 
     """
 
-    def __init__(
-        self, directory: os.PathLike, structure: Structure, **kwargs: dict
-    ) -> None:
+    def __init__(self, directory: os.PathLike, **kwargs: dict) -> None:
         """_summary_
 
         Parameters
@@ -64,8 +60,7 @@ class Calculator(ABC):
         structure
             _description_
         """
-        self.dir = dir
-        self.structure = structure
+        self.directory = directory
 
     @abstractmethod
     def calculate(self, command: str) -> None:
