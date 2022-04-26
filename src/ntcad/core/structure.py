@@ -7,9 +7,10 @@ atoms in a unit cell together with some useful methods.
 import os
 
 import numpy as np
+
 # from ntcad.io.vasp import read_poscar, write_poscar
 
-# All allowed atomic symbols including a ``None`` kind.
+# All allowed atomic symbols including a ``None`` / "X" kind.
 _symbols = [
     # --- 0 ------------------------------------------------------------
     "X",

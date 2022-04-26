@@ -25,7 +25,7 @@ def monkhorst_pack(size: np.ndarray):
     return (kpts + 0.5) / size - 0.5
 
 
-def path(points: np.ndarray, num: int = 50) -> np.ndarray:
+def kpoint_path(points: np.ndarray, num: int = 50) -> np.ndarray:
     """Generates a k-point path along the given symmetry points.
 
     Parameters

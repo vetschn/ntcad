@@ -4,8 +4,8 @@ specific calculator implementations.
 
 """
 
-import os
 from abc import ABC, abstractmethod
+import os
 
 
 class Calculator(ABC):
@@ -60,7 +60,7 @@ class Calculator(ABC):
         structure
             _description_
         """
-        self.directory = directory
+        ...
 
     @abstractmethod
     def calculate(self, command: str) -> None:

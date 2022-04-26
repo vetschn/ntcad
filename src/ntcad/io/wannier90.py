@@ -2,11 +2,12 @@
 
 """
 from datetime import datetime
+import os
 
 import numpy as np
 
 
-def read_hr_dat(path: str, full: bool = False) -> np.ndarray:
+def read_hr_dat(path: os.PathLike, full: bool = False) -> np.ndarray:
     """Parses the contents of a ``seedname_hr.dat`` file.
 
     The first line gives the date and time at which the file was
@@ -83,7 +84,7 @@ def read_hr_dat(path: str, full: bool = False) -> np.ndarray:
     return H_R
 
 
-def read_r_dat(path: str, full: bool = False) -> np.ndarray:
+def read_r_dat(path: os.PathLike, full: bool = False) -> np.ndarray:
     """Parses the contents of a ``seedname_r.dat`` file.
 
     The first line gives the date and time at which the file was
@@ -155,7 +156,7 @@ def read_r_dat(path: str, full: bool = False) -> np.ndarray:
     return r_R
 
 
-def read_band_dat(path: str) -> np.ndarray:
+def read_band_dat(path: os.PathLike) -> np.ndarray:
     """Parses the contents of a ``seedname_band.dat`` file.
 
     This file contains the raw data for the interpolated band structure.
@@ -188,7 +189,7 @@ def read_band_dat(path: str) -> np.ndarray:
     return bands
 
 
-def read_band_kpt(path: str) -> np.ndarray:
+def read_band_kpt(path: os.PathLike) -> np.ndarray:
     """Parses the contents of a ``seedname_band.kpt`` file
 
     The k-points used for the interpolated band structure, in units of
@@ -219,7 +220,7 @@ def read_band_kpt(path: str) -> np.ndarray:
     return kpt
 
 
-def read_eig(path: str) -> np.ndarray:
+def read_eig(path: os.PathLike) -> np.ndarray:
     """Parses the contents of a ``seedname.eig`` file.
 
     The file ``seedname.eig`` contains the Kohn-Sham eigenvalues [eV] at
@@ -489,7 +490,7 @@ def _parse_wout_timing(lines: list[str]) -> dict:
     return {}
 
 
-def read_wout(path: str) -> dict:
+def read_wout(path: os.PathLike) -> dict:
     """Parses the contents of a ``seedname.wout`` file.
 
     Parameters

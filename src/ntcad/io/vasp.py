@@ -4,7 +4,6 @@
 
 import logging
 import os
-from typing import Any, Dict, Union
 
 import numpy as np
 from ntcad.core.structure import Structure, _symbols
@@ -134,19 +133,19 @@ def write_poscar(path: os.PathLike, structure: Structure) -> None:
         _description_
 
     """
-    lines = ["POSCAR written by ntcad\n", f"  {1.0:.5f}\n"]
+    lines = ["POSCAR written by ntcad\n", f"{1.0:.5f}\n"]
     for vec in structure.cell:
-        lines.append("{:22.16f} {:22.16f} {:22.16f}\n".format(*vec))
+        lines.append("{:.16f} {:22.16f} {:22.16f}\n".format(*vec))
 
     kinds, counts = np.unique(structure.kinds, return_counts=True)
-    lines.append("  " + " ".join(kinds) + "\n")
-    lines.append("  " + "  ".join(map(str, counts)) + "\n")
+    lines.append(" ".join(kinds) + "\n")
+    lines.append("  ".join(map(str, counts)) + "\n")
 
     # TODO allow switch between cartesian and direct. Only Cartesian for
     # now.
     lines.append("Cartesian\n")
     for position in structure.positions:
-        lines.append("{:20.16f} {:20.16f} {:20.16f}\n".format(*position))
+        lines.append("{:.16f} {:22.16f} {:22.16f}\n".format(*position))
 
     with open(os.path.join(os.path.dirname(path), "POSCAR"), "w") as poscar:
         poscar.writelines(lines)

@@ -4,8 +4,8 @@ an interface to run Wannier90 jobs and read the resulting output files.
 
 """
 
-import os
 
+import os
 from ntcad.calculators.calculator import Calculator
 from ntcad.core.structure import Structure
 
@@ -25,11 +25,12 @@ class Wannier90(Calculator):
     Methods
     -------
 
-   """
+    """
+
     def __init__(
         self, directory: os.PathLike, structure: Structure, **kwargs: dict
     ) -> None:
-        super().__init__(directory, structure, **kwargs)
+        pass
 
     def calculate(self, command: str) -> None:
         return super().calculate(command)

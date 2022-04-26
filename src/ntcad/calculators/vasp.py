@@ -7,7 +7,6 @@ output files.
 
 import os
 import subprocess
-from sys import stdout
 
 import numpy as np
 from ntcad.calculators.calculator import Calculator
@@ -55,7 +54,7 @@ class VASP(Calculator):
         shift: dict = None,
         potentials: dict = None,
         recommended_potentials: bool = False,
-        **kwargs: dict,
+        **incar_tags: dict,
     ) -> None:
         """_summary_
 
@@ -74,13 +73,13 @@ class VASP(Calculator):
         recommended_potentials, optional
             _description_, by default False
         """
-        super().__init__(directory, **kwargs)
+        self.directory = directory
         self.structure = structure
         self.kpoints = kpoints
         self.shift = shift
         self.potentials = potentials
         self.recommended_potentials = recommended_potentials
-        self.incar_tags = kwargs
+        self.incar_tags = incar_tags
 
     def calculate(self, command: str) -> int:
         """_summary_
@@ -105,7 +104,7 @@ class VASP(Calculator):
             self.write_input()
 
         with open("vasp.out", "a") as vasp_out:
-            # NOTE: Don't really like the shell=True here.
+            # TODO: Don't really like the shell=True here.
             retcode = subprocess.call(
                 command, shell=True, stdout=vasp_out, cwd=self.directory
             )

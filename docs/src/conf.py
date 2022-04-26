@@ -283,10 +283,4 @@ texinfo_documents = [
 autosummary_generate = True
 autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
 
-html_context = {
-    'versions': [
-        "master",
-        "4.0.1", 
-        "4.0.0"
-    ]
-}
+html_context = {"versions": ["master", "4.0.1", "4.0.0"]}

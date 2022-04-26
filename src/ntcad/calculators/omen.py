@@ -8,16 +8,14 @@ should be pretty lax.
 
 """
 
-import os
 
+import os
 from ntcad.calculators.calculator import Calculator
 from ntcad.core.structure import Structure
 
 
 class OMEN(Calculator):
-    def __init__(
-        self, directory: os.PathLike, **kwargs: dict
-    ) -> None:
+    def __init__(self, directory: os.PathLike, **kwargs: dict) -> None:
         pass
 
     def calculate(self, command: str) -> None:
