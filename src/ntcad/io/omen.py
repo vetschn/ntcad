@@ -2,11 +2,19 @@
 
 """
 
+import os
+from typing import Any
+
 import numpy as np
 from scipy.sparse import csr_matrix
+from ntcad.core.structure import Structure
+
+from scipy import constants
+
+m_u = constants["atomic mass constant"]
 
 
-def read_bin(path: str) -> csr_matrix:
+def read_bin(path: os.PathLike) -> csr_matrix:
     """Parses an OMEN binary sparse matrix file.
 
     Parameters
@@ -36,3 +44,77 @@ def read_bin(path: str) -> csr_matrix:
         dtype=np.complex64,
     )
     return matrix
+
+
+def read_layer_matrix(path: os.PathLike) -> Any:
+    """_summary_
+
+    Parameters
+    ----------
+    path
+        _description_
+
+    Returns
+    -------
+        _description_
+
+    """
+    layer_matrix = np.loadtxt(path)
+    coords = layer_matrix[:, :3]
+    kinds = layer_matrix[:, 3]
+    nn = layer_matrix[:, 4:]
+
+
+def read_lattice_dat(path: os.PathLike) -> Any:
+    """_summary_
+
+    Parameters
+    ----------
+    path
+        _description_
+
+    Returns
+    -------
+        _description_
+
+    """
+    with open(path, "r") as f:
+        lines = f.readlines()
+
+
+def read_mat_par(path: os.PathLike) -> dict:
+    """_summary_
+
+    Parameters
+    ----------
+    path
+        _description_
+
+    Returns
+    -------
+    mat_par
+        _description_
+
+    """
+    if not os.path.basename(path).startswith("ph"):
+        raise NotImplementedError()
+
+    with open(path, "r") as f:
+        lines = f.readlines()
+
+    num_anions, num_cations = tuple(map(int, lines[0].split()))
+    Eg, Ec_min, Ev_max = tuple(map(float, lines[1].split()))
+    num_orbitals = np.array(list(map(int, lines[2].split())))
+    atomic_masses = np.array(list(map(float, lines[3].split()))) * m_u
+
+    mat_par = {
+        "num_anions": num_anions,
+        "num_cations": num_cations,
+        "Eg": Eg,
+        "Ec_min": Ec_min,
+        "Ev_max": Ev_max,
+        "num_orbitals": num_orbitals,
+        "atomic_masses": atomic_masses,
+    }
+
+    return mat_par
