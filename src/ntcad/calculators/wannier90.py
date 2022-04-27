@@ -18,6 +18,11 @@ class Wannier90(Calculator):
     calculation. This calculator does not write input files per se
     (everything in seedname.win can be set via vasp-wannier incar tags.)
 
+    The same should be true for other DFT codes (still have to check).
+
+
+
+
     Attributes
     ----------
 
@@ -35,8 +40,8 @@ class Wannier90(Calculator):
     def calculate(self, command: str) -> None:
         return super().calculate(command)
 
-    def _write_input(self) -> None:
+    def write_input(self) -> None:
         return super()._write_input()
 
-    def _read_output(self) -> None:
+    def read_output(self) -> None:
         return super()._read_output()

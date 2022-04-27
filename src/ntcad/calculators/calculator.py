@@ -74,11 +74,11 @@ class Calculator(ABC):
         ...
 
     @abstractmethod
-    def _write_input(self) -> None:
+    def write_input(self) -> None:
         """_summary_"""
         ...
 
     @abstractmethod
-    def _read_output(self) -> None:
+    def read_output(self) -> None:
         """_summary_"""
         ...

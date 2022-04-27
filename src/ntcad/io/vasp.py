@@ -96,7 +96,7 @@ def read_poscar(path: os.PathLike) -> Structure:
     pass
 
 
-def write_incar(path: os.PathLike, **kwargs: dict) -> None:
+def write_incar(path: os.PathLike, **incar_tags: dict) -> None:
     """Writes an INCAR file at the given path.
 
     Parameters
@@ -110,7 +110,7 @@ def write_incar(path: os.PathLike, **kwargs: dict) -> None:
 
     """
     lines = ["INCAR written by ntcad\n"]
-    for tag, value in kwargs.items():
+    for tag, value in incar_tags.items():
         line = tag.upper() + " = "
         if isinstance(value, (list, tuple)):
             line += " ".join(list(map(str, value)))
