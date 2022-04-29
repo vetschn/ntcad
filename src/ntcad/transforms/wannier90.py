@@ -9,20 +9,27 @@ from scipy import constants
 
 logger = logging.Logger(__name__)
 
+c, *__ = constants.physical_constants["speed of light in vacuum"]
+e, *__ = constants.physical_constants["elementary charge"]
 hbar, *__ = constants.physical_constants["reduced Planck constant in eV s"]
 m_e, *__ = constants.physical_constants["electron mass"]
 
 
-def _approx_momentum_operator(
+def _approximate_momentum_operator(
     H_R: np.ndarray,
     Ai: np.ndarray,
     Ra: np.ndarray = None,
     tau_ij: bool = False,
     centers: np.ndarray = None,
+    in_si_units=False,
 ) -> np.ndarray:
     """Approximates the momentum operator elements ``p_R``.
 
     This function just takes the on-site terms into account.
+
+    The resulting momentum matrix is in [eV/c] per default. If you wish to
+    get the matrix in SI units [kg*m/s], set the ``in_si_units`` keyword
+    accordingly. OMEN requires [eV/c].
 
     Note
     ----
@@ -44,6 +51,9 @@ def _approx_momentum_operator(
     centers
         Wannier centers (``num_wann`` x 3). Needed to include the ``tau_ij``
         contributions.
+    in_si_units
+        Whether to return the momentum operator in SI units [kg*m/s].
+        Defaults to ``False``.
 
     Returns
     -------
@@ -58,37 +68,49 @@ def _approx_momentum_operator(
     midpoint = np.floor_divide(np.subtract(H_R.shape[:3], 1), 2)
 
     p_R = np.zeros(H_R.shape + (3,), dtype=np.complex64)
+    # Iterate over all spacial components.
     for i in range(p_R.shape[-1]):
         d_0_i = np.zeros(H_R.shape[-2:])
         if tau_ij:
+            # Trickery: Wannier center distances within cell from
+            # transposed version of the Wannier centers themselves.
             d_0_i = centers[:, i].reshape(-1, 1) - centers[:, i]
-        p_R_i = np.zeros_like(H_R)
-        for Rs in np.ndindex(p_R.shape[:3]):
+        # Construct the position operator for spacial dimension i.
+        r_R_i = np.zeros_like(H_R)
+        for Rs in np.ndindex(r_R_i.shape[:3]):
             R = Rs - midpoint
             allowed = np.any(H_R[(*R,)])
             if Ra is not None:
                 allowed = np.any(np.all(Ra == R, axis=1))
             if allowed:
-                p_R_i[(*R,)] += H_R[(*R,)] * (R @ Ai)[i] + d_0_i
-                p_R[..., i] += p_R_i
-
-    # TODO: Not sure about the 1e-10 factor.
-    return 1j * 1e10 * m_e / hbar * p_R
+                r_R_i[(*R,)] = (R @ Ai)[i] + d_0_i
+        p_R[..., i] = r_R_i * H_R
+    # Conversion to SI units [kg*m/s].
+    p_R_SI = 1j * 1e-10 * m_e / hbar * p_R
+    if in_si_units:
+        return p_R_SI
+    # Conversion to [eV/c].
+    return c / e * p_R_SI
 
 
 def momentum_operator(
     H_R: np.ndarray,
     Ai: np.ndarray,
     r_R: np.ndarray = None,
-    approx: bool = False,
+    approximate: bool = False,
     Ra: np.ndarray = None,
     tau_ij: bool = False,
     centers: np.ndarray = None,
+    in_si_units=False,
 ) -> np.ndarray:
     """Calculates the momentum operator elements ``p_R``.
 
     The momentum operator ``p_R`` is the commutator between Hamiltonian
     ``H_R`` and position operator ``r_R`` in the same Wannier basis.
+
+    The resulting momentum matrix is in [eV/c] per default. If you wish to
+    get the matrix in SI units [kg*m/s], set the ``in_si_units`` keyword
+    accordingly. OMEN requires [eV/c].
 
     Note
     ----
@@ -106,7 +128,7 @@ def momentum_operator(
         Position matrix elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
         ``num_wann`` x 3). Not needed if the momentum operator should
         merely be approximated.
-    approx
+    approximate
         Whether to approximate the momentum operator. Defaults to
         ``False``.
     Ra
@@ -117,6 +139,9 @@ def momentum_operator(
     centers
         Wannier centers (``num_wann`` x 3). Needed to include the ``tau_ij``
         contributions.
+    in_si_units
+        Whether to return the momentum operator in SI units [kg*m/s].
+        Defaults to ``False``.
 
 
     Returns
@@ -132,10 +157,16 @@ def momentum_operator(
     """
     if tau_ij and centers is None:
         raise ValueError("Wannier centers needed if ``tau_ij`` is ``True``.")
-    if approx:
-        return _approx_momentum_operator(
-            H_R=H_R, Ai=Ai, Ra=Ra, tau_ij=tau_ij, centers=centers
+    if approximate:
+        p_R_approximate = _approximate_momentum_operator(
+            H_R=H_R,
+            Ai=Ai,
+            Ra=Ra,
+            tau_ij=tau_ij,
+            centers=centers,
+            in_si_units=in_si_units,
         )
+        return p_R_approximate
     elif r_R is None:
         raise ValueError("Position Matrix elements needed if ``approx`` is ``False``.")
 
@@ -161,9 +192,13 @@ def momentum_operator(
                     or np.any(np.all(Ra == (R - Rp), axis=1))
                 )
             if allowed and in_bounds_lower and in_bounds_upper:
+                # Iterate over all spacial components.
                 for i in range(p_R.shape[-1]):
                     d_0_i = np.zeros(H_R.shape[-2:])
                     if tau_ij:
+                        # Trickery: Wannier center distances within cell
+                        # from transposed version of the Wannier centers
+                        # themselves.
                         d_0_i = centers[:, i].reshape(-1, 1) - centers[:, i]
                     r_R_i = r_R[..., i]
                     p_R_i = np.zeros_like(r_R_i)
@@ -171,9 +206,12 @@ def momentum_operator(
                     p_R_i[(*R,)] += H_R[(*Rp,)] @ r_R_i[(*(R - Rp),)]
                     p_R_i[(*R,)] -= r_R_i[(*Rp,)] @ H_R[(*(R - Rp),)]
                     p_R[..., i] += p_R_i
-
-    # TODO: Not sure about the 1e-10 factor.
-    return 1j * 1e10 * m_e / hbar * p_R
+    # Conversion to SI units [kg*m/s].
+    p_R_SI = 1j * 1e-10 * m_e / hbar * p_R
+    if in_si_units:
+        return p_R_SI
+    # Conversion to [eV/c].
+    return c / e * p_R_SI
 
 
 def distance_matrix(
@@ -223,21 +261,21 @@ def distance_matrix(
     return d_R
 
 
-def k_sample(O_R: np.ndarray, kpts: np.ndarray) -> np.ndarray:
-    """Samples the given operator ``O_R`` at given ``kpts``.
+def k_sample(O_R: np.ndarray, kpoints: np.ndarray) -> np.ndarray:
+    """Samples the given operator ``O_R`` at given ``kpoints``.
 
     Parameters
     ----------
     O_R
         Operator elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
         ``num_wann``).
-    kpts
+    kpoints
         Reciprocal-space points in fractional coordinates (``N_k`` x 3).
 
     Returns
     -------
     O_k
-        Operator at the specified ``kpts``.
+        Operator at the specified ``kpoints``.
 
     """
     # TODO: This here could definitely be done in a nicer / more concise
@@ -247,6 +285,6 @@ def k_sample(O_R: np.ndarray, kpts: np.ndarray) -> np.ndarray:
     R_R = np.zeros(O_R.shape[:3] + (3,))
     for Ri in R:
         R_R[(*Ri,)] = Ri
-    phase = np.exp(2j * np.pi * np.einsum("ijkr,lr->ijkl", R_R, kpts))
+    phase = np.exp(2j * np.pi * np.einsum("ijkr,lr->ijkl", R_R, kpoints))
     O_k = np.einsum("ijkmn,ijkl->lmn", O_R, phase)
     return O_k
