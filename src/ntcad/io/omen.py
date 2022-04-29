@@ -46,7 +46,7 @@ def read_bin(path: os.PathLike) -> csr_matrix:
     return matrix
 
 
-def read_layer_matrix(path: os.PathLike) -> Any:
+def read_layer_matrix_dat(path: os.PathLike) -> Any:
     """_summary_
 
     Parameters
@@ -63,6 +63,7 @@ def read_layer_matrix(path: os.PathLike) -> Any:
     coords = layer_matrix[:, :3]
     kinds = layer_matrix[:, 3]
     nn = layer_matrix[:, 4:]
+    # TODO
 
 
 def read_lattice_dat(path: os.PathLike) -> Any:
