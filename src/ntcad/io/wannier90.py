@@ -205,15 +205,15 @@ def read_band_kpt(path: os.PathLike) -> np.ndarray:
     -------
     kpt
         The k-points used for the interpolated band structure
-        (``num_kpts`` x 3)
+        (``num_kpoints`` x 3)
 
     """
     with open(path, "r") as f:
         lines = f.readlines()
 
-    num_kpts = lines[0].strip()
+    num_kpoints = lines[0].strip()
 
-    kpt = np.zeros((num_kpts, 3))
+    kpt = np.zeros((num_kpoints, 3))
     for i, line in enumerate(lines[1:]):
         kpt[i, :] = list(map(float, line.split()))
 

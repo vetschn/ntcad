@@ -21,8 +21,8 @@ def monkhorst_pack(size: np.ndarray):
     ValueError
         _description_
     """
-    kpts = np.indices(size).transpose((1, 2, 3, 0)).reshape((-1, 3))
-    return (kpts + 0.5) / size - 0.5
+    kpoints = np.indices(size).transpose((1, 2, 3, 0)).reshape((-1, 3))
+    return (kpoints + 0.5) / size - 0.5
 
 
 def kpoint_path(points: np.ndarray, num: int = 50) -> np.ndarray:
@@ -38,7 +38,7 @@ def kpoint_path(points: np.ndarray, num: int = 50) -> np.ndarray:
 
     Returns
     -------
-    kpts
+    kpoints
         All k-points along the given symmetry points (``N_s``*``num`` x 3),
         where ``N_s`` is the number of sections between symmetry points.
     """
@@ -46,5 +46,5 @@ def kpoint_path(points: np.ndarray, num: int = 50) -> np.ndarray:
     sections = np.zeros((N_s, num, 3))
     for i in range(N_s):
         sections[i] = np.linspace(points[i], points[i + 1], num)
-    kpts = sections.reshape((N_s * num, 3))
-    return kpts
+    kpoints = sections.reshape((N_s * num, 3))
+    return kpoints
