@@ -11,7 +11,7 @@ from ntcad.core.structure import Structure
 
 from scipy import constants
 
-m_u = constants["atomic mass constant"]
+m_u, *__ = constants.physical_constants["atomic mass constant"]
 
 
 def read_bin(path: os.PathLike) -> csr_matrix:
