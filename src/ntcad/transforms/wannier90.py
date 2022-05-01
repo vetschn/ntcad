@@ -3,6 +3,7 @@
 """
 
 import logging
+import multiprocessing
 
 import numpy as np
 from scipy import constants
@@ -79,8 +80,9 @@ def _approximate_momentum_operator(
         r_R_i = np.zeros_like(H_R)
         for Rs in np.ndindex(r_R_i.shape[:3]):
             R = Rs - midpoint
-            allowed = np.any(H_R[(*R,)])
-            if Ra is not None:
+            if Ra is None:
+                allowed = np.any(H_R[(*R,)])
+            else:
                 allowed = np.any(np.all(Ra == R, axis=1))
             if allowed:
                 r_R_i[(*R,)] = (R @ Ai)[i] + d_0_i
@@ -173,39 +175,56 @@ def momentum_operator(
     # Midpoint of the Wigner-Seitz cell indices.
     midpoint = np.floor_divide(np.subtract(H_R.shape[:3], 1), 2)
 
-    # Iterate over R, Rp (R') and 3 spatial dimensions and
-    # populate the momentum operator matrix.
+    # NOTE: The multiprocessing module requires a picklable object in
+    # the call to Pool.map.
+    # https://docs.python.org/3/library/pickle.html#what-can-be-pickled-and-unpickled
+    # Hence the global keyword here.
+    global _compute_p_R_i
+
+    # Spacial dimensions are treated in parallel.
+    def _compute_p_R_i(i: int) -> np.ndarray:
+        """Computes the i-th spacial contribution."""
+        p_R_i = np.zeros(H_R.shape, dtype=np.complex64)
+        d_0_i = np.zeros(H_R.shape[-2:])
+        if tau_ij:
+            # Trickery: Wannier center distances within cell from
+            # transposed version of the Wannier centers themselves.
+            d_0_i = centers[:, i].reshape(-1, 1) - centers[:, i]
+        # Iterate over all R vectors.
+        for Rs in np.ndindex(p_R_i.shape[:3]):
+            R = Rs - midpoint
+            if Ra is None:
+                allowed = np.any(H_R[(*R,)])
+            else:
+                allowed = np.any(np.all(Ra == R, axis=1))
+            if not allowed:
+                continue
+            p_R_i[(*R,), ...] += H_R[(*R,)] * (R @ Ai)[i] + d_0_i
+            # Iterate over all R' vectors.
+            for Rps in np.ndindex(p_R_i.shape[:3]):
+                Rp = Rps - midpoint
+                in_bounds_lower = np.all(np.abs(R - Rp) <= midpoint)
+                in_bounds_upper = np.all(np.abs(R + Rp) <= midpoint)
+                if Ra is None:
+                    allowed = np.any(H_R[(*Rp,)]) and np.any(H_R[(*(R - Rp),)])
+                else:
+                    allowed = np.any(np.all(Ra == Rp, axis=1)) or np.any(
+                        np.all(Ra == (R - Rp), axis=1)
+                    )
+                if allowed and in_bounds_lower and in_bounds_upper:
+                    p_R_i[(*R,), ...] += H_R[(*Rp,)] @ r_R[(*(R - Rp),), ..., i]
+                    p_R_i[(*R,), ...] -= r_R[(*Rp,), ..., i] @ H_R[(*(R - Rp),)]
+        return p_R_i
+
+    # Compute the spacial dimensions in parallel.
+    pool = multiprocessing.Pool(3)
+    p_R_i = pool.map(_compute_p_R_i, range(3))
+
+    # Put the momentum matrix together.
     p_R = np.zeros(H_R.shape + (3,), dtype=np.complex64)
-    for Rs in np.ndindex(p_R.shape[:3]):
-        R = Rs - midpoint
-        for Rps in np.ndindex(p_R.shape[:3]):
-            Rp = Rps - midpoint
-            in_bounds_lower = (np.abs(R - Rp) <= midpoint).all()
-            in_bounds_upper = (np.abs(R + Rp) <= midpoint).all()
-            allowed = (
-                np.any(H_R[(*R,)]) and np.any(H_R[(*Rp,)]) and np.any(H_R[(*(R - Rp),)])
-            )
-            if Ra is not None:
-                allowed = (
-                    np.any(np.all(Ra == R, axis=1))
-                    or np.any(np.all(Ra == Rp, axis=1))
-                    or np.any(np.all(Ra == (R - Rp), axis=1))
-                )
-            if allowed and in_bounds_lower and in_bounds_upper:
-                # Iterate over all spacial components.
-                for i in range(p_R.shape[-1]):
-                    d_0_i = np.zeros(H_R.shape[-2:])
-                    if tau_ij:
-                        # Trickery: Wannier center distances within cell
-                        # from transposed version of the Wannier centers
-                        # themselves.
-                        d_0_i = centers[:, i].reshape(-1, 1) - centers[:, i]
-                    r_R_i = r_R[..., i]
-                    p_R_i = np.zeros_like(r_R_i)
-                    p_R_i[(*R,)] += H_R[(*R,)] * (R @ Ai)[i] + d_0_i
-                    p_R_i[(*R,)] += H_R[(*Rp,)] @ r_R_i[(*(R - Rp),)]
-                    p_R_i[(*R,)] -= r_R_i[(*Rp,)] @ H_R[(*(R - Rp),)]
-                    p_R[..., i] += p_R_i
+    for i in range(p_R.shape[-1]):
+        p_R[..., i] = p_R_i[i]
+
     # Conversion to SI units [kg*m/s].
     p_R_SI = 1j * 1e-10 * m_e / hbar * p_R
     if in_si_units:
