@@ -92,8 +92,33 @@ def read_poscar(path: os.PathLike) -> Structure:
     -------
         _description_
     """
-    # TODO
-    pass
+    with open(path, "r") as f:
+        lines = f.readlines()
+
+    attr = {"comment": lines[0].strip(), "path": os.path.abspath(path)}
+
+    scaling = float(lines[1])
+    _cell = np.zeros((3, 3))
+    for i in range(3):
+        cell[i] = list(map(float, lines[2 + i].split()))
+    cell = scaling * _cell
+
+    _kinds = lines[5].split()
+    counts = list(map(int, lines[6].split()))
+    kinds = np.array([], dtype=str)
+    for kind, count in zip(_kinds, counts):
+        np.concatenate((kinds, [kind] * count))
+
+    cartesian = lines[7].startswith(("C", "c"))
+
+    positions = np.zeros((sum(counts), 3))
+    for i in range(sum(counts)):
+        positions[i] = list[map(float, lines[8 + i].split())]
+
+    structure = Structure(
+        kinds=kinds, positions=positions, cell=cell, cartesian=cartesian, attr=attr
+    )
+    return structure
 
 
 def write_incar(path: os.PathLike, **incar_tags: dict) -> None:

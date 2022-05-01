@@ -8,138 +8,28 @@ import os
 
 import numpy as np
 
-# from ntcad.io.vasp import read_poscar, write_poscar
+import ntcad
 
 # All allowed atomic symbols including a ``None`` / "X" kind.
-_symbols = [
+# Written this way for less clutter (leave me alone).
+_symbols = (
     # --- 0 ------------------------------------------------------------
-    "X",
+    "X "
     # --- 1 ------------------------------------------------------------
-    "H",
-    "He",
+    "H He "
     # --- 2 ------------------------------------------------------------
-    "Li",
-    "Be",
-    "B",
-    "C",
-    "N",
-    "O",
-    "F",
-    "Ne",
+    "Li Be B C N O F Ne "
     # --- 3 ------------------------------------------------------------
-    "Na",
-    "Mg",
-    "Al",
-    "Si",
-    "P",
-    "S",
-    "Cl",
-    "Ar",
+    "Na Mg Al Si P S Cl Ar "
     # --- 4 ------------------------------------------------------------
-    "K",
-    "Ca",
-    "Sc",
-    "Ti",
-    "V",
-    "Cr",
-    "Mn",
-    "Fe",
-    "Co",
-    "Ni",
-    "Cu",
-    "Zn",
-    "Ga",
-    "Ge",
-    "As",
-    "Se",
-    "Br",
-    "Kr",
+    "K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr "
     # --- 5 ------------------------------------------------------------
-    "Rb",
-    "Sr",
-    "Y",
-    "Zr",
-    "Nb",
-    "Mo",
-    "Tc",
-    "Ru",
-    "Rh",
-    "Pd",
-    "Ag",
-    "Cd",
-    "In",
-    "Sn",
-    "Sb",
-    "Te",
-    "I",
-    "Xe",
+    "Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe "
     # --- 6 ------------------------------------------------------------
-    "Cs",
-    "Ba",
-    "La",
-    "Ce",
-    "Pr",
-    "Nd",
-    "Pm",
-    "Sm",
-    "Eu",
-    "Gd",
-    "Tb",
-    "Dy",
-    "Ho",
-    "Er",
-    "Tm",
-    "Yb",
-    "Lu",
-    "Hf",
-    "Ta",
-    "W",
-    "Re",
-    "Os",
-    "Ir",
-    "Pt",
-    "Au",
-    "Hg",
-    "Tl",
-    "Pb",
-    "Bi",
-    "Po",
-    "At",
-    "Rn",
+    "Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn "
     # --- 7 ------------------------------------------------------------
-    "Fr",
-    "Ra",
-    "Ac",
-    "Th",
-    "Pa",
-    "U",
-    "Np",
-    "Pu",
-    "Am",
-    "Cm",
-    "Bk",
-    "Cf",
-    "Es",
-    "Fm",
-    "Md",
-    "No",
-    "Lr",
-    "Rf",
-    "Db",
-    "Sg",
-    "Bh",
-    "Hs",
-    "Mt",
-    "Ds",
-    "Rg",
-    "Cn",
-    "Nh",
-    "Fl",
-    "Mc",
-    "Lv",
-    "Ts",
-    "Og",
-]
+    "Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og "
+).split()
 
 # The atomic number mapped to the corresponding atomic symbol.
 _numbers = {}
@@ -185,6 +75,7 @@ class Structure:
         positions: np.ndarray,
         cell: np.ndarray,
         cartesian: bool = True,
+        attr: dict = None,
     ) -> None:
         """_summary_
 
@@ -208,6 +99,8 @@ class Structure:
         self.sites = np.array(list(zip(kinds, positions)), dtype=_sites_dtype)
         self.cell = np.array(cell)
 
+        self.attr = None
+
     def __str__(self) -> str:
         """_summary_
 
@@ -226,8 +119,7 @@ class Structure:
         path
             _description_
         """
-        #  TODO
-        pass
+        ntcad.io.vasp.write_poscar(path, self)
 
     def to_cif(self, path: os.PathLike) -> None:
         """_summary_
