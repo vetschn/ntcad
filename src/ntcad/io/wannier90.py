@@ -3,11 +3,12 @@
 """
 from datetime import datetime
 import os
+from typing import Tuple
 
 import numpy as np
 
 
-def read_hr_dat(path: os.PathLike, full: bool = False) -> np.ndarray:
+def read_hr_dat(path: os.PathLike, full: bool = False) -> Tuple[np.ndarray, ...]:
     """Parses the contents of a ``seedname_hr.dat`` file.
 
     The first line gives the date and time at which the file was
@@ -36,13 +37,13 @@ def read_hr_dat(path: os.PathLike, full: bool = False) -> np.ndarray:
     Returns
     -------
     H_R, deg, Ra
-        The Hamiltonian elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
-        ``num_wann``), where ``N_i`` correspond to the number of
-        Wigner-Seitz cells along the lattice vectors ``A_i``. The indices
-        are chose such that (0, 0, 0) actually gets you the center
-        Wigner-Seitz cell. Additionally, if ``full`` is ``True``, the
-        degeneracy info and the allowed Wigner-Seitz cell indices are
-        also returned.
+        The Hamiltonian elements (``N_1`` x ``N_2`` x ``N_3`` x
+        ``num_wann`` x ``num_wann``), where ``N_i`` correspond to the
+        number of Wigner-Seitz cells along the lattice vectors ``A_i``.
+        The indices are chose such that (0, 0, 0) actually gets you the
+        center Wigner-Seitz cell. Additionally, if ``full`` is ``True``,
+        the degeneracy info and the allowed Wigner-Seitz cell indices
+        ``Ra`` are also returned.
 
     """
     with open(path, "r") as f:
@@ -537,3 +538,81 @@ def read_wout(path: os.PathLike) -> dict:
     }
 
     return wout
+
+
+def write_hr_dat(
+    path: os.PathLike, O_R: np.ndarray, deg: np.ndarray = None, Ra: np.ndarray = None
+) -> None:
+    """Writes an operator to a ``seedname_hr.dat`` file.
+
+    This function is useful to write a momentum operator that should be
+    transformed by winterface for use in OMEN for instance.
+
+    Parameters
+    ----------
+    path
+        Path where to write the ``seedname_hr.dat``
+    O_R
+        The operator elements (``N_1`` x ``N_2`` x ``N_3`` x
+        ``num_wann`` x ``num_wann``), where ``N_i`` correspond to the
+        number of Wigner-Seitz cells along the lattice vectors ``A_i``.
+        The indices are such that (0, 0, 0) actually gets you the center
+        Wigner-Seitz cell.
+    deg, optional
+        Degeneracy info to write to file. If None, writes all zeros.
+    Ra, optional
+        The allowed Wigner-Seitz cell indices. If None, the function
+        only writes the operator for Wigner-Seitz cell indices where the
+        operator is non-zero.
+
+    """
+    if O_R.ndim != 5:
+        raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
+    if O_R.shape[-1] != O_R.shape[-2]:
+        raise ValueError(f"Operator at R must be square: {O_R.ndim=}")
+
+    lines = ["Written by ntcad\n"]
+
+    # Find the allowed Wigner-Seitz cell indices.
+    if Ra is None:
+        # Midpoint of the Wigner-Seitz cell indices.
+        midpoint = np.floor_divide(np.subtract(O_R.shape[:3], 1), 2)
+        Ra = np.array([]).reshape(0,3)
+        for Rs in np.ndindex(O_R.shape[:3]):
+            R = Rs - midpoint
+            if np.any(O_R[(*R,)]):
+                Ra = np.append(Ra, R.reshape(1,3), axis=0)
+
+    num_wann = O_R.shape[-1]
+    nrpts = Ra.shape[0]
+    lines.append(str(num_wann) + "\n")
+    lines.append(str(nrpts) + "\n")
+
+    # Construct degeneracy lines.
+    if deg is None:
+        deg = np.zeros(nrpts, dtype=int)
+    deg_per_line = 15
+    deg_str = ""
+    for i, val in enumerate(deg):
+        deg_str += "{:5d}".format(val)
+        if ((i + 1) % deg_per_line) == 0:
+            deg_str += "\n\\"
+    deg_str += "\n"
+    deg_lines = deg_str.split("\\")
+    lines.extend(deg_lines)
+
+    # Construct the matrix entry lines.
+    for R in Ra:
+        R_1, R_2, R_3 = tuple(map(int, R))
+        for m, n in np.ndindex(O_R.shape[-2:]):
+            O_R_mn = O_R[R_1, R_2, R_3, m, n]
+            O_R_mn_real, O_R_mn_imag = O_R_mn.real, O_R_mn.imag
+            line = "{:d} {:5d} {:5d} {:5d} {:5d} ".format(R_1, R_2, R_3, m, n)
+            line += "{:22.16f} {:22.16f}\n".format(O_R_mn_real, O_R_mn_imag)
+            lines.append(line)
+
+    if not path.endswith("_hr.dat"):
+        path += "_hr.dat"
+
+    with open(path, "w") as hr_dat:
+        hr_dat.writelines(lines)
