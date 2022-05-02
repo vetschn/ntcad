@@ -1,8 +1,10 @@
-""" TODO: Docstrings.
+"""
+This module implements file I/O functions for interfacing with
+Wannier90.
 
 """
-from datetime import datetime
 import os
+from datetime import datetime
 from typing import Tuple
 
 import numpy as np
@@ -28,7 +30,7 @@ def read_hr_dat(path: os.PathLike, full: bool = False) -> Tuple[np.ndarray, ...]
     ----------
     path
         Path to ``seedname_hr.dat``.
-    full
+    full, optional
         Switch determining nature of return value. When it is ``False``
         (the default) just ``r_R`` is returned, when ``True``, the
         degeneracy info and the allowed Wigner-Seitz cell indices are
@@ -102,7 +104,7 @@ def read_r_dat(path: os.PathLike, full: bool = False) -> np.ndarray:
     ----------
     path
         Path to ``seedname_r.dat``.
-    full
+    full, optional
         Switch determining nature of return value. When it is ``False``
         (the default) just ``r_R`` is returned, when ``True``, the allowed
         Wigner-Seitz cell indices are also returned.
@@ -191,7 +193,7 @@ def read_band_dat(path: os.PathLike) -> np.ndarray:
 
 
 def read_band_kpt(path: os.PathLike) -> np.ndarray:
-    """Parses the contents of a ``seedname_band.kpt`` file
+    """Parses the contents of a ``seedname_band.kpt`` file.
 
     The k-points used for the interpolated band structure, in units of
     the reciprocal lattice vectors. This file can be used to generate a
@@ -361,23 +363,8 @@ def _parse_wout_system(lines: list[str]) -> dict:
     return system
 
 
-# TODO
-def _parse_wout_k_mesh(lines: list[str]) -> dict:
-    """Parses the k-mesh section of a ``seedname.wout`` file.
-
-    This part of the output files provides information on the b-vectors
-    and weights chosen.
-
-    Parameters
-    ----------
-    lines
-        Lines of the ``seedname.wout`` file.
-
-    Returns
-    -------
-        _description_
-
-    """
+def _parse_wout_k_mesh(lines: list) -> dict:
+    """TODO"""
     pass
 
 
@@ -396,7 +383,6 @@ def _parse_wout_disentangle(lines: list[str]) -> dict:
         the final ``Omega_I``.
 
     """
-
     for line in lines:
         if "Outer:" in line:
             __, __, dis_win_min, __, dis_win_max, *__ = line.split()
@@ -455,40 +441,14 @@ def _parse_wout_wannierise(lines: list[str]) -> dict:
     return wannierise
 
 
-# TODO
 def _parse_wout_plotting(lines: list) -> dict:
-    """_summary_
-
-    Parameters
-    ----------
-    ind
-        _description_
-    lines
-        _description_
-
-    Returns
-    -------
-        _description_
-    """
+    """TODO"""
     pass
 
 
-# TODO
-def _parse_wout_timing(lines: list[str]) -> dict:
-    """Parses the summary timings section of a ``seedname.wout`` file.
-
-    Parameters
-    ----------
-    ind
-        Index at the section start.
-    lines
-        Lines of the ``seedname.wout`` file.
-
-    Returns
-    -------
-        _description_
-    """
-    return {}
+def _parse_wout_timing(lines: list) -> dict:
+    """TODO"""
+    pass
 
 
 def read_wout(path: os.PathLike) -> dict:
@@ -506,7 +466,6 @@ def read_wout(path: os.PathLike) -> dict:
         file from a Wannier90 run.
 
     """
-
     with open(path, "r") as f:
         lines = f.readlines()
 
@@ -536,7 +495,6 @@ def read_wout(path: os.PathLike) -> dict:
         # "plotting": _parse_wout_plotting(sections[5]),
         # "timing": _parse_wout_timing(sections[6]),
     }
-
     return wout
 
 
@@ -577,11 +535,11 @@ def write_hr_dat(
     if Ra is None:
         # Midpoint of the Wigner-Seitz cell indices.
         midpoint = np.floor_divide(np.subtract(O_R.shape[:3], 1), 2)
-        Ra = np.array([]).reshape(0,3)
+        Ra = np.array([]).reshape(0, 3)
         for Rs in np.ndindex(O_R.shape[:3]):
             R = Rs - midpoint
             if np.any(O_R[(*R,)]):
-                Ra = np.append(Ra, R.reshape(1,3), axis=0)
+                Ra = np.append(Ra, R.reshape(1, 3), axis=0)
 
     num_wann = O_R.shape[-1]
     nrpts = Ra.shape[0]
