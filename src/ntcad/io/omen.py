@@ -1,15 +1,14 @@
-""" TODO
+"""
+This module implements file I/O functions for interfacing with OMEN.
 
 """
-
 import os
 from typing import Any
 
 import numpy as np
-from scipy.sparse import csr_matrix
 from ntcad.core.structure import Structure
-
 from scipy import constants
+from scipy.sparse import csr_matrix
 
 m_u, *__ = constants.physical_constants["atomic mass constant"]
 
@@ -47,7 +46,7 @@ def read_bin(path: os.PathLike) -> csr_matrix:
 
 
 def read_layer_matrix_dat(path: os.PathLike) -> Any:
-    """_summary_
+    """TODO
 
     Parameters
     ----------
@@ -67,7 +66,7 @@ def read_layer_matrix_dat(path: os.PathLike) -> Any:
 
 
 def read_lattice_dat(path: os.PathLike) -> Any:
-    """_summary_
+    """TODO
 
     Parameters
     ----------
@@ -84,17 +83,18 @@ def read_lattice_dat(path: os.PathLike) -> Any:
 
 
 def read_mat_par(path: os.PathLike) -> dict:
-    """_summary_
+    """Reads the material parameters.
 
     Parameters
     ----------
     path
-        _description_
+        Path to a ``mat_par`` file.
 
     Returns
     -------
     mat_par
-        _description_
+        A dictionary containing the information parsed from the
+        ``mat_par`` file.
 
     """
     if not os.path.basename(path).startswith("ph"):

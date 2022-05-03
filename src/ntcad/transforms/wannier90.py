@@ -22,15 +22,15 @@ def _approximate_momentum_operator(
     Ra: np.ndarray = None,
     tau_ij: bool = False,
     centers: np.ndarray = None,
-    in_si_units=False,
+    si_units=False,
 ) -> np.ndarray:
     """Approximates the momentum operator elements ``p_R``.
 
     This function just takes the on-site terms into account.
 
-    The resulting momentum matrix is in [eV/c] per default. If you wish to
-    get the matrix in SI units [kg*m/s], set the ``in_si_units`` keyword
-    accordingly. OMEN requires [eV/c].
+    The resulting momentum matrix is in [eV/c] per default. If you wish
+    to get the matrix in SI units [kg*m/s], set the ``in_si_units``
+    keyword accordingly. OMEN requires [eV/c].
 
     Note
     ----
@@ -40,8 +40,8 @@ def _approximate_momentum_operator(
     Parameters
     ----------
     H_R
-        Hamiltonian elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
-        ``num_wann``).
+        Hamiltonian elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann``
+        x ``num_wann``).
     Ai
         Real-Space lattice vectors (3 x 3).
     Ra
@@ -50,9 +50,9 @@ def _approximate_momentum_operator(
     tau_ij
         Whether to include the contributions between Wannier centers.
     centers
-        Wannier centers (``num_wann`` x 3). Needed to include the ``tau_ij``
-        contributions.
-    in_si_units
+        Wannier centers (``num_wann`` x 3). Needed to include the
+        ``tau_ij`` contributions.
+    si_units
         Whether to return the momentum operator in SI units [kg*m/s].
         Defaults to ``False``.
 
@@ -60,9 +60,9 @@ def _approximate_momentum_operator(
     -------
     p_R
         The approximated momentum operator elements (``N_1`` x ``N_2`` x
-        ``N_3`` x ``num_wann`` x ``num_wann`` x 3). The indices are chosen
-        such that (0, 0, 0) actually gets you the center Wigner-Seitz
-        cell distance matrix.
+        ``N_3`` x ``num_wann`` x ``num_wann`` x 3). The indices are
+        chosen such that (0, 0, 0) actually gets you the center
+        Wigner-Seitz cell distance matrix.
 
     """
     # Midpoint of the Wigner-Seitz cell indices.
@@ -80,16 +80,15 @@ def _approximate_momentum_operator(
         r_R_i = np.zeros_like(H_R)
         for Rs in np.ndindex(r_R_i.shape[:3]):
             R = Rs - midpoint
-            if Ra is None:
-                allowed = np.any(H_R[(*R,)])
-            else:
+            allowed = np.any(H_R[(*R,)])
+            if Ra is not None:
                 allowed = np.any(np.all(Ra == R, axis=1))
             if allowed:
-                r_R_i[(*R,)] = (R @ Ai)[i] + d_0_i
+                r_R_i[(*R,)] += (R @ Ai)[i] + d_0_i
         p_R[..., i] = r_R_i * H_R
     # Conversion to SI units [kg*m/s].
     p_R_SI = 1j * 1e-10 * m_e / hbar * p_R
-    if in_si_units:
+    if si_units:
         return p_R_SI
     # Conversion to [eV/c].
     return c / e * p_R_SI
@@ -103,16 +102,16 @@ def momentum_operator(
     Ra: np.ndarray = None,
     tau_ij: bool = False,
     centers: np.ndarray = None,
-    in_si_units=False,
+    si_units=False,
 ) -> np.ndarray:
     """Calculates the momentum operator elements ``p_R``.
 
     The momentum operator ``p_R`` is the commutator between Hamiltonian
     ``H_R`` and position operator ``r_R`` in the same Wannier basis.
 
-    The resulting momentum matrix is in [eV/c] per default. If you wish to
-    get the matrix in SI units [kg*m/s], set the ``in_si_units`` keyword
-    accordingly. OMEN requires [eV/c].
+    The resulting momentum matrix is in [eV/c] per default. If you wish
+    to get the matrix in SI units [kg*m/s], set the ``in_si_units``
+    keyword accordingly. OMEN requires [eV/c].
 
     Note
     ----
@@ -122,14 +121,14 @@ def momentum_operator(
     Parameters
     ----------
     H_R
-        Hamiltonian elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
-        ``num_wann``).
+        Hamiltonian elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann``
+        x ``num_wann``).
     Ai
         Real-Space lattice vectors (3 x 3).
     r_R
-        Position matrix elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
-        ``num_wann`` x 3). Not needed if the momentum operator should
-        merely be approximated.
+        Position matrix elements (``N_1`` x ``N_2`` x ``N_3`` x
+        ``num_wann`` x ``num_wann`` x 3). Not needed if the momentum
+        operator should merely be approximated.
     approximate
         Whether to approximate the momentum operator. Defaults to
         ``False``.
@@ -139,9 +138,9 @@ def momentum_operator(
     tau_ij
         Whether to include the contributions between Wannier centers.
     centers
-        Wannier centers (``num_wann`` x 3). Needed to include the ``tau_ij``
-        contributions.
-    in_si_units
+        Wannier centers (``num_wann`` x 3). Needed to include the
+        ``tau_ij`` contributions.
+    si_units
         Whether to return the momentum operator in SI units [kg*m/s].
         Defaults to ``False``.
 
@@ -149,9 +148,10 @@ def momentum_operator(
     Returns
     -------
     p_R
-        Momentum matrix elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
-        ``num_wann`` x 3). The indices are chosen such that (0, 0, 0)
-        actually gets you the center Wigner-Seitz cell distance matrix.
+        Momentum matrix elements (``N_1`` x ``N_2`` x ``N_3`` x
+        ``num_wann`` x ``num_wann`` x 3). The indices are chosen such
+        that (0, 0, 0) actually gets you the center Wigner-Seitz cell
+        distance matrix.
 
     Raises
     ------
@@ -166,7 +166,7 @@ def momentum_operator(
             Ra=Ra,
             tau_ij=tau_ij,
             centers=centers,
-            in_si_units=in_si_units,
+            si_units=si_units,
         )
         return p_R_approximate
     elif r_R is None:
@@ -176,14 +176,14 @@ def momentum_operator(
     midpoint = np.floor_divide(np.subtract(H_R.shape[:3], 1), 2)
 
     # NOTE: The multiprocessing module requires a picklable object in
-    # the call to Pool.map.
-    # https://docs.python.org/3/library/pickle.html#what-can-be-pickled-and-unpickled
-    # Hence the global keyword here.
+    # the call to Pool.map. Only funcions defined at the module level
+    # are picklable, hence the global keyword here.
+    # https://docs.python.org/3/library/pickle.html
     global _compute_p_R_i
 
     # Spacial dimensions are treated in parallel.
     def _compute_p_R_i(i: int) -> np.ndarray:
-        """Computes the i-th spacial contribution."""
+        """Computes the i-th spacial contribution of ``p_R``"""
         p_R_i = np.zeros(H_R.shape, dtype=np.complex64)
         d_0_i = np.zeros(H_R.shape[-2:])
         if tau_ij:
@@ -193,41 +193,39 @@ def momentum_operator(
         # Iterate over all R vectors.
         for Rs in np.ndindex(p_R_i.shape[:3]):
             R = Rs - midpoint
-            if Ra is None:
-                allowed = np.any(H_R[(*R,)])
-            else:
+            allowed = np.any(H_R[(*R,)])
+            if Ra is not None:
                 allowed = np.any(np.all(Ra == R, axis=1))
             if not allowed:
                 continue
-            p_R_i[(*R,), ...] += H_R[(*R,)] * (R @ Ai)[i] + d_0_i
+            p_R_i[(*R,), ...] += H_R[(*R,)] * (R @ Ai)[i]
             # Iterate over all R' vectors.
             for Rps in np.ndindex(p_R_i.shape[:3]):
                 Rp = Rps - midpoint
                 in_bounds_lower = np.all(np.abs(R - Rp) <= midpoint)
                 in_bounds_upper = np.all(np.abs(R + Rp) <= midpoint)
-                if Ra is None:
-                    allowed = np.any(H_R[(*Rp,)]) and np.any(H_R[(*(R - Rp),)])
-                else:
-                    allowed = np.any(np.all(Ra == Rp, axis=1)) or np.any(
+                allowed = np.any(H_R[(*Rp,)]) and np.any(H_R[(*(R - Rp),)])
+                if Ra is not None:
+                    allowed = np.any(np.all(Ra == Rp, axis=1)) and np.any(
                         np.all(Ra == (R - Rp), axis=1)
                     )
-                if allowed and in_bounds_lower and in_bounds_upper:
+                if in_bounds_lower and in_bounds_upper and allowed:
                     p_R_i[(*R,), ...] += H_R[(*Rp,)] @ r_R[(*(R - Rp),), ..., i]
                     p_R_i[(*R,), ...] -= r_R[(*Rp,), ..., i] @ H_R[(*(R - Rp),)]
         return p_R_i
 
     # Compute the spacial dimensions in parallel.
     pool = multiprocessing.Pool(3)
-    p_R_i = pool.map(_compute_p_R_i, range(3))
+    _p_R = pool.map(_compute_p_R_i, range(3))
 
     # Put the momentum matrix together.
     p_R = np.zeros(H_R.shape + (3,), dtype=np.complex64)
     for i in range(p_R.shape[-1]):
-        p_R[..., i] = p_R_i[i]
+        p_R[..., i] = _p_R[i]
 
     # Conversion to SI units [kg*m/s].
     p_R_SI = 1j * 1e-10 * m_e / hbar * p_R
-    if in_si_units:
+    if si_units:
         return p_R_SI
     # Conversion to [eV/c].
     return c / e * p_R_SI
@@ -254,11 +252,11 @@ def distance_matrix(
     Returns
     -------
     d_R
-        Matrix (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x ``num_wann``)
-        containing distances between Wannier centers for all the
-        requested Wigner Seitz cells. The indices are chosen such that
-        (0, 0, 0) actually gets you the center Wigner-Seitz cell
-        distance matrix.
+        Matrix (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
+        ``num_wann``) containing distances between Wannier centers for
+        all the requested Wigner Seitz cells. The indices are chosen
+        such that (0, 0, 0) actually gets you the center Wigner-Seitz
+        cell distance matrix.
 
     """
     Ras = np.subtract(Ra, Ra.min(axis=0))
@@ -297,6 +295,8 @@ def k_sample(O_R: np.ndarray, kpoints: np.ndarray) -> np.ndarray:
         Operator at the specified ``kpoints``.
 
     """
+    if O_R.ndim != 5:
+        raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
     # TODO: This here could definitely be done in a nicer / more concise
     # way.
     midpoint = np.floor_divide(np.subtract(O_R.shape[:3], 1), 2)
@@ -307,3 +307,62 @@ def k_sample(O_R: np.ndarray, kpoints: np.ndarray) -> np.ndarray:
     phase = np.exp(2j * np.pi * np.einsum("ijkr,lr->ijkl", R_R, kpoints))
     O_k = np.einsum("ijkmn,ijkl->lmn", O_R, phase)
     return O_k
+
+
+def is_hermitian(O_R: np.ndarray) -> bool:
+    """_summary_
+
+    Parameters
+    ----------
+    O_R
+        _description_
+    Ra, optional
+        _description_, by default None
+
+    Returns
+    -------
+        _description_
+
+    Raises
+    ------
+    ValueError
+        _description_
+    """
+    if O_R.ndim != 5:
+        raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
+
+    midpoint = np.floor_divide(np.subtract(O_R.shape[:3], 1), 2)
+
+    hermitian = True
+    for Rs in np.ndindex(O_R.shape[:3]):
+        R = Rs - midpoint
+        if not np.all(np.equal(np.conjugate(O_R[(*R,)].T), O_R[(*-R,)])):
+            hermitian = False
+
+    return hermitian
+
+
+def make_hermitian(O_R: np.ndarray) -> np.ndarray:
+    """_summary_
+
+    Parameters
+    ----------
+    O_R
+        _description_
+
+    Returns
+    -------
+        _description_
+    """
+    if O_R.ndim != 5:
+        raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
+
+    midpoint = np.floor_divide(np.subtract(O_R.shape[:3], 1), 2)
+
+    O_R_hermitian = np.zeros_like(O_R)
+    for Rs in np.ndindex(O_R.shape[:3]):
+        R = Rs - midpoint
+        O_R_hermitian[(*R,)] = 0.5 * (np.conjugate(O_R[(*R,)].T) + O_R[(*-R,)])
+        O_R_hermitian[(*-R,)] = np.conjugate(O_R_hermitian[(*R,)].T)
+
+    return O_R_hermitian

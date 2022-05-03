@@ -1,9 +1,8 @@
 """
 This module abstracts reading from and writing from different file types
 for all external calculators by trying to guess file types.
+
 """
-
-
 import os
 from typing import Any
 
@@ -11,14 +10,26 @@ from ntcad.io import omen, vasp, wannier90, winterface
 
 
 def read(path: os.PathLike, filetype: str = None, **kwargs: dict) -> Any:
-    """Tries to read any implemented filetype.
+    """Tries to read any implemented filetype by guessing file format.
 
     Parameters
     ----------
     path
-        _description_
+        Path to the file to be read in.
     filetype, optional
-        _description_, by default None
+        Specify this keyword to explicitly set the filetype. If None,
+        the function tries to guess the filetype.
+
+    Returns
+    -------
+        The specified file.
+
+    Raises
+    ------
+    NotImplementedError
+        If the filetype could not be guessed, or if the explicitly
+        specified filetype is unknown.
+
     """
     filename = str(os.path.basename(path))
     __, filext = os.path.splitext(filename)
