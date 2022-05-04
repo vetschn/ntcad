@@ -1,5 +1,8 @@
 """ TODO: Docstrings.
 
+
+NOTE: Beware of numpy advanced indexing pitfalls.
+
 """
 
 import logging
@@ -44,15 +47,15 @@ def _approximate_momentum_operator(
         x ``num_wann``).
     Ai
         Real-Space lattice vectors (3 x 3).
-    Ra
+    Ra, optional
         Allowed Wigner-Seitz cell indices. If not given, this assumes
         that all completely zero Hamiltonian blocks are not allowed.
-    tau_ij
+    tau_ij, optional
         Whether to include the contributions between Wannier centers.
-    centers
+    centers, optional
         Wannier centers (``num_wann`` x 3). Needed to include the
         ``tau_ij`` contributions.
-    si_units
+    si_units, optional
         Whether to return the momentum operator in SI units [kg*m/s].
         Defaults to ``False``.
 
@@ -83,8 +86,9 @@ def _approximate_momentum_operator(
             allowed = np.any(H_R[(*R,)])
             if Ra is not None:
                 allowed = np.any(np.all(Ra == R, axis=1))
-            if allowed:
-                r_R_i[(*R,)] += (R @ Ai)[i] + d_0_i
+            if not allowed:
+                continue
+            r_R_i[(*R,)] += (R @ Ai)[i] + d_0_i
         p_R[..., i] = r_R_i * H_R
     # Conversion to SI units [kg*m/s].
     p_R_SI = 1j * 1e-10 * m_e / hbar * p_R
@@ -125,22 +129,23 @@ def momentum_operator(
         x ``num_wann``).
     Ai
         Real-Space lattice vectors (3 x 3).
-    r_R
+    r_R, optional
         Position matrix elements (``N_1`` x ``N_2`` x ``N_3`` x
         ``num_wann`` x ``num_wann`` x 3). Not needed if the momentum
         operator should merely be approximated.
-    approximate
+    approximate, optional
         Whether to approximate the momentum operator. Defaults to
         ``False``.
-    Ra
+    Ra, optional
         Allowed Wigner-Seitz Cell indices. If not given, this assumes
         that all completely zero Hamiltonian blocks are not allowed.
-    tau_ij
-        Whether to include the contributions between Wannier centers.
-    centers
+    tau_ij, optional
+        Whether to include the contributions between Wannier centers
+        when approximating the momentum operator.
+    centers, optional
         Wannier centers (``num_wann`` x 3). Needed to include the
         ``tau_ij`` contributions.
-    si_units
+    si_units, optional
         Whether to return the momentum operator in SI units [kg*m/s].
         Defaults to ``False``.
 
@@ -155,6 +160,14 @@ def momentum_operator(
 
     Raises
     ------
+    ValueError
+        _description_
+
+    Notes
+    -----
+    .. [1] C. Klinkert, "The ab initio microscope: on the performance of
+           2D materials as future field-effect transistors", Ph.D.
+           thesis, ETH Zurich, 2021.
 
     """
     if tau_ij and centers is None:
@@ -183,7 +196,7 @@ def momentum_operator(
 
     # Spacial dimensions are treated in parallel.
     def _compute_p_R_i(i: int) -> np.ndarray:
-        """Computes the i-th spacial contribution of ``p_R``"""
+        """Computes the i-th spacial contribution to ``p_R``."""
         p_R_i = np.zeros(H_R.shape, dtype=np.complex64)
         d_0_i = np.zeros(H_R.shape[-2:])
         if tau_ij:
@@ -198,20 +211,20 @@ def momentum_operator(
                 allowed = np.any(np.all(Ra == R, axis=1))
             if not allowed:
                 continue
-            p_R_i[(*R,), ...] += H_R[(*R,)] * (R @ Ai)[i]
+            p_R_i[(*R,)] += H_R[(*R,)] * ((R @ Ai)[i] + d_0_i)
             # Iterate over all R' vectors.
             for Rps in np.ndindex(p_R_i.shape[:3]):
                 Rp = Rps - midpoint
-                in_bounds_lower = np.all(np.abs(R - Rp) <= midpoint)
-                in_bounds_upper = np.all(np.abs(R + Rp) <= midpoint)
+                out_of_bounds = np.any(np.abs(R - Rp) > 0) or np.any(np.abs(R + Rp) > 0)
                 allowed = np.any(H_R[(*Rp,)]) and np.any(H_R[(*(R - Rp),)])
                 if Ra is not None:
                     allowed = np.any(np.all(Ra == Rp, axis=1)) and np.any(
                         np.all(Ra == (R - Rp), axis=1)
                     )
-                if in_bounds_lower and in_bounds_upper and allowed:
-                    p_R_i[(*R,), ...] += H_R[(*Rp,)] @ r_R[(*(R - Rp),), ..., i]
-                    p_R_i[(*R,), ...] -= r_R[(*Rp,), ..., i] @ H_R[(*(R - Rp),)]
+                if out_of_bounds or not allowed:
+                    continue
+                p_R_i[(*R,)] += H_R[(*Rp,)] @ r_R[(*(R - Rp),)][..., i]
+                p_R_i[(*R,)] -= r_R[(*Rp,)][..., i] @ H_R[(*(R - Rp),)]
         return p_R_i
 
     # Compute the spacial dimensions in parallel.
