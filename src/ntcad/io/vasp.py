@@ -4,6 +4,7 @@
 
 import logging
 import os
+import ast
 
 import numpy as np
 from ntcad.core.structure import Structure, _symbols
@@ -78,6 +79,51 @@ _recommended_potentials = {
     "Fr": "_sv",
     "Ra": "_sv",
 }
+
+
+def read_incar(path: os.PathLike) -> dict:
+    """_summary_
+
+    Parameters
+    ----------
+    path
+        _description_
+
+    Returns
+    -------
+        _description_
+
+    """
+    with open("./INCAR", "r") as f:
+        lines = f.readlines()
+
+    # Get rid of irrelevant gobbledygook / comments.
+    lines = [line for line in lines if "=" in line]
+    lines = [line.split("#")[0].split("!")[0] for line in lines]
+
+    # Split apart multiple tags on a single line.
+    lines = [line.split(";") for line in lines]
+    for i, line in enumerate(lines):
+        if isinstance(line, list):
+            lines[i] = line[0]
+            if len(line) > 1:
+                lines.extend(line[1:])
+
+    # Get the tags and their values.
+    lines = [line.strip().split("=") for line in lines]
+    tags, values = zip(*lines)
+    tags = [tag.strip().lower() for tag in tags]
+    values = [" ".join(value.strip().split()) for value in values]
+
+    # Put together dictionary and try to evaluate literals.
+    incar_tags = {}
+    for tag, value in zip(tags, values):
+        try:
+            incar_tags[tag] = ast.literal_eval(value)
+        except:
+            incar_tags[tag] = value
+
+    return incar_tags
 
 
 def read_poscar(path: os.PathLike) -> Structure:
