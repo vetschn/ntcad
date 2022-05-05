@@ -1,7 +1,9 @@
 """ TODO: Docstrings.
 
 
-NOTE: Beware of numpy advanced indexing pitfalls.
+Note
+----
+Beware of numpy advanced indexing pitfalls.
 
 """
 
@@ -19,6 +21,47 @@ hbar, *__ = constants.physical_constants["reduced Planck constant in eV s"]
 m_e, *__ = constants.physical_constants["electron mass"]
 
 
+def approximate_position_operator(
+    Ai: np.ndarray, centers: np.ndarray, Ra: np.ndarray
+) -> np.ndarray:
+    """Approximates the position operator elements ``r_R``.
+
+    Note
+    ----
+    ``N_i`` correspond to the number of Wigner-Seitz cells along the
+    lattice vectors ``A_i``
+
+    Parameters
+    ----------
+    Ai
+        Real-Space lattice vectors (3 x 3).
+    centers
+        Wannier centers (``num_wann`` x 3). Needed to include the
+        ``tau_ij`` contributions.
+    Ra
+        Allowed Wigner-Seitz cell indices.
+
+    Returns
+    -------
+    r_R
+        The approximated position operator elements (``N_1`` x ``N_2`` x
+        ``N_3`` x ``num_wann`` x ``num_wann`` x 3). The indices are
+        chosen such that (0, 0, 0) actually gets you the center
+        Wigner-Seitz cell position matrix.
+
+    """
+    Ras = np.subtract(Ra, np.min(Ra, axis=0))
+    N_1, N_2, N_3 = np.max(Ras, axis=0) + 1
+    num_wann = centers.shape[0]
+
+    r_R = np.zeros((N_1, N_2, N_3, num_wann, num_wann, 3), dtype=np.complex64)
+    for i in range(r_R.shape[-1]):
+        d_0_i = centers[:, i].reshape(-1, 1) - centers[:, i]
+        for R in Ra:
+            r_R[(*R,)][..., i] = (R @ Ai)[i] + d_0_i
+    return r_R
+
+
 def _approximate_momentum_operator(
     H_R: np.ndarray,
     Ai: np.ndarray,
@@ -28,8 +71,6 @@ def _approximate_momentum_operator(
     si_units=False,
 ) -> np.ndarray:
     """Approximates the momentum operator elements ``p_R``.
-
-    This function just takes the on-site terms into account.
 
     The resulting momentum matrix is in [eV/c] per default. If you wish
     to get the matrix in SI units [kg*m/s], set the ``in_si_units``
@@ -65,7 +106,7 @@ def _approximate_momentum_operator(
         The approximated momentum operator elements (``N_1`` x ``N_2`` x
         ``N_3`` x ``num_wann`` x ``num_wann`` x 3). The indices are
         chosen such that (0, 0, 0) actually gets you the center
-        Wigner-Seitz cell distance matrix.
+        Wigner-Seitz cell momentum matrix.
 
     """
     # Midpoint of the Wigner-Seitz cell indices.
@@ -156,7 +197,7 @@ def momentum_operator(
         Momentum matrix elements (``N_1`` x ``N_2`` x ``N_3`` x
         ``num_wann`` x ``num_wann`` x 3). The indices are chosen such
         that (0, 0, 0) actually gets you the center Wigner-Seitz cell
-        distance matrix.
+        momentum matrix.
 
     Raises
     ------
