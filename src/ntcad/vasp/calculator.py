@@ -9,7 +9,8 @@ import os
 import subprocess
 
 import numpy as np
-from ntcad.core import Calculator, Structure
+from ntcad.core.calculator import Calculator
+from ntcad.core.structure import Structure
 from ntcad.vasp.io import (
     read_incar,
     read_poscar,

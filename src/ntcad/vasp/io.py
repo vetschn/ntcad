@@ -7,7 +7,8 @@ import logging
 import os
 
 import numpy as np
-from ntcad.core import Structure
+from ntcad.core.structure import Structure
+from datetime import datetime
 
 logger = logging.Logger(__name__)
 
@@ -180,7 +181,7 @@ def write_incar(path: os.PathLike, **incar_tags: dict) -> None:
         written to the file.
 
     """
-    lines = ["INCAR written by ntcad\n"]
+    lines = [f"INCAR written by ntcad | {datetime.now()}\n"]
     for tag, value in incar_tags.items():
         line = tag.upper() + " = "
         if isinstance(value, (list, tuple)):
@@ -204,7 +205,7 @@ def write_poscar(path: os.PathLike, structure: Structure) -> None:
         _description_
 
     """
-    lines = ["POSCAR written by ntcad\n", f"{1.0:.5f}\n"]
+    lines = [f"POSCAR written by ntcad | {datetime.now()}\n", f"{1.0:.5f}\n"]
     for vec in structure.cell:
         lines.append("{:.16f} {:22.16f} {:22.16f}\n".format(*vec))
 
@@ -278,7 +279,7 @@ def write_kpoints(path: os.PathLike, kpoints: np.ndarray, shift: np.ndarray = No
     if not isinstance(kpoints, np.ndarray):
         kpoints = np.array(kpoints)
 
-    lines = ["KPOINTS written by ntcad\n"]
+    lines = [f"KPOINTS written by ntcad | {datetime.now()}\n"]
     # TODO: Maybe properly support line-mode at some point.
     if kpoints.ndim == 1:
         # Monkhorst-Pack grid.
