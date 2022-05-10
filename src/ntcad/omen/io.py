@@ -6,7 +6,7 @@ import os
 from typing import Any
 
 import numpy as np
-from ntcad.core.structure import Structure
+from ntcad.core import Structure
 from scipy import constants
 from scipy.sparse import csr_matrix
 

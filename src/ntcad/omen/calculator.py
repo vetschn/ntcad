@@ -10,8 +10,8 @@ should be pretty lax.
 
 
 import os
-from ntcad.calculators.calculator import Calculator
-from ntcad.core.structure import Structure
+
+from ntcad.core import Calculator, Structure
 
 
 class OMEN(Calculator):
@@ -19,6 +19,9 @@ class OMEN(Calculator):
         pass
 
     def calculate(self, command: str) -> None:
+        pass
+
+    def read_input(self) -> None:
         pass
 
     def write_input(self) -> None:

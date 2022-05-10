@@ -7,8 +7,7 @@ atoms in a unit cell together with some useful methods.
 import os
 
 import numpy as np
-
-import ntcad
+from ntcad.vasp.io import read_poscar, write_poscar
 
 # All allowed atomic symbols including a ``None`` / "X" kind.
 # Written this way for less clutter (leave me alone).
@@ -155,7 +154,7 @@ class Structure:
         path
             _description_
         """
-        ntcad.io.vasp.write_poscar(path, self)
+        write_poscar(path, self)
 
     def to_cif(self, path: os.PathLike) -> None:
         """_summary_

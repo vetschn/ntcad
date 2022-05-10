@@ -4,8 +4,8 @@ specific calculator implementations.
 
 """
 
-from abc import ABC, abstractmethod
 import os
+from abc import ABC, abstractmethod
 
 
 class Calculator(ABC):
@@ -71,6 +71,11 @@ class Calculator(ABC):
         command
             _description_
         """
+        ...
+
+    @abstractmethod
+    def read_input(self) -> None:
+        """_summary_"""
         ...
 
     @abstractmethod

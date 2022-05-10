@@ -1,1 +1,1 @@
-from ntcad.core.structure import Structure
+from ntcad.core import Structure, read

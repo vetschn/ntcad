@@ -2,12 +2,12 @@
 
 """
 
+import ast
 import logging
 import os
-import ast
 
 import numpy as np
-from ntcad.core.structure import Structure, _symbols
+from ntcad.core import Structure
 
 logger = logging.Logger(__name__)
 
@@ -306,7 +306,7 @@ def write_kpoints(path: os.PathLike, kpoints: np.ndarray, shift: np.ndarray = No
 
 
 def read_chg(path: os.PathLike) -> tuple[Structure, np.ndarray]:
-    """
+    """TODO
 
     Parameters
     ----------
@@ -352,3 +352,18 @@ def read_chg(path: os.PathLike) -> tuple[Structure, np.ndarray]:
     data = np.array(list(map(float, _data.split()))).reshape(shape)
 
     return structure, data
+
+
+def read_vasprun_xml(path: os.PathLike) -> dict:
+    """TODO
+
+    Parameters
+    ----------
+    path
+        _description_
+
+    Returns
+    -------
+        _description_
+    """
+    pass

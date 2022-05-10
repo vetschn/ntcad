@@ -5,12 +5,11 @@ Wannier90.
 """
 import os
 from datetime import datetime
-from typing import Tuple
 
 import numpy as np
 
 
-def read_hr_dat(path: os.PathLike, full: bool = False) -> Tuple[np.ndarray, ...]:
+def read_hr_dat(path: os.PathLike, full: bool = False) -> tuple[np.ndarray, ...]:
     """Parses the contents of a ``seedname_hr.dat`` file.
 
     The first line gives the date and time at which the file was

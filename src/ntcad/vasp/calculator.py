@@ -9,9 +9,15 @@ import os
 import subprocess
 
 import numpy as np
-from ntcad.calculators.calculator import Calculator
-from ntcad.core.structure import Structure
-from ntcad.io.vasp import write_incar, write_kpoints, write_poscar, write_potcar
+from ntcad.core import Calculator, Structure
+from ntcad.vasp.io import (
+    read_incar,
+    read_poscar,
+    write_incar,
+    write_kpoints,
+    write_poscar,
+    write_potcar,
+)
 
 
 class VASP(Calculator):
@@ -130,3 +136,12 @@ class VASP(Calculator):
     def reset(self) -> None:
         """Clears all outputs of a VASP run."""
         pass
+
+    @classmethod
+    def from_input(cls, directory: os.PathLike) -> "VASP":
+        """Reads all the inputs file necessary for a VASP run.
+
+        This includes INCAR, POSCAR, KPOINTS, and POTCAR.
+
+        """
+        io.read
