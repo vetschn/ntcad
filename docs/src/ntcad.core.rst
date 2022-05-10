@@ -1,18 +1,29 @@
 ntcad.core package
 ==================
 
-.. automodule:: ntcad.core
+Submodules
+----------
+
+ntcad.core.kpoints module
+-------------------------
+
+.. automodule:: ntcad.core.kpoints
    :members:
    :undoc-members:
    :show-inheritance:
-
-Submodules
-----------
 
 ntcad.core.structure module
 ---------------------------
 
 .. automodule:: ntcad.core.structure
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: ntcad.core
    :members:
    :undoc-members:
    :show-inheritance:

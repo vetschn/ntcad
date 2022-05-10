@@ -1,11 +1,6 @@
 ntcad package
 =============
 
-.. automodule:: ntcad
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Subpackages
 -----------
 
@@ -18,3 +13,11 @@ Subpackages
    ntcad.transforms
    ntcad.utils
    ntcad.visualization
+
+Module contents
+---------------
+
+.. automodule:: ntcad
+   :members:
+   :undoc-members:
+   :show-inheritance:
