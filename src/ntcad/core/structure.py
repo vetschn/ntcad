@@ -108,8 +108,44 @@ class Structure:
         -------
             _description_
         """
-        #  TODO
-        pass
+        # POSCAR-like string.
+        lines = ["POSCAR", f"{1.0:.5f}\n"]
+        for vec in self.cell:
+            lines.append("{:.16f} {:22.16f} {:22.16f}\n".format(*vec))
+
+        kinds, counts = np.unique(self.kinds, return_counts=True)
+        lines.append(" ".join(kinds) + "\n")
+        lines.append("  ".join(map(str, counts)) + "\n")
+
+        lines.append("Cartesian\n")
+        for position in self.positions:
+            lines.append("{:.16f} {:22.16f} {:22.16f}\n".format(*position))
+
+        return "".join(lines)
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    @property
+    def volume(self) -> float:
+        """_summary_
+
+        Returns
+        -------
+            _description_
+        """
+        a_1, a_2, a_3 = self.cell
+        return np.dot(a_1, np.cross(a_2, a_3))
+
+    @property
+    def reciprocal_cell(self) -> float:
+        """_summary_
+
+        Returns
+        -------
+            _description_
+        """
+        return 2 * np.pi * np.transpose(np.linalg.inv(self.cell))
 
     def to_poscar(self, path: os.PathLike) -> None:
         """_summary_

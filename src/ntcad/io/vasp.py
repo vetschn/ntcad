@@ -97,7 +97,7 @@ def read_incar(path: os.PathLike) -> dict:
     with open("./INCAR", "r") as f:
         lines = f.readlines()
 
-    # Get rid of irrelevant gobbledygook / comments.
+    # Get rid of irrelevant gobbledygook and comments.
     lines = [line for line in lines if "=" in line]
     lines = [line.split("#")[0].split("!")[0] for line in lines]
 
@@ -146,7 +146,7 @@ def read_poscar(path: os.PathLike) -> Structure:
     scaling = float(lines[1])
     _cell = np.zeros((3, 3))
     for i in range(3):
-        cell[i] = list(map(float, lines[2 + i].split()))
+        _cell[i] = list(map(float, lines[2 + i].split()))
     cell = scaling * _cell
 
     _kinds = lines[5].split()
@@ -303,3 +303,52 @@ def write_kpoints(path: os.PathLike, kpoints: np.ndarray, shift: np.ndarray = No
 
     with open(os.path.join(os.path.dirname(path), "KPOINTS"), "w") as kpoints:
         kpoints.writelines(lines)
+
+
+def read_chg(path: os.PathLike) -> tuple[Structure, np.ndarray]:
+    """
+
+    Parameters
+    ----------
+    path
+        _description_
+
+    Returns
+    -------
+        _description_
+    """
+    # POSCAR like structure header.
+    with open(path, "r") as f:
+        lines = f.readlines()
+
+    attr = {"comment": lines[0].strip(), "path": os.path.abspath(path)}
+
+    scaling = float(lines[1])
+    _cell = np.zeros((3, 3))
+    for i in range(3):
+        _cell[i] = list(map(float, lines[2 + i].split()))
+    cell = scaling * _cell
+
+    _kinds = lines[5].split()
+    counts = list(map(int, lines[6].split()))
+    kinds = np.array([], dtype=str)
+    for kind, count in zip(_kinds, counts):
+        np.concatenate((kinds, [kind] * count))
+
+    cartesian = lines[7].startswith(("C", "c"))
+
+    positions = np.zeros((sum(counts), 3))
+    for i in range(sum(counts)):
+        positions[i] = list(map(float, lines[8 + i].split()))
+
+    structure = Structure(
+        kinds=kinds, positions=positions, cell=cell, cartesian=cartesian, attr=attr
+    )
+
+    # Data grid shape and charge density data.
+    shape = tuple(map(int, lines[9 + sum(counts)].strip().split()))
+
+    _data = " ".join(lines[10 + sum(counts) :]).replace("\n", "")
+    data = np.array(list(map(float, _data.split()))).reshape(shape)
+
+    return structure, data
