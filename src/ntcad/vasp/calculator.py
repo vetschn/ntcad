@@ -100,17 +100,11 @@ class VASP(Calculator):
         -------
         retcode
             _description_
-        """
-        # Check if input is written.
-        paths = [
-            os.path.join(self.directory, file)
-            for file in ("INCAR" "POSCAR" "KPOINTS" "POTCAR")
-        ]
-        files_exist = [os.path.exists(path) for path in paths]
-        if not all(files_exist):
-            self.write_input()
 
-        with open("vasp.out", "a") as vasp_out:
+        """
+        self.write_input()
+
+        with open(os.path.join(self.directory, "vasp.out"), "a") as vasp_out:
             # TODO: Don't really like the shell=True here.
             retcode = subprocess.call(
                 command, shell=True, stdout=vasp_out, cwd=self.directory
@@ -123,26 +117,27 @@ class VASP(Calculator):
         This includes INCAR, POSCAR, KPOINTS, and POTCAR.
 
         """
-        write_incar(self.directory, **self.incar_tags)
-        write_poscar(self.directory, self.structure)
-        write_kpoints(self.directory, self.kpoints, self.shift)
+        if not os.path.isdir(self.directory):
+            os.mkdir(self.directory)
+
+        # Check if input is written.
+        paths = [
+            os.path.join(self.directory, file)
+            for file in ("INCAR" "POSCAR" "KPOINTS" "POTCAR")
+        ]
+        if all(os.path.exists(path) for path in paths):
+            return
+
+        write_incar(path=self.directory, **self.incar_tags)
+        write_poscar(path=self.directory, structure=self.structure)
+        write_kpoints(path=self.directory, kpoints=self.kpoints, shift=self.shift)
         write_potcar(
-            self.directory, self.structure, self.potentials, self.recommended_potentials
+            path=self.directory,
+            structure=self.structure,
+            potentials=self.potentials,
+            recommended_potentials=self.recommended_potentials,
         )
 
-    def read_output(self) -> None:
-        """_summary_"""
-        pass
-
     def reset(self) -> None:
-        """Clears all outputs of a VASP run."""
+        """TODO: Clears all outputs of a VASP run."""
         pass
-
-    @classmethod
-    def from_input(cls, directory: os.PathLike) -> "VASP":
-        """Reads all the inputs file necessary for a VASP run.
-
-        This includes INCAR, POSCAR, KPOINTS, and POTCAR.
-
-        """
-        io.read

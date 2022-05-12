@@ -43,18 +43,21 @@ class Winterface(Calculator):
         -------
             _description_
         """
-        # Check if input is written.
-        if not os.path.exists(os.path.join(self.directory, "winput")):
-            self.write_input()
-
+        self.write_input()
+        
         # TODO: Don't really like the shell=True here.
         retcode = subprocess.call(command, shell=True, cwd=self.directory)
         return retcode
 
     def write_input(self) -> None:
         """_summary_"""
+        if not os.path.isdir(self.directory):
+            os.mkdir(self.directory)
 
-        write_winput(self.directory, **self.winput_tags)
+        if os.path.exists(os.path.join(self.directory, "winput")):
+            return
+        
+        write_winput(path=self.directory, **self.winput_tags)
 
     def read_output(self) -> None:
         """_summary_
