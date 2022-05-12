@@ -1,5 +1,3 @@
-from ntcad.core import kpoints
-from ntcad.core.io import read
+from ntcad.core import kpoints, io
 from ntcad.core.structure import Structure
-
-__version__ = open("../VERSION").read()
+from ntcad import utils
