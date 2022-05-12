@@ -528,7 +528,7 @@ def write_hr_dat(
     if O_R.shape[-1] != O_R.shape[-2]:
         raise ValueError(f"Operator at R must be square: {O_R.ndim=}")
 
-    lines = ["Written by ntcad\n"]
+    lines = [f"hr.dat written by ntcad | {datetime.now()}\n"]
 
     # Find the allowed Wigner-Seitz cell indices.
     if Ra is None:

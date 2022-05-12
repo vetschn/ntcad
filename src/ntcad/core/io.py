@@ -48,7 +48,7 @@ def read(path: os.PathLike, filetype: str = None, **kwargs: dict) -> Any:
         return omen.io.read_mat_par(path)
 
     # --- VASP filetypes -----------------------------------------------
-    if filename == "POSCAR" or filetype == "poscar":
+    if filename in ("POSCAR", "CONTCAR") or filetype == "poscar":
         return vasp.io.read_poscar(path)
         # TODO
 

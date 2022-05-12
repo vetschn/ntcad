@@ -154,13 +154,13 @@ def read_poscar(path: os.PathLike) -> Structure:
     counts = list(map(int, lines[6].split()))
     kinds = np.array([], dtype=str)
     for kind, count in zip(_kinds, counts):
-        np.concatenate((kinds, [kind] * count))
+        kinds = np.concatenate((kinds, [kind] * count))
 
     cartesian = lines[7].startswith(("C", "c"))
 
     positions = np.zeros((sum(counts), 3))
     for i in range(sum(counts)):
-        positions[i] = list[map(float, lines[8 + i].split())]
+        positions[i] = list(map(float, lines[8 + i].split()))
 
     structure = Structure(
         kinds=kinds, positions=positions, cell=cell, cartesian=cartesian, attr=attr
@@ -186,11 +186,17 @@ def write_incar(path: os.PathLike, **incar_tags: dict) -> None:
         line = tag.upper() + " = "
         if isinstance(value, (list, tuple)):
             line += " ".join(list(map(str, value)))
+        elif isinstance(value, str) and "\n" in value:
+            # Multiline strings need ""s
+            line += '"' + value + '"'
         else:
             line += str(value)
         lines.append(line + "\n")
 
-    with open(os.path.join(os.path.dirname(path), "INCAR"), "w") as incar:
+    if os.path.isfile(path):
+        path = os.path.dirname(path)
+
+    with open(os.path.join(path, "INCAR"), "w") as incar:
         incar.writelines(lines)
 
 
@@ -219,7 +225,10 @@ def write_poscar(path: os.PathLike, structure: Structure) -> None:
     for position in structure.positions:
         lines.append("{:.16f} {:22.16f} {:22.16f}\n".format(*position))
 
-    with open(os.path.join(os.path.dirname(path), "POSCAR"), "w") as poscar:
+    if os.path.isfile(path):
+        path = os.path.dirname(path)
+
+    with open(os.path.join(path, "POSCAR"), "w") as poscar:
         poscar.writelines(lines)
 
 
@@ -257,7 +266,10 @@ def write_potcar(
         else:
             potentials = {**_minimal_potentials, **potentials}
 
-    with open(os.path.join(os.path.dirname(path), "POTCAR"), "w") as out_potcar:
+    if os.path.isfile(path):
+        path = os.path.dirname(path)
+
+    with open(os.path.join(path, "POTCAR"), "w") as out_potcar:
         for symbol in np.unique(structure.kinds):
             potcar_folder = symbol + potentials.get(symbol, "")
             potcar_path = os.path.join(base_path, potcar_folder, "POTCAR")
@@ -294,15 +306,25 @@ def write_kpoints(path: os.PathLike, kpoints: np.ndarray, shift: np.ndarray = No
         lines.append("{:d}\n".format(len(kpoints)))
         lines.append("Reciprocal\n")
         for kpoint in kpoints:
-            # Variable length per line in case weights are included.
-            lines.append(("{:d}" * len(kpoint)).format(*kpoint) + "\n")
+            if len(kpoint) == 3:
+                # Automatically append ones if no weights are included.
+                lines.append(
+                    "{:.16f} {:22.16f} {:22.16f} {:22.16f}".format(*kpoint, 1.0) + "\n"
+                )
+            else:
+                lines.append(
+                    "{:.16f} {:22.16f} {:22.16f} {:22.16f}".format(*kpoint) + "\n"
+                )
     else:
         raise ValueError(
             "The kpoints should either describe a Monkhorst-Pack grid "
             "or should contain a list of points in reciprocal space."
         )
 
-    with open(os.path.join(os.path.dirname(path), "KPOINTS"), "w") as kpoints:
+    if os.path.isfile(path):
+        path = os.path.dirname(path)
+
+    with open(os.path.join(path, "KPOINTS"), "w") as kpoints:
         kpoints.writelines(lines)
 
 

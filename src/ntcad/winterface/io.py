@@ -39,5 +39,8 @@ def write_winput(path: os.PathLike, **winput_tags: dict) -> None:
             line += " = " + str(value)
         lines.append(line + "\n")
 
-    with open(os.path.join(os.path.dirname(path), "winput"), "w") as winput:
+    if os.path.isfile(path):
+        path = os.path.dirname(path)
+
+    with open(os.path.join(path, "winput"), "w") as winput:
         winput.writelines(lines)

@@ -22,11 +22,5 @@ class OMEN(Calculator):
     def calculate(self, command: str) -> None:
         pass
 
-    def read_input(self) -> None:
-        pass
-
     def write_input(self) -> None:
-        pass
-
-    def read_output(self) -> None:
         pass

@@ -94,7 +94,10 @@ class Structure:
         # negative positions to positive positions in cell, actually
         # check whether cartesian or not.
         self.kinds = np.array(kinds)
-        self.positions = np.array(positions)
+        if cartesian:
+            self.positions = np.array(positions)
+        else:
+            self.positions = np.array(positions) @ np.array(cell)
         self.sites = np.array(list(zip(kinds, positions)), dtype=_sites_dtype)
         self.cell = np.array(cell)
 
