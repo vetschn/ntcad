@@ -52,7 +52,7 @@ class Winterface(Calculator):
     def write_input(self) -> None:
         """_summary_"""
         if not os.path.isdir(self.directory):
-            os.mkdir(self.directory)
+            os.makedirs(self.directory)
 
         if os.path.exists(os.path.join(self.directory, "winput")):
             return

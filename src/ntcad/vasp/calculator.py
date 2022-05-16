@@ -118,7 +118,7 @@ class VASP(Calculator):
 
         """
         if not os.path.isdir(self.directory):
-            os.mkdir(self.directory)
+            os.makedirs(self.directory)
 
         # Check if input is written.
         paths = [
