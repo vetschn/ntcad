@@ -46,7 +46,7 @@ def read_bin(path: os.PathLike) -> csr_matrix:
     return matrix
 
 
-def read_layer_matrix_dat(path: os.PathLike) -> Any:
+def read_layer_matrix(path: os.PathLike) -> tuple[np.ndarray, np.ndarray]:
     """TODO
 
     Parameters
@@ -60,13 +60,12 @@ def read_layer_matrix_dat(path: os.PathLike) -> Any:
 
     """
     layer_matrix = np.loadtxt(path)
-    coords = layer_matrix[:, :3]
-    kinds = layer_matrix[:, 3]
-    nn = layer_matrix[:, 4:]
-    # TODO
+    positions = layer_matrix[:, :3]
+    nearest_neighbors = layer_matrix[:, 3:]
+    return positions, nearest_neighbors
 
 
-def read_lattice_dat(path: os.PathLike) -> Any:
+def read_lattice_dat(path: os.PathLike) -> Structure:
     """TODO
 
     Parameters
@@ -79,8 +78,22 @@ def read_lattice_dat(path: os.PathLike) -> Any:
         _description_
 
     """
-    with open(path, "r") as f:
+    with open(path) as f:
         lines = f.readlines()
+    num_sites, *__ = tuple(map(int, lines[0].strip().split()))
+
+    cell = np.zeros((3, 3))
+    for i in range(3):
+        cell[i] = list(map(float, lines[2 + i].split()))
+
+    kinds = np.zeros(num_sites, dtype=(np.unicode_, 2))
+    positions = np.zeros((num_sites,3))
+    for i in range(num_sites):
+        kinds[i] = lines[6+i].split()[0]
+        positions[i] = list(map(float, lines[6+i].split()[1:]))
+
+    return Structure(kinds, positions, cell, cartesian=True)
+    
 
 
 def read_mat_par(path: os.PathLike) -> dict:
@@ -106,8 +119,8 @@ def read_mat_par(path: os.PathLike) -> dict:
 
     num_anions, num_cations = tuple(map(int, lines[0].split()))
     Eg, Ec_min, Ev_max = tuple(map(float, lines[1].split()))
-    num_orbitals = np.array(list(map(int, lines[2].split())))
-    atomic_masses = np.array(list(map(float, lines[3].split()))) * m_u
+    orbitals = np.array(list(map(int, lines[2].split())))
+    masses = np.array(list(map(float, lines[3].split()))) * m_u
 
     mat_par = {
         "num_anions": num_anions,
@@ -115,8 +128,8 @@ def read_mat_par(path: os.PathLike) -> dict:
         "Eg": Eg,
         "Ec_min": Ec_min,
         "Ev_max": Ev_max,
-        "num_orbitals": num_orbitals,
-        "atomic_masses": atomic_masses,
+        "orbitals": orbitals,
+        "masses": masses,
     }
 
     return mat_par

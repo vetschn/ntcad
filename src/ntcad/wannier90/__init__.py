@@ -1,6 +1,6 @@
 from ntcad.wannier90 import io
 from ntcad.wannier90.calculator import Wannier90
-from ntcad.wannier90.transforms import (
+from ntcad.wannier90.operations import (
     approximate_position_operator,
     distance_matrix,
     is_hermitian,
