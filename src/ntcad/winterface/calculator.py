@@ -44,7 +44,7 @@ class Winterface(Calculator):
             _description_
         """
         self.write_input()
-        
+
         # TODO: Don't really like the shell=True here.
         retcode = subprocess.call(command, shell=True, cwd=self.directory)
         return retcode
@@ -56,7 +56,7 @@ class Winterface(Calculator):
 
         if os.path.exists(os.path.join(self.directory, "winput")):
             return
-        
+
         write_winput(path=self.directory, **self.winput_tags)
 
     def read_output(self) -> None:

@@ -3,7 +3,8 @@
 
 import subprocess
 
-def get_idle_hosts(name:str) -> list[str]:
+
+def get_idle_hosts(name: str) -> list[str]:
     """_summary_
 
     Parameters
