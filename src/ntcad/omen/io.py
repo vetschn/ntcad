@@ -2,14 +2,14 @@
 This module implements file I/O functions for interfacing with OMEN.
 
 """
+import glob
 import os
-from typing import Any
 
 import numpy as np
+from ntcad import omen
 from ntcad.core.structure import Structure
 from scipy import constants
 from scipy.sparse import csr_matrix
-from datetime import datetime
 
 m_u, *__ = constants.physical_constants["atomic mass constant"]
 
@@ -46,7 +46,7 @@ def read_bin(path: os.PathLike) -> csr_matrix:
     return matrix
 
 
-def read_layer_matrix(path: os.PathLike) -> tuple[np.ndarray, np.ndarray]:
+def read_dat(path: os.PathLike) -> np.ndarray:
     """TODO
 
     Parameters
@@ -59,10 +59,7 @@ def read_layer_matrix(path: os.PathLike) -> tuple[np.ndarray, np.ndarray]:
         _description_
 
     """
-    layer_matrix = np.loadtxt(path)
-    positions = layer_matrix[:, :3]
-    nearest_neighbors = layer_matrix[:, 3:]
-    return positions, nearest_neighbors
+    return np.loadtxt(path)
 
 
 def read_lattice_dat(path: os.PathLike) -> Structure:
@@ -87,13 +84,12 @@ def read_lattice_dat(path: os.PathLike) -> Structure:
         cell[i] = list(map(float, lines[2 + i].split()))
 
     kinds = np.zeros(num_sites, dtype=(np.unicode_, 2))
-    positions = np.zeros((num_sites,3))
+    positions = np.zeros((num_sites, 3))
     for i in range(num_sites):
-        kinds[i] = lines[6+i].split()[0]
-        positions[i] = list(map(float, lines[6+i].split()[1:]))
+        kinds[i] = lines[6 + i].split()[0]
+        positions[i] = list(map(float, lines[6 + i].split()[1:]))
 
     return Structure(kinds, positions, cell, cartesian=True)
-    
 
 
 def read_mat_par(path: os.PathLike) -> dict:
@@ -133,3 +129,50 @@ def read_mat_par(path: os.PathLike) -> dict:
     }
 
     return mat_par
+
+
+def read_M_matrices(path: os.PathLike) -> dict:
+    """_summary_
+
+    Parameters
+    ----------
+    path
+        _description_
+
+    Returns
+    -------
+        _description_
+    """
+    if not os.path.isdir(path):
+        raise ValueError(f"{path} is not a directory")
+
+    bin_files = glob.glob(os.path.join(path, "M*_H_*.bin"))
+
+    M = {"x": {}, "y": {}, "z": {}}
+
+    for file in bin_files:
+        basename = os.path.basename(file)
+        dim = basename[1]
+        num = int(basename[5])
+        M[dim][num] = omen.io.read_bin(file)
+    return M
+
+
+def write_e_dat(path: os.PathLike, energies: np.ndarray) -> None:
+    """_summary_
+
+    Parameters
+    ----------
+    path
+        _description_
+    energies
+        _description_
+    """
+    lines = [len(energies)]
+    lines.append(("{:22.16f}" * len(energies)).format(*energies))
+
+    if os.path.isfile(path):
+        path = os.path.dirname(path)
+
+    with open(os.path.join(path, "E_dat"), "w") as e_dat:
+        e_dat.writelines(lines)
