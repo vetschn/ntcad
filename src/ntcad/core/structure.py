@@ -280,9 +280,8 @@ class Structure:
             size = 50 + list(_jmol_colors).index(site["kind"])
             ax.scatter(*site["position"], c=color, s=size, edgecolors="black")
 
-        # NOTE: Not sure if there is a smarter way to draw the cell. 
-        # (I hope there is.)
-        for i,j,k in np.ndindex((3, 3, 3)):
+        # NOTE: Not sure if there is a smarter way to draw the cell.
+        for i, j, k in np.ndindex((3, 3, 3)):
             # Base lattice vectors.
             xs_0 = np.array([0, self.cell[i][0]])
             ys_0 = np.array([0, self.cell[i][1]])
@@ -305,6 +304,8 @@ class Structure:
             zs_2 = zs_1 + [self.cell[j][2], self.cell[k][2]]
             ax.plot(xs_2, ys_2, zs_2, "k--")
 
+        # There is no working equivalent for ax.set_aspect("equal").
+        # This is a workaround.
         # https://github.com/matplotlib/matplotlib/issues/17172#issuecomment-830139107
         ax.set_box_aspect(
             [ub - lb for lb, ub in (getattr(ax, f"get_{a}lim")() for a in "xyz")]
