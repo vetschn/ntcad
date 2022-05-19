@@ -230,7 +230,7 @@ def momentum_operator(
     midpoint = np.floor_divide(np.subtract(H_R.shape[:3], 1), 2)
 
     # NOTE: The multiprocessing module requires a picklable object in
-    # the call to Pool.map. Only funcions defined at the module level
+    # the call to Pool.map. Only functions defined at the module level
     # are picklable, hence the global keyword here.
     # https://docs.python.org/3/library/pickle.html
     global _compute_p_R_i
