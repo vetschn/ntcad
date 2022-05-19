@@ -5,10 +5,13 @@ atoms in a unit cell together with some useful methods.
 """
 
 import os
+from typing import Any
 
+import ase.visualize
 import matplotlib.pyplot as plt
 import ntcad
 import numpy as np
+from ase import Atoms
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 # All allowed atomic symbols including a ``None`` / "X" kind.
@@ -225,20 +228,8 @@ class Structure:
         -------
             _description_
         """
-        # POSCAR-like string.
-        lines = ["POSCAR\n", f"{1.0:.5f}\n"]
-        for vec in self.cell:
-            lines.append("{:.16f} {:22.16f} {:22.16f}\n".format(*vec))
-
-        kinds, counts = np.unique(self.kinds, return_counts=True)
-        lines.append(" ".join(kinds) + "\n")
-        lines.append("  ".join(map(str, counts)) + "\n")
-
-        lines.append("Cartesian\n")
-        for position in self.positions:
-            lines.append("{:.16f} {:22.16f} {:22.16f}\n".format(*position))
-
-        return "".join(lines)
+        s = f"Structure(kinds={self.kinds}, positions={self.positions}, cell={self.cell})"
+        return s
 
     def __repr__(self) -> str:
         return str(self)
@@ -264,8 +255,23 @@ class Structure:
         """
         return 2 * np.pi * np.transpose(np.linalg.inv(self.cell))
 
-    def view(self, ax: Axes3D = None) -> Axes3D:
+    def view(self, **kwargs) -> Any:
         """_summary_
+
+        Returns
+        -------
+            _description_
+        """
+        atoms = Atoms(symbols=self.kinds, positions=self.positions, cell=self.cell)
+        return ase.visualize.view(atoms, **kwargs)
+
+    def _mpl_view(self, ax: Axes3D = None) -> Axes3D:
+        """_summary_
+
+        Parameters
+        ----------
+        ax, optional
+            _description_, by default None
 
         Returns
         -------
@@ -310,7 +316,6 @@ class Structure:
         ax.set_box_aspect(
             [ub - lb for lb, ub in (getattr(ax, f"get_{a}lim")() for a in "xyz")]
         )
-
         return ax
 
     def to_poscar(self, path: os.PathLike) -> None:
