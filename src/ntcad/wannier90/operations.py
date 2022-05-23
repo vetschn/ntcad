@@ -9,7 +9,7 @@ Beware of numpy advanced indexing pitfalls.
 
 import logging
 import multiprocessing
-
+from tqdm import tqdm
 import numpy as np
 from scipy import constants
 
@@ -114,7 +114,7 @@ def _approximate_momentum_operator(
 
     p_R = np.zeros(H_R.shape + (3,), dtype=np.complex64)
     # Iterate over all spacial components.
-    for i in range(p_R.shape[-1]):
+    for i in tqdm(range(p_R.shape[-1])):
         d_0_i = np.zeros(H_R.shape[-2:])
         if tau_ij:
             # Trickery: Wannier center distances within cell from
@@ -245,7 +245,7 @@ def momentum_operator(
             # transposed version of the Wannier centers themselves.
             d_0_i = centers[:, i].reshape(-1, 1) - centers[:, i]
         # Iterate over all R vectors.
-        for Rs in np.ndindex(p_R_i.shape[:3]):
+        for Rs in tqdm(np.ndindex(p_R_i.shape[:3])):
             R = Rs - midpoint
             allowed = np.any(H_R[(*R,)])
             if Ra is not None:
