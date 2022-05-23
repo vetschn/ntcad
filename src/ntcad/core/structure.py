@@ -221,18 +221,8 @@ class Structure:
 
         self.attr = None
 
-    def __str__(self) -> str:
-        """_summary_
-
-        Returns
-        -------
-            _description_
-        """
-        s = f"Structure(kinds={self.kinds}, positions={self.positions}, cell={self.cell})"
-        return s
-
     def __repr__(self) -> str:
-        return str(self)
+        return self.view()
 
     @property
     def volume(self) -> float:
