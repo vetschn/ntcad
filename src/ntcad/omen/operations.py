@@ -2,9 +2,91 @@
 """
 
 import multiprocessing
-
+import os
+from scipy.sparse import csr_matrix
 import numpy as np
 from tqdm import tqdm
+
+
+def split_H_matrices(
+    ph_mat_par: dict, H: dict, layer_matrix: np.ndarray, Lz: float
+) -> dict:
+    """_summary_
+
+    Parameters
+    ----------
+    ph_mat_par
+        _description_
+    H
+        _description_
+    layer_matrix
+        _description_
+    Lz
+        _description_
+
+    Returns
+    -------
+        _description_
+
+    """
+    # Extracting some useful information.
+    num_orbs = ph_mat_par["orbitals"]
+
+    layer_pos = layer_matrix[:, :3]
+    kind_inds = layer_matrix[:, 3].astype(int) - 1
+
+    num_atoms = layer_pos.shape[0]
+
+    # Array containing the summed number of orbitals at any atom index.
+    sum_num_orbs = np.zeros(num_atoms, dtype=int)
+    for i in range(num_atoms):
+        sum_num_orbs[i] = np.sum(num_orbs[kind_inds[:i]])
+
+    Lz_split = Lz / 2
+
+    slab_a = np.argwhere(layer_pos[:, 2] < Lz_split - 0.01).flatten()
+    slab_b = np.argwhere(layer_pos[:, 2] >= Lz_split - 0.01).flatten()
+
+    split_size_a = np.sum(num_orbs[kind_inds[slab_a]])
+    split_size_b = np.sum(num_orbs[kind_inds[slab_b]])
+    assert split_size_a == split_size_b, "Sanity check"
+
+    # R_a and R_b are block-wise identity matrices.
+    R_a = np.zeros((split_size_a, 2 * split_size_a), dtype=int)
+    R_b = np.zeros((split_size_a, 2 * split_size_a), dtype=int)
+
+    # NOTE: There may very well be a smarter / more concise way of doing
+    # this.
+    i = 0
+    for i_a, i_b in zip(slab_a, slab_b):
+        num_orbs_i = num_orbs[kind_inds[i_a]]  # Number of orbitals on atom i.
+
+        j_a = sum_num_orbs[i_a]
+        j_b = sum_num_orbs[i_b]
+
+        R_a[i : i + num_orbs_i, j_a : j_a + num_orbs_i] = np.eye(num_orbs_i)
+        R_b[i : i + num_orbs_i, j_b : j_b + num_orbs_i] = np.eye(num_orbs_i)
+
+        i += num_orbs_i
+
+    # Cut the matrices using scipy.sparse for speed.
+    R_a = csr_matrix(R_a)
+    R_b = csr_matrix(R_b)
+
+    H_split = {}
+
+    H_split[4] = R_a * H[4] * R_a.transpose()
+
+    H_split[5] = R_a * H[4] * R_b.transpose()
+    H_split[3] = H_split[5].transpose()
+
+    H_split[6] = R_a * H[5] * R_a.transpose()
+    H_split[2] = H_split[6].transpose()
+
+    H_split[7] = R_a * H[5] * R_b.transpose()
+    H_split[1] = H_split[7].transpose()
+
+    return H_split
 
 
 def photon_scattering_matrix(
@@ -37,8 +119,8 @@ def photon_scattering_matrix(
     num_orbs = ph_mat_par["orbitals"]
 
     layer_pos = layer_matrix[:, :3]
-    kind_inds = (layer_matrix[:, 3] - 1).astype(int)
-    layer_nn = (layer_matrix[:, 4:] - 1).astype(int)
+    kind_inds = layer_matrix[:, 3].astype(int) - 1
+    layer_nn = layer_matrix[:, 4:].astype(int) - 1
 
     total_pos = total_matrix[:, :3]
     total_nn = (total_matrix[:, 4:] - 1).astype(int)
@@ -48,9 +130,9 @@ def photon_scattering_matrix(
     num_nn = layer_nn.shape[-1]
 
     # Array containing the summed number of orbitals at any atom index.
-    tot_num_orbs = np.zeros(num_atoms, dtype=int)
+    sum_num_orbs = np.zeros(num_atoms, dtype=int)
     for i in range(num_atoms):
-        tot_num_orbs[i] = np.sum(num_orbs[kind_inds[:i]])
+        sum_num_orbs[i] = np.sum(num_orbs[kind_inds[:i]])
 
     # NOTE: The multiprocessing module requires a picklable object in
     # the call to Pool.map. Only functions defined at the module level
@@ -69,7 +151,7 @@ def photon_scattering_matrix(
 
         # Local interaction terms.
         num_ii = 4  # H_4.bin corresponds to the middle layer.
-        slice_i = slice(tot_num_orbs[i], tot_num_orbs[i] + num_orbs_i)
+        slice_i = slice(sum_num_orbs[i], sum_num_orbs[i] + num_orbs_i)
 
         Mx = np.imag(M["x"][num_ii][slice_i, slice_i]).toarray()
         My = np.imag(M["y"][num_ii][slice_i, slice_i]).toarray()
@@ -98,7 +180,7 @@ def photon_scattering_matrix(
 
             js[nn_order] = j
             nums_ij[nn_order] = num_ij
-            slice_j = slice(tot_num_orbs[j], tot_num_orbs[j] + num_orbs_j)
+            slice_j = slice(sum_num_orbs[j], sum_num_orbs[j] + num_orbs_j)
 
             Mx = np.imag(M["x"][num_ij][slice_i, slice_j]).toarray()
             My = np.imag(M["y"][num_ij][slice_i, slice_j]).toarray()
