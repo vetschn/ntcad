@@ -564,7 +564,8 @@ def write_hr_dat(
         for m, n in np.ndindex(O_R.shape[-2:]):
             O_R_mn = O_R[R_1, R_2, R_3, m, n]
             O_R_mn_real, O_R_mn_imag = O_R_mn.real, O_R_mn.imag
-            line = "{:d} {:5d} {:5d} {:5d} {:5d} ".format(R_1, R_2, R_3, m, n)
+            # NOTE: m and n are one-indexed in hr_dat files.
+            line = "{:d} {:5d} {:5d} {:5d} {:5d} ".format(R_1, R_2, R_3, m + 1, n + 1)
             line += "{:22.16f} {:22.16f}\n".format(O_R_mn_real, O_R_mn_imag)
             lines.append(line)
 
