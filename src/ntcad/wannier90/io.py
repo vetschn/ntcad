@@ -547,7 +547,7 @@ def write_hr_dat(
 
     # Construct degeneracy lines.
     if deg is None:
-        deg = np.zeros(nrpts, dtype=int)
+        deg = np.ones(nrpts, dtype=int)
     deg_per_line = 15
     deg_str = ""
     for i, val in enumerate(deg):
@@ -561,12 +561,12 @@ def write_hr_dat(
     # Construct the matrix entry lines.
     for R in Ra:
         R_1, R_2, R_3 = tuple(map(int, R))
-        for m, n in np.ndindex(O_R.shape[-2:]):
+        for n, m in np.ndindex(O_R.shape[-2:]):
             O_R_mn = O_R[R_1, R_2, R_3, m, n]
             O_R_mn_real, O_R_mn_imag = O_R_mn.real, O_R_mn.imag
             # NOTE: m and n are one-indexed in hr_dat files.
             line = "{:d} {:5d} {:5d} {:5d} {:5d} ".format(R_1, R_2, R_3, m + 1, n + 1)
-            line += "{:22.16f} {:22.16f}\n".format(O_R_mn_real, O_R_mn_imag)
+            line += "{:22.10e} {:22.10e}\n".format(O_R_mn_real, O_R_mn_imag)
             lines.append(line)
 
     if not path.endswith("_hr.dat"):
