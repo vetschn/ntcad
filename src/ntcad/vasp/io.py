@@ -3,12 +3,14 @@
 """
 
 import ast
+import json
 import logging
 import os
+from datetime import datetime
 
 import numpy as np
+import xmltodict
 from ntcad.core.structure import Structure
-from datetime import datetime
 
 logger = logging.Logger(__name__)
 
@@ -389,4 +391,10 @@ def read_vasprun_xml(path: os.PathLike) -> dict:
     -------
         _description_
     """
-    pass
+    with open(path, "r") as f:
+        vasprun_xml = f.read()
+
+    vasprun_ordered = xmltodict.parse(vasprun_xml, xml_attribs=False)
+    vasprun = json.loads(json.dumps(vasprun_ordered))
+
+    return vasprun
