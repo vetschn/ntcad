@@ -222,7 +222,7 @@ class Structure:
         self.attr = None
 
     def __repr__(self) -> str:
-        return self.view()
+        return f"Structure(\nsites=\n{self.sites},\ncell=\n{self.cell}\n)"
 
     @property
     def volume(self) -> float:
