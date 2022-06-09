@@ -38,7 +38,7 @@ def read_bin(path: os.PathLike, no_header: bool = False) -> csr_matrix:
     matrix = csr_matrix(
         (real + 1j * imag, (row_inds, col_inds)),
         shape=(dim, dim),
-        dtype=np.complex64,
+        dtype=np.complex128,
     )
     return matrix
 
@@ -56,14 +56,13 @@ def write_bin(path: os.PathLike, M: csr_matrix, one_indexed: bool = False) -> No
     """
     header = np.array([M.shape[0], M.nnz, float(one_indexed)])
 
-    row_inds, col_inds = np.nonzero(M)
-    s = np.argsort(row_inds)
-    vals = np.squeeze(np.array(M[row_inds[s], col_inds[s]]))
+    i, j = np.nonzero(M.sorted_indices())
+    vals = np.squeeze(np.array(M[i, j]))
 
     if one_indexed:
-        row_inds, col_inds = row_inds + 1, col_inds + 1
+        i, j = i + 1, j + 1
 
-    data = np.stack([row_inds[s], col_inds[s], np.real(vals[s]), np.imag(vals[s])])
+    data = np.stack([i, j, np.real(vals), np.imag(vals)])
     data = data.transpose().flatten()
 
     with open(path, "wb") as f:
