@@ -1,25 +1,23 @@
-"""TODO
+"""
+Utility functions for the creation of k-point grids.
+
 """
 
 import numpy as np
 
 
-def monkhorst_pack(size: np.ndarray):
+def monkhorst_pack(size: np.ndarray) -> np.ndarray:
     """Constructs a uniform sampling of k-space of given size.
 
     Parameters
     ----------
     size
-        _description_
+        Size of the Monkhorst-Pack grid.
 
     Returns
     -------
-        _description_
+        An array containing all Monkhorst-Pack grid points.
 
-    Raises
-    ------
-    ValueError
-        _description_
     """
     kpoints = np.indices(size).transpose((1, 2, 3, 0)).reshape((-1, 3))
     return (kpoints + 0.5) / size - 0.5

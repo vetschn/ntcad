@@ -1,6 +1,8 @@
-""" TODO: Docstrings.
+"""
+Visualization routines for Wannier90 outputs.
 
 """
+
 from typing import Callable
 
 import matplotlib.pyplot as plt

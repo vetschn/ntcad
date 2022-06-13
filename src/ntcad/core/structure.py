@@ -4,18 +4,15 @@ atoms in a unit cell together with some useful methods.
 
 """
 
-import os
 from typing import Any
 
 import ase.visualize
 import matplotlib.pyplot as plt
-import ntcad
 import numpy as np
 from ase import Atoms
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 # All allowed atomic symbols including a ``None`` / "X" kind.
-# Written this way for less clutter (leave me alone).
 _symbols = (
     # --- 0 ------------------------------------------------------------
     "X "
@@ -167,22 +164,20 @@ class Structure:
 
     Attributes
     ----------
-    sites
-        The atomic kinds and positions.
+    kinds
+        The atomic kinds.
     positions
         The atomic positions
     sites
         The atomic sites and positions in one structure numpy array.
-
-    Methods
-    -------
-    to_poscar
-
-    to_cif
-
-    from_poscar
-
-    from_cif
+    cell
+        The structure's unit cell.
+    volume
+        The cell's volume.
+    reciprocal_cell
+        The reciprocal-space version of the unit cell.
+    attr
+        Optional attributes of the structure.
 
     """
 
@@ -194,79 +189,73 @@ class Structure:
         cartesian: bool = True,
         attr: dict = None,
     ) -> None:
-        """_summary_
+        """Initializes a structure.
 
         Parameters
         ----------
         kinds
-            _description_
+            The atomic kinds.
         positions
-            _description_
+            The atomic positions.
         cell
-            _description_
-        cartesian, optional
-            _description_, by default True
-        """
-        # TODO: Checks whether the atoms are valid, whether the
-        # positions are valid, whether the cell is valid, convert
-        # negative positions to positive positions in cell, actually
-        # check whether cartesian or not.
-        self.kinds = np.array(kinds)
-        if cartesian:
-            self.positions = np.array(positions)
-        else:
-            self.positions = np.array(positions) @ np.array(cell)
-        self.sites = np.array(list(zip(kinds, positions)), dtype=_sites_dtype)
-        self.cell = np.array(cell)
+            The unit cell of the structure.
+        cartesian
+            Whether the positions are given in cartesian coordinates, by
+            default True.
 
-        self.attr = None
+        """
+        self.kinds = np.array(kinds)
+        if not set(kinds).issubset(_symbols):
+            raise ValueError("Invalid symbol in atomic kinds.")
+
+        self.cell = np.array(cell)
+        if np.isclose(self.volume, 0.0):
+            raise ValueError("Invalid cell volume.")
+
+        if not cartesian:
+            self.positions = self.positions @ self.cell
+
+        self.sites = np.array(list(zip(kinds, positions)), dtype=_sites_dtype)
+        self.attr = attr
 
     def __repr__(self) -> str:
         return f"Structure(\nsites=\n{self.sites},\ncell=\n{self.cell}\n)"
 
     @property
     def volume(self) -> float:
-        """_summary_
-
-        Returns
-        -------
-            _description_
-        """
+        """The cell volume."""
         a_1, a_2, a_3 = self.cell
         return np.dot(a_1, np.cross(a_2, a_3))
 
     @property
     def reciprocal_cell(self) -> float:
-        """_summary_
-
-        Returns
-        -------
-            _description_
-        """
+        """The reciprocal unit cell."""
         return 2 * np.pi * np.transpose(np.linalg.inv(self.cell))
 
     def view(self, **kwargs) -> Any:
-        """_summary_
+        """Visualizes the structure in ASE GUI.
 
         Returns
         -------
-            _description_
+            The viewer handle.
+
+        See Also
+        --------
+        ase.visualize.view: Interface to various visualization tools.
+
         """
         atoms = Atoms(symbols=self.kinds, positions=self.positions, cell=self.cell)
         return ase.visualize.view(atoms, **kwargs)
 
-    def _mpl_view(self, ax: Axes3D = None) -> Axes3D:
-        """_summary_
-
-        Parameters
-        ----------
-        ax, optional
-            _description_, by default None
+    def _mpl_view(self, **kwargs) -> Axes3D:
+        """Visualizes the structure in a matplotlib figure.
 
         Returns
         -------
-            _description_
+            The plot's axes.
+
         """
+        ax = kwargs.get("ax")
         if ax is None:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection="3d")
@@ -276,7 +265,6 @@ class Structure:
             size = 50 + list(_jmol_colors).index(site["kind"])
             ax.scatter(*site["position"], c=color, s=size, edgecolors="black")
 
-        # NOTE: Not sure if there is a smarter way to draw the cell.
         for i, j, k in np.ndindex((3, 3, 3)):
             # Base lattice vectors.
             xs_0 = np.array([0, self.cell[i][0]])
@@ -307,55 +295,3 @@ class Structure:
             [ub - lb for lb, ub in (getattr(ax, f"get_{a}lim")() for a in "xyz")]
         )
         return ax
-
-    def to_poscar(self, path: os.PathLike) -> None:
-        """_summary_
-
-        Parameters
-        ----------
-        path
-            _description_
-        """
-        ntcad.vasp.io.write_poscar(path, self)
-
-    def to_cif(self, path: os.PathLike) -> None:
-        """_summary_
-
-        Parameters
-        ----------
-        path
-            _description_
-        """
-        #  TODO
-        pass
-
-    @classmethod
-    def from_poscar(cls, path: os.PathLike) -> "Structure":
-        """_summary_
-
-        Parameters
-        ----------
-        path
-            _description_
-
-        Returns
-        -------
-            _description_
-        """
-        return vasp.io.read_poscar(path)
-
-    @classmethod
-    def from_cif(cls, path: os.PathLike) -> "Structure":
-        """_summary_
-
-        Parameters
-        ----------
-        path
-            _description_
-
-        Returns
-        -------
-            _description_
-        """
-        # TODO
-        pass

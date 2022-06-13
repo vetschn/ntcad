@@ -2,7 +2,16 @@
 This module implements file I/O functions for interfacing with
 Wannier90.
 
+Currently supports the following filetypes:
+
+- ``seedname_hr.dat`` (I/O)
+- ``seedname_r.dat`` (I)
+- ``seedname_band.dat`` (I)
+- ``seedname.eig`` (I)
+- ``seedname.wout`` (I)
+
 """
+
 import os
 from datetime import datetime
 
@@ -29,7 +38,7 @@ def read_hr_dat(path: os.PathLike, full: bool = False) -> tuple[np.ndarray, ...]
     ----------
     path
         Path to ``seedname_hr.dat``.
-    full, optional
+    full
         Switch determining nature of return value. When it is ``False``
         (the default) just ``r_R`` is returned, when ``True``, the
         degeneracy info and the allowed Wigner-Seitz cell indices are
@@ -103,7 +112,7 @@ def read_r_dat(path: os.PathLike, full: bool = False) -> np.ndarray:
     ----------
     path
         Path to ``seedname_r.dat``.
-    full, optional
+    full
         Switch determining nature of return value. When it is ``False``
         (the default) just ``r_R`` is returned, when ``True``, the allowed
         Wigner-Seitz cell indices are also returned.
@@ -171,7 +180,7 @@ def read_band_dat(path: os.PathLike) -> np.ndarray:
     Returns
     -------
     bands
-        The bandstructure along the ``kpoint_path`` specified in the
+        The band structure along the ``kpoint_path`` specified in the
         ``seedname.win`` file (``num_wann`` x ``bands_num_points``).
 
     """
@@ -297,7 +306,7 @@ def _parse_wout_system(lines: list[str]) -> dict:
 
     This section includes real and reciprocal lattice vectors, atomic
     positions, k-points, parameters for job control, disentanglement,
-    localisation and plotting
+    localization and plotting
 
     Parameters
     ----------
@@ -363,8 +372,8 @@ def _parse_wout_system(lines: list[str]) -> dict:
 
 
 def _parse_wout_k_mesh(lines: list) -> dict:
-    """TODO"""
-    pass
+    # TODO
+    ...
 
 
 def _parse_wout_disentangle(lines: list[str]) -> dict:
@@ -441,13 +450,13 @@ def _parse_wout_wannierise(lines: list[str]) -> dict:
 
 
 def _parse_wout_plotting(lines: list) -> dict:
-    """TODO"""
-    pass
+    # TODO
+    ...
 
 
 def _parse_wout_timing(lines: list) -> dict:
-    """TODO"""
-    pass
+    # TODO
+    ...
 
 
 def read_wout(path: os.PathLike) -> dict:
@@ -488,11 +497,11 @@ def read_wout(path: os.PathLike) -> dict:
     wout = {
         "header": _parse_wout_header(sections[0]),
         "system": _parse_wout_system(sections[1]),
-        # "k_mesh": _parse_wout_k_mesh(sections[2]),
+        # TODO: "k_mesh": _parse_wout_k_mesh(sections[2]),
         "disentangle": _parse_wout_disentangle(sections[3]),
         "wannierise": _parse_wout_wannierise(sections[4]),
-        # "plotting": _parse_wout_plotting(sections[5]),
-        # "timing": _parse_wout_timing(sections[6]),
+        # TODO: "plotting": _parse_wout_plotting(sections[5]), todo
+        # TODO: "timing": _parse_wout_timing(sections[6]),
     }
     return wout
 

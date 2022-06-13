@@ -3,6 +3,7 @@ This module abstracts reading from and writing from different file types
 for all external calculators by trying to guess file types.
 
 """
+
 import os
 from typing import Any
 
@@ -16,7 +17,7 @@ def read(path: os.PathLike, filetype: str = None, **kwargs: dict) -> Any:
     ----------
     path
         Path to the file to be read in.
-    filetype, optional
+    filetype
         Specify this keyword to explicitly set the filetype. If None,
         the function tries to guess the filetype.
 

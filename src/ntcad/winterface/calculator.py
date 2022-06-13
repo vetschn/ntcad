@@ -7,8 +7,7 @@ an interface to run Winterface jobs.
 import os
 import subprocess
 
-from ntcad.core.calculator import Calculator
-from ntcad.winterface.io import write_winput
+from ntcad import Calculator
 
 
 class Winterface(Calculator):

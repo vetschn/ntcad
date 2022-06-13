@@ -2,12 +2,12 @@
 This module implements file I/O functions for interfacing with OMEN.
 
 """
+
 import glob
 import os
 
 import numpy as np
-from ntcad import omen
-from ntcad.core.structure import Structure
+from ntcad import Structure, omen
 from scipy.sparse import csr_matrix
 
 

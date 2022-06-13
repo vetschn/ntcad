@@ -7,12 +7,11 @@ an interface to run Wannier90 jobs and read the resulting output files.
 
 import os
 
-from ntcad.core.calculator import Calculator
-from ntcad.core.structure import Structure
+from ntcad import Calculator, Structure
 
 
 class Wannier90(Calculator):
-    """_summary_
+    """Calculator interface for running Wannier90 jobs.
 
     NOTE: This should take the output of a DFT calculation as input,
     probably easiest to just get the directory of the DFT -> Wannier90
@@ -22,14 +21,8 @@ class Wannier90(Calculator):
     The same should be true for other DFT codes (still have to check).
 
 
-
-
     Attributes
     ----------
-
-
-    Methods
-    -------
 
     """
 

@@ -9,20 +9,11 @@ import os
 import subprocess
 
 import numpy as np
-from ntcad.core.calculator import Calculator
-from ntcad.core.structure import Structure
-from ntcad.vasp.io import (
-    read_incar,
-    read_poscar,
-    write_incar,
-    write_kpoints,
-    write_poscar,
-    write_potcar,
-)
+from ntcad import Calculator, Structure, vasp
 
 
 class VASP(Calculator):
-    """_summary_
+    """Calculator interface for running VASP jobs.
 
     Attributes
     ----------
@@ -40,16 +31,6 @@ class VASP(Calculator):
         _description_, by default None
     recommended_potentials, optional
         _description_, by default False
-
-    Methods
-    -------
-    calculate
-        _description_
-    read_output
-        _description_
-    write_input
-        _description_
-
 
     """
 
@@ -79,6 +60,7 @@ class VASP(Calculator):
             _description_, by default None
         recommended_potentials, optional
             _description_, by default False
+
         """
         self.directory = directory
         self.structure = structure
@@ -105,16 +87,19 @@ class VASP(Calculator):
         self.write_input()
 
         with open(os.path.join(self.directory, "vasp.out"), "a") as vasp_out:
-            # TODO: Don't really like the shell=True here.
             retcode = subprocess.call(
                 command, shell=True, stdout=vasp_out, cwd=self.directory
             )
         return retcode
 
-    def write_input(self) -> None:
+    def write_input(self, force: bool = False) -> None:
         """Writes all the inputs file necessary for a VASP run.
 
-        This includes INCAR, POSCAR, KPOINTS, and POTCAR.
+        Parameters
+        ----------
+        force
+            If force is set to True, the inputs are overwritten even if
+            they are already present.
 
         """
         if not os.path.isdir(self.directory):
@@ -125,19 +110,58 @@ class VASP(Calculator):
             os.path.join(self.directory, file)
             for file in ("INCAR" "POSCAR" "KPOINTS" "POTCAR")
         ]
-        if all(os.path.exists(path) for path in paths):
+        if not force and all(os.path.exists(path) for path in paths):
             return
 
-        write_incar(path=self.directory, **self.incar_tags)
-        write_poscar(path=self.directory, structure=self.structure)
-        write_kpoints(path=self.directory, kpoints=self.kpoints, shift=self.shift)
-        write_potcar(
+        vasp.io.write_incar(path=self.directory, **self.incar_tags)
+        vasp.io.write_poscar(path=self.directory, structure=self.structure)
+        vasp.io.write_kpoints(
+            path=self.directory, kpoints=self.kpoints, shift=self.shift
+        )
+        vasp.io.write_potcar(
             path=self.directory,
             structure=self.structure,
             potentials=self.potentials,
             recommended_potentials=self.recommended_potentials,
         )
 
-    def reset(self) -> None:
-        """TODO: Clears all outputs of a VASP run."""
+    def clear(self) -> None:
+        """Clears all outputs of a VASP run."""
+        if not os.path.isdir(self.directory):
+            raise FileNotFoundError(f"{self.directory} is not a directory.")
+
+        paths = [
+            os.path.join(self.directory, file)
+            for file in (
+                "BSEFATBAND",
+                "CHG",
+                "CHGCAR",
+                "CONTCAR",
+                "DOSCAR",
+                "EIGENVAL",
+                "ELFCAR",
+                "IBZKPT",
+                "LOCPOT",
+                "OSZICAR",
+                "OUTCAR",
+                "PARCHG",
+                "PCDAT",
+                "PROCAR",
+                "PROOUT",
+                "REPORT",
+                "TMPCAR",
+                "vasprun.xml",
+                "vaspout.h5",
+                "vaspwave.h5",
+                "WAVECAR",
+                "WAVEDER",
+                "XDATCAR",
+            )
+        ]
+
+        for p in paths:
+            if not os.path.exists(p):
+                continue
+            os.remove(p)
+
         pass

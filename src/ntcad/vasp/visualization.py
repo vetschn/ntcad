@@ -1,26 +1,34 @@
-"""_summary_
+"""
+Visualization routines for VASP outputs.
+
 """
 
-from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.axes import Axes
 
 
-def plot_bands(vasprun: dict, path: list = None, ax: Axes = None, **kwargs) -> Axes:
-    """_summary_
+def plot_bands(vasprun: dict, path: list = None, **kwargs) -> Axes:
+    """Plots the band structure obtained from VASP.
 
     Parameters
     ----------
     vasprun
-        _description_
-    ax, optional
-        _description_, by default None
+        Dictionary representing the vasprun.xml file, containing the
+        eigenvalues.
+    path
+        Path along which to plot the bands.
 
     Returns
     -------
-        _description_
+        The plot's axes.
+
+    See Also
+    --------
+    ntcad.kpoints: Functions for the creation of k-point grids/paths.
 
     """
+    ax = kwargs.get("ax")
     if ax is None:
         fig, ax = plt.subplots()
 
@@ -31,6 +39,7 @@ def plot_bands(vasprun: dict, path: list = None, ax: Axes = None, **kwargs) -> A
     num_bands = len(eigenvalues[0]["r"])
     bands = np.zeros((num_kpoints, num_bands))
 
+    # Split eigenvalues from occupancy info and reshape.
     for i in range(num_kpoints):
         e, __ = zip(*[eigenvalue.split() for eigenvalue in eigenvalues[i]["r"]])
         e = list(map(float, e))
@@ -41,6 +50,8 @@ def plot_bands(vasprun: dict, path: list = None, ax: Axes = None, **kwargs) -> A
         if not num_kpoints % (len(path) - 1) == 0:
             raise ValueError("Given path cannot be cast onto number of k-points.")
 
+        # Make plotted distances proportional to reciprocal-space
+        # distances between given symmetry points.
         num = int(num_kpoints / (len(path) - 1))
         kpoints = []
         d_total = 0.0

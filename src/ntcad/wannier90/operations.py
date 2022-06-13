@@ -1,24 +1,35 @@
-""" TODO: Docstrings.
-
-
-Note
-----
-Beware of numpy advanced indexing pitfalls.
+"""
+Useful operations to perform on Wannier90 outputs.
 
 """
 
-import logging
 import multiprocessing
-from tqdm import tqdm
+
 import numpy as np
 from scipy import constants
-
-logger = logging.Logger(__name__)
+from tqdm import tqdm
 
 c, *__ = constants.physical_constants["speed of light in vacuum"]
 e, *__ = constants.physical_constants["elementary charge"]
 hbar, *__ = constants.physical_constants["reduced Planck constant in eV s"]
 m_e, *__ = constants.physical_constants["electron mass"]
+
+
+def _midpoint(shape: tuple) -> np.ndarray:
+    """Finds the midpoint of the Wigner-Seitz cell indices.
+
+    Parameters
+    ----------
+    shape
+        Shape of the Wigner-Seitz cell indices (``N_1`` x ``N_2`` x
+        ``N_3``).
+
+    Returns
+    -------
+        The Wigner-Seitz cell index of the middle cell.
+
+    """
+    return np.floor_divide(np.subtract(shape, 1), 2)
 
 
 def approximate_position_operator(
@@ -109,8 +120,7 @@ def _approximate_momentum_operator(
         Wigner-Seitz cell momentum matrix.
 
     """
-    # Midpoint of the Wigner-Seitz cell indices.
-    midpoint = np.floor_divide(np.subtract(H_R.shape[:3], 1), 2)
+    midpoint = _midpoint(H_R.shape)
 
     p_R = np.zeros(H_R.shape + (3,), dtype=np.complex64)
     # Iterate over all spacial components.
@@ -158,10 +168,14 @@ def momentum_operator(
     to get the matrix in SI units [kg*m/s], set the ``in_si_units``
     keyword accordingly. OMEN requires [eV/c].
 
-    Note
-    ----
+    Notes
+    -----
     ``N_i`` correspond to the number of Wigner-Seitz cells along the
-    lattice vectors ``A_i``
+    lattice vectors ``A_i``.
+
+    The momentum operator components for all spacial dimensions are
+    calculated in parallel.
+
 
     Parameters
     ----------
@@ -199,11 +213,6 @@ def momentum_operator(
         that (0, 0, 0) actually gets you the center Wigner-Seitz cell
         momentum matrix.
 
-    Raises
-    ------
-    ValueError
-        _description_
-
     Notes
     -----
     .. [1] C. Klinkert, "The ab initio microscope: on the performance of
@@ -227,12 +236,9 @@ def momentum_operator(
         raise ValueError("Position Matrix elements needed if ``approx`` is ``False``.")
 
     # Midpoint of the Wigner-Seitz cell indices.
-    midpoint = np.floor_divide(np.subtract(H_R.shape[:3], 1), 2)
+    midpoint = _midpoint(H_R.shape)
 
-    # NOTE: The multiprocessing module requires a picklable object in
-    # the call to Pool.map. Only functions defined at the module level
-    # are picklable, hence the global keyword here.
-    # https://docs.python.org/3/library/pickle.html
+    # NOTE: https://docs.python.org/3/library/pickle.html
     global _compute_p_R_i
 
     # Spacial dimensions are treated in parallel.
@@ -321,7 +327,7 @@ def distance_matrix(
     d_0 = centers[:, np.newaxis] - centers
 
     # Midpoint of the Wigner-Seitz cell indices.
-    midpoint = np.floor_divide(np.subtract((N_1, N_2, N_3), 1), 2)
+    midpoint = _midpoint((N_1, N_2, N_3))
     num_wann = len(centers)
     d_R = np.zeros((N_1, N_2, N_3, num_wann, num_wann))
     for Rs in np.ndindex((N_1, N_2, N_3)):
@@ -353,7 +359,7 @@ def k_sample(O_R: np.ndarray, kpoints: np.ndarray) -> np.ndarray:
         raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
     # TODO: This here could definitely be done in a nicer / more concise
     # way.
-    midpoint = np.floor_divide(np.subtract(O_R.shape[:3], 1), 2)
+    midpoint = _midpoint(O_R.shape)
     R = list(np.ndindex(O_R.shape[:3])) - midpoint
     R_R = np.zeros(O_R.shape[:3] + (3,))
     for Ri in R:
@@ -364,54 +370,53 @@ def k_sample(O_R: np.ndarray, kpoints: np.ndarray) -> np.ndarray:
 
 
 def is_hermitian(O_R: np.ndarray) -> bool:
-    """_summary_
+    """Checks whether a given operator is Hermitian.
 
     Parameters
     ----------
     O_R
-        _description_
-    Ra, optional
-        _description_, by default None
+        Operator elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
+        ``num_wann``).
+    Ra
+        The allowed Wigner-Seitz cells (``R_1``, ``R_2``, ``R_3``).
 
     Returns
     -------
-        _description_
+        Whether the operator is hermitian or not.
 
-    Raises
-    ------
-    ValueError
-        _description_
     """
     if O_R.ndim != 5:
         raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
 
-    midpoint = np.floor_divide(np.subtract(O_R.shape[:3], 1), 2)
+    midpoint = _midpoint(O_R.shape)
 
-    hermitian = True
     for Rs in np.ndindex(O_R.shape[:3]):
         R = Rs - midpoint
         if not np.all(np.equal(np.conjugate(O_R[(*R,)].T), O_R[(*-R,)])):
-            hermitian = False
+            return False
 
-    return hermitian
+    return True
 
 
 def make_hermitian(O_R: np.ndarray) -> np.ndarray:
-    """_summary_
+    """Enforces the given operator to be Hermitian.
 
     Parameters
     ----------
     O_R
-        _description_
+        Operator elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
+        ``num_wann``).
 
     Returns
     -------
-        _description_
+        The now hermitian operator (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
+        ``num_wann``).
+
     """
     if O_R.ndim != 5:
         raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
 
-    midpoint = np.floor_divide(np.subtract(O_R.shape[:3], 1), 2)
+    midpoint = _midpoint(O_R.shape)
 
     O_R_hermitian = np.zeros_like(O_R)
     for Rs in np.ndindex(O_R.shape[:3]):
