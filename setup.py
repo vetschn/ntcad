@@ -24,6 +24,13 @@ setuptools.setup(
     keywords=["Nano-TCAD", "VASP", "OMEN", "Wannier90"],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
-    install_requires=[],
+    install_requires=[
+        "numpy>=1.21.2",
+        "scipy>=1.7.3",
+        "tqdm>=4.64.0",
+        "ase>=3.23.0",
+        "matplotlib>=3.5.1",
+        "xmltodict>=0.12.0",
+    ],
     python_requires=">=3.9",
 )
