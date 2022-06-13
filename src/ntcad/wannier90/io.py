@@ -547,7 +547,7 @@ def write_hr_dat(
 
     # Construct degeneracy lines.
     if deg is None:
-        deg = np.ones(nrpts, dtype=int)
+        deg = np.zeros(nrpts, dtype=int)
     deg_per_line = 15
     deg_str = ""
     for i, val in enumerate(deg):
