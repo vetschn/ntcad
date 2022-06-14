@@ -43,11 +43,6 @@ class Calculator(ABC):
     structure
         The
 
-    Methods
-    -------
-    calculate
-        Start the calculation according to the specified command.
-
     """
 
     def __init__(self, directory: os.PathLike, **kwargs: dict) -> None:

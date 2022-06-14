@@ -31,12 +31,11 @@ def kpoint_path(points: np.ndarray, num: int = 50) -> np.ndarray:
     points
         Symmetry points along the path (``N_p`` x 3), where ``N_p`` is the
         number of symmetry points.
-    num, optional
+    num
         The number of k-points along each section, by default 50.
 
     Returns
     -------
-    kpoints
         All k-points along the given symmetry points (``N_s``*``num`` x 3),
         where ``N_s`` is the number of sections between symmetry points.
     """

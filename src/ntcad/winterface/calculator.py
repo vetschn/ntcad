@@ -30,7 +30,7 @@ class Winterface(Calculator):
         self.directory = directory
         self.winput_tags = winput_tags
 
-    def calculate(self, command: str) -> None:
+    def calculate(self, command: str) -> int:
         """_summary_
 
         Parameters
@@ -40,6 +40,7 @@ class Winterface(Calculator):
 
         Returns
         -------
+        int
             _description_
         """
         self.write_input()
@@ -61,9 +62,6 @@ class Winterface(Calculator):
     def read_output(self) -> None:
         """_summary_
 
-        Returns
-        -------
-            _description_
         """
         ...
 

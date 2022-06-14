@@ -25,11 +25,11 @@ class VASP(Calculator):
         _description_
     kpoints
         _description_
-    shift, optional
+    shift
         _description_, by default None
-    potentials, optional
+    potentials
         _description_, by default None
-    recommended_potentials, optional
+    recommended_potentials
         _description_, by default False
 
     """
@@ -54,11 +54,11 @@ class VASP(Calculator):
             _description_
         kpoints
             _description_
-        shift, optional
+        shift
             _description_, by default None
-        potentials, optional
+        potentials
             _description_, by default None
-        recommended_potentials, optional
+        recommended_potentials
             _description_, by default False
 
         """
@@ -80,7 +80,7 @@ class VASP(Calculator):
 
         Returns
         -------
-        retcode
+        int
             _description_
 
         """

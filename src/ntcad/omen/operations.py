@@ -9,7 +9,7 @@ from scipy.sparse import csr_matrix
 from tqdm import tqdm
 
 
-def _matrix_info(matrix: np.ndarray) -> tuple:
+def _matrix_info(matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, int, int]:
     """_summary_
 
     Parameters

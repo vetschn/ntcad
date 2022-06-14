@@ -46,7 +46,6 @@ def read_hr_dat(path: os.PathLike, full: bool = False) -> tuple[np.ndarray, ...]
 
     Returns
     -------
-    H_R, deg, Ra
         The Hamiltonian elements (``N_1`` x ``N_2`` x ``N_3`` x
         ``num_wann`` x ``num_wann``), where ``N_i`` correspond to the
         number of Wigner-Seitz cells along the lattice vectors ``A_i``.
@@ -95,7 +94,7 @@ def read_hr_dat(path: os.PathLike, full: bool = False) -> tuple[np.ndarray, ...]
     return H_R
 
 
-def read_r_dat(path: os.PathLike, full: bool = False) -> np.ndarray:
+def read_r_dat(path: os.PathLike, full: bool = False) -> tuple[np.ndarray, ...]:
     """Parses the contents of a ``seedname_r.dat`` file.
 
     The first line gives the date and time at which the file was
@@ -119,7 +118,6 @@ def read_r_dat(path: os.PathLike, full: bool = False) -> np.ndarray:
 
     Returns
     -------
-    r_R, Ra
         The position matrix elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann``
         x ``num_wann`` x 3), where ``N_i`` correspond to the number of
         Wigner-Seitz cells along the lattice vectors ``A_i``. The indices
@@ -179,7 +177,6 @@ def read_band_dat(path: os.PathLike) -> np.ndarray:
 
     Returns
     -------
-    bands
         The band structure along the ``kpoint_path`` specified in the
         ``seedname.win`` file (``num_wann`` x ``bands_num_points``).
 
@@ -214,7 +211,6 @@ def read_band_kpt(path: os.PathLike) -> np.ndarray:
 
     Returns
     -------
-    kpt
         The k-points used for the interpolated band structure
         (``num_kpoints`` x 3)
 
@@ -249,7 +245,6 @@ def read_eig(path: os.PathLike) -> np.ndarray:
 
     Returns
     -------
-    eig
         The Kohn-Sham eigenvalues by band number and k-point number
         (``num_bands`` x ``num_kpoints``).
 
@@ -281,7 +276,6 @@ def _parse_wout_header(lines: list[str]) -> dict:
 
     Returns
     -------
-    header
         Dictionary containing version, version release date and
         Wannier90 run POSIX timestamp.
 
@@ -315,7 +309,6 @@ def _parse_wout_system(lines: list[str]) -> dict:
 
     Returns
     -------
-    system
         Dictionary containing the lattice vectors in real and reciprocal
         space, the atomic sites, the utilized k-grid, the number of
         bands and the number of Wannier functions, as well as the
@@ -386,7 +379,6 @@ def _parse_wout_disentangle(lines: list[str]) -> dict:
 
     Returns
     -------
-    disentangle
         Dictionary containing information on disentanglement windows and
         the final ``Omega_I``.
 
@@ -419,7 +411,6 @@ def _parse_wout_wannierise(lines: list[str]) -> dict:
 
     Returns
     -------
-    wannierise
         Dictionary containing the number of iterations, as well as the
         centers and spreads at each iteration.
 
@@ -469,7 +460,6 @@ def read_wout(path: os.PathLike) -> dict:
 
     Returns
     -------
-    wout
         A dictionary representing the contents of the ``seedname.wout``
         file from a Wannier90 run.
 
@@ -524,9 +514,9 @@ def write_hr_dat(
         number of Wigner-Seitz cells along the lattice vectors ``A_i``.
         The indices are such that (0, 0, 0) actually gets you the center
         Wigner-Seitz cell.
-    deg, optional
+    deg
         Degeneracy info to write to file. If None, writes all zeros.
-    Ra, optional
+    Ra
         The allowed Wigner-Seitz cell indices. If None, the function
         only writes the operator for Wigner-Seitz cell indices where the
         operator is non-zero.

@@ -21,7 +21,6 @@ def read_bin(path: os.PathLike, no_header: bool = False) -> csr_matrix:
 
     Returns
     -------
-    csr_matrix
         The matrix stored in the file as ``scipy.sparse.csr_matrix``.
 
     """
@@ -176,7 +175,6 @@ def read_mat_par(path: os.PathLike) -> dict:
 
     Returns
     -------
-    mat_par
         A dictionary containing the information parsed from the
         ``mat_par`` file.
 

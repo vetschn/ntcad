@@ -172,10 +172,6 @@ class Structure:
         The atomic sites and positions in one structure numpy array.
     cell
         The structure's unit cell.
-    volume
-        The cell's volume.
-    reciprocal_cell
-        The reciprocal-space version of the unit cell.
     attr
         Optional attributes of the structure.
 
@@ -237,6 +233,7 @@ class Structure:
 
         Returns
         -------
+        Any
             The viewer handle.
 
         See Also
@@ -252,6 +249,7 @@ class Structure:
 
         Returns
         -------
+        Axes3D
             The plot's axes.
 
         """

@@ -54,7 +54,6 @@ def approximate_position_operator(
 
     Returns
     -------
-    r_R
         The approximated position operator elements (``N_1`` x ``N_2`` x
         ``N_3`` x ``num_wann`` x ``num_wann`` x 3). The indices are
         chosen such that (0, 0, 0) actually gets you the center
@@ -99,21 +98,20 @@ def _approximate_momentum_operator(
         x ``num_wann``).
     Ai
         Real-Space lattice vectors (3 x 3).
-    Ra, optional
+    Ra
         Allowed Wigner-Seitz cell indices. If not given, this assumes
         that all completely zero Hamiltonian blocks are not allowed.
-    tau_ij, optional
+    tau_ij
         Whether to include the contributions between Wannier centers.
-    centers, optional
+    centers
         Wannier centers (``num_wann`` x 3). Needed to include the
         ``tau_ij`` contributions.
-    si_units, optional
+    si_units
         Whether to return the momentum operator in SI units [kg*m/s].
         Defaults to ``False``.
 
     Returns
     -------
-    p_R
         The approximated momentum operator elements (``N_1`` x ``N_2`` x
         ``N_3`` x ``num_wann`` x ``num_wann`` x 3). The indices are
         chosen such that (0, 0, 0) actually gets you the center
@@ -184,30 +182,29 @@ def momentum_operator(
         x ``num_wann``).
     Ai
         Real-Space lattice vectors (3 x 3).
-    r_R, optional
+    r_R
         Position matrix elements (``N_1`` x ``N_2`` x ``N_3`` x
         ``num_wann`` x ``num_wann`` x 3). Not needed if the momentum
         operator should merely be approximated.
-    approximate, optional
+    approximate
         Whether to approximate the momentum operator. Defaults to
         ``False``.
-    Ra, optional
+    Ra
         Allowed Wigner-Seitz Cell indices. If not given, this assumes
         that all completely zero Hamiltonian blocks are not allowed.
-    tau_ij, optional
+    tau_ij
         Whether to include the contributions between Wannier centers
         when approximating the momentum operator.
-    centers, optional
+    centers
         Wannier centers (``num_wann`` x 3). Needed to include the
         ``tau_ij`` contributions.
-    si_units, optional
+    si_units
         Whether to return the momentum operator in SI units [kg*m/s].
         Defaults to ``False``.
 
 
     Returns
     -------
-    p_R
         Momentum matrix elements (``N_1`` x ``N_2`` x ``N_3`` x
         ``num_wann`` x ``num_wann`` x 3). The indices are chosen such
         that (0, 0, 0) actually gets you the center Wigner-Seitz cell
@@ -311,7 +308,6 @@ def distance_matrix(
 
     Returns
     -------
-    d_R
         Matrix (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
         ``num_wann``) containing distances between Wannier centers for
         all the requested Wigner Seitz cells. The indices are chosen
@@ -351,7 +347,6 @@ def k_sample(O_R: np.ndarray, kpoints: np.ndarray) -> np.ndarray:
 
     Returns
     -------
-    O_k
         Operator at the specified ``kpoints``.
 
     """

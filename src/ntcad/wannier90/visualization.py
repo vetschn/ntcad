@@ -28,16 +28,16 @@ def plot_operator(
         Wigner-Seitz cells along the lattice vectors ``A_i``. The indices
         are chosen such that (0, 0, 0) actually gets you the center
         Wigner-Seitz cell.
-    axis, optional
+    axis
         Which Wigner-Seitz index axis to fix, by default 2, i. e. the z
         axis.
-    indices, optional
+    indices
         At which index to fix the selected Wigner-Seitz index axis, by
         default 0.
-    mod, optional
+    mod
         A modifier to be applied to the matrix elements before plotting,
         by default np.abs.
-    norm, optional
+    norm
         A normalizing function to be applied during plotting.
 
     """
