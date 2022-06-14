@@ -68,7 +68,7 @@ ipython_config.py
 cython_debug/
 
 # Sphinx documentation
-docs/src/_build
+docs
 
 # System
 gmon.out
