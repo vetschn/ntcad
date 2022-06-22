@@ -8,6 +8,7 @@ import os
 import subprocess
 
 from ntcad import Calculator
+from ntcad.winterface.io import write_winput
 
 
 class Winterface(Calculator):

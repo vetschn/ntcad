@@ -208,8 +208,9 @@ class Structure:
         if np.isclose(self.volume, 0.0):
             raise ValueError("Invalid cell volume.")
 
+        self.positions = positions
         if not cartesian:
-            self.positions = self.positions @ self.cell
+            self.positions = positions @ self.cell
 
         self.sites = np.array(list(zip(kinds, positions)), dtype=_sites_dtype)
         self.attr = attr

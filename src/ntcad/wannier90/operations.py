@@ -118,7 +118,7 @@ def _approximate_momentum_operator(
         Wigner-Seitz cell momentum matrix.
 
     """
-    midpoint = _midpoint(H_R.shape)
+    midpoint = _midpoint(H_R.shape[:3])
 
     p_R = np.zeros(H_R.shape + (3,), dtype=np.complex64)
     # Iterate over all spacial components.
@@ -233,7 +233,7 @@ def momentum_operator(
         raise ValueError("Position Matrix elements needed if ``approx`` is ``False``.")
 
     # Midpoint of the Wigner-Seitz cell indices.
-    midpoint = _midpoint(H_R.shape)
+    midpoint = _midpoint(H_R.shape[:3])
 
     # NOTE: https://docs.python.org/3/library/pickle.html
     global _compute_p_R_i
@@ -354,7 +354,7 @@ def k_sample(O_R: np.ndarray, kpoints: np.ndarray) -> np.ndarray:
         raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
     # TODO: This here could definitely be done in a nicer / more concise
     # way.
-    midpoint = _midpoint(O_R.shape)
+    midpoint = _midpoint(O_R.shape[:3])
     R = list(np.ndindex(O_R.shape[:3])) - midpoint
     R_R = np.zeros(O_R.shape[:3] + (3,))
     for Ri in R:
@@ -383,7 +383,7 @@ def is_hermitian(O_R: np.ndarray) -> bool:
     if O_R.ndim != 5:
         raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
 
-    midpoint = _midpoint(O_R.shape)
+    midpoint = _midpoint(O_R.shape[:3])
 
     for Rs in np.ndindex(O_R.shape[:3]):
         R = Rs - midpoint
@@ -411,7 +411,7 @@ def make_hermitian(O_R: np.ndarray) -> np.ndarray:
     if O_R.ndim != 5:
         raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
 
-    midpoint = _midpoint(O_R.shape)
+    midpoint = _midpoint(O_R.shape[:3])
 
     O_R_hermitian = np.zeros_like(O_R)
     for Rs in np.ndindex(O_R.shape[:3]):
