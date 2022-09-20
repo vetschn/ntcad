@@ -8,7 +8,7 @@ import numpy as np
 from matplotlib.axes import Axes
 
 
-def plot_bands(vasprun: dict, path: list = None, **kwargs) -> Axes:
+def plot_bands(vasprun: dict, path: list = None, ax= None, **kwargs) -> Axes:
     """Plots the band structure obtained from VASP.
 
     Parameters
@@ -28,7 +28,6 @@ def plot_bands(vasprun: dict, path: list = None, **kwargs) -> Axes:
     ntcad.kpoints: Functions for the creation of k-point grids/paths.
 
     """
-    ax = kwargs.get("ax")
     if ax is None:
         fig, ax = plt.subplots()
 
