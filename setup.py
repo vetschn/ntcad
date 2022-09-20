@@ -28,7 +28,7 @@ setuptools.setup(
         "numpy>=1.21.2",
         "scipy>=1.7.3",
         "tqdm>=4.64.0",
-        "ase>=3.23.0",
+        "ase",
         "matplotlib>=3.5.1",
         "xmltodict>=0.12.0",
     ],
