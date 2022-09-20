@@ -356,6 +356,9 @@ def k_sample(
     grid_size
         Monkhorst-Pack grid size (``N_1``, ``N_2``, ``N_3``). Used if
         ``kpoints`` is ``None``.
+    optimize
+        Whether to optimize the einsum call. See ``np.einsum`` for more
+        information.
 
     Returns
     -------
