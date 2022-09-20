@@ -4,8 +4,10 @@ Useful operations to perform on Wannier90 outputs.
 """
 
 import multiprocessing
+from typing import Any
 
 import numpy as np
+from ntcad.core.kpoints import monkhorst_pack
 from scipy import constants
 from tqdm import tqdm
 
@@ -334,7 +336,12 @@ def distance_matrix(
     return d_R
 
 
-def k_sample(O_R: np.ndarray, kpoints: np.ndarray) -> np.ndarray:
+def k_sample(
+    O_R: np.ndarray,
+    kpoints: np.ndarray = None,
+    grid_size: tuple = None,
+    optimize: Any = "optimal",
+) -> np.ndarray:
     """Samples the given operator ``O_R`` at given ``kpoints``.
 
     Parameters
@@ -344,6 +351,11 @@ def k_sample(O_R: np.ndarray, kpoints: np.ndarray) -> np.ndarray:
         ``num_wann``).
     kpoints
         Reciprocal-space points in fractional coordinates (``N_k`` x 3).
+        Used if ``monkhorst_pack`` is ``None``. This is ideal for path
+        sampling.
+    grid_size
+        Monkhorst-Pack grid size (``N_1``, ``N_2``, ``N_3``). Used if
+        ``kpoints`` is ``None``.
 
     Returns
     -------
@@ -352,15 +364,33 @@ def k_sample(O_R: np.ndarray, kpoints: np.ndarray) -> np.ndarray:
     """
     if O_R.ndim != 5:
         raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
-    # TODO: This here could definitely be done in a nicer / more concise
-    # way.
-    midpoint = _midpoint(O_R.shape[:3])
-    R = list(np.ndindex(O_R.shape[:3])) - midpoint
+
+    midpoint_R = _midpoint(O_R.shape[:3])
+    R = list(np.ndindex(O_R.shape[:3])) - midpoint_R
     R_R = np.zeros(O_R.shape[:3] + (3,))
     for Ri in R:
         R_R[(*Ri,)] = Ri
-    phase = np.exp(2j * np.pi * np.einsum("ijkr,lr->ijkl", R_R, kpoints))
-    O_k = np.einsum("ijkmn,ijkl->lmn", O_R, phase)
+
+    if kpoints is not None:
+        if grid_size is None:
+            raise ValueError("Either 'kpoints' or 'monkhorst_pack' must be specified.")
+
+        R_dot_k = np.einsum("ijkr,lr->ijkl", R_R, kpoints, optimize=optimize)
+        phase = np.exp(2j * np.pi * R_dot_k)
+        O_k = np.einsum("ijkmn,ijkl->lmn", O_R, phase, optimize=optimize)
+        return O_k
+
+    grid_size = tuple(grid_size)
+    kpoints = monkhorst_pack(grid_size)
+    midpoint_k = _midpoint(grid_size)
+    R = list(np.ndindex(grid_size)) - midpoint_k
+    k_R = np.zeros(grid_size + (3,))
+    for Ri, kpoint in zip(R, kpoints):
+        k_R[(*Ri,)] = kpoint
+
+    R_dot_k = np.einsum("ijkr,uvwr->ijkuvw", R_R, k_R, optimize=optimize)
+    phase = np.exp(2j * np.pi * R_dot_k)
+    O_k = np.einsum("ijkmn,ijkuvw->uvwmn", O_R, phase, optimize=optimize)
     return O_k
 
 
