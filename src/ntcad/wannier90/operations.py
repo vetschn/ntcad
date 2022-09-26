@@ -340,7 +340,7 @@ def k_sample(
     O_R: np.ndarray,
     kpoints: np.ndarray = None,
     grid_size: tuple = None,
-    optimize: Any = "optimal",
+    einsum_optimize: Any = "optimal",
 ) -> np.ndarray:
     """Samples the given operator ``O_R`` at given ``kpoints``.
 
@@ -378,9 +378,9 @@ def k_sample(
         if grid_size is None:
             raise ValueError("Either 'kpoints' or 'monkhorst_pack' must be specified.")
 
-        R_dot_k = np.einsum("ijkr,lr->ijkl", R_R, kpoints, optimize=optimize)
+        R_dot_k = np.einsum("ijkr,lr->ijkl", R_R, kpoints, optimize=einsum_optimize)
         phase = np.exp(2j * np.pi * R_dot_k)
-        O_k = np.einsum("ijkmn,ijkl->lmn", O_R, phase, optimize=optimize)
+        O_k = np.einsum("ijkmn,ijkl->lmn", O_R, phase, optimize=einsum_optimize)
         return O_k
 
     grid_size = tuple(grid_size)
@@ -391,9 +391,9 @@ def k_sample(
     for Ri, kpoint in zip(R, kpoints):
         k_R[(*Ri,)] = kpoint
 
-    R_dot_k = np.einsum("ijkr,uvwr->ijkuvw", R_R, k_R, optimize=optimize)
+    R_dot_k = np.einsum("ijkr,uvwr->ijkuvw", R_R, k_R, optimize=einsum_optimize)
     phase = np.exp(2j * np.pi * R_dot_k)
-    O_k = np.einsum("ijkmn,ijkuvw->uvwmn", O_R, phase, optimize=optimize)
+    O_k = np.einsum("ijkmn,ijkuvw->uvwmn", O_R, phase, optimize=einsum_optimize)
     return O_k
 
 
