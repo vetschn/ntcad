@@ -70,7 +70,7 @@ def approximate_position_operator(
     for i in range(r_R.shape[-1]):
         d_0_i = centers[:, i].reshape(-1, 1) - centers[:, i]
         for R in Ra:
-            r_R[(*R,)][..., i] = (R @ Ai)[i] + d_0_i
+            r_R[tuple(R)][..., i] = (R @ Ai)[i] + d_0_i
     return r_R
 
 
@@ -85,7 +85,7 @@ def _approximate_momentum_operator(
     """Approximates the momentum operator elements ``p_R``.
 
     The resulting momentum matrix is in [eV/c] per default. If you wish
-    to get the matrix in SI units [kg*m/s], set the ``in_si_units``
+    to get the matrix in SI units [kg*m/s], set the ``si_units``
     keyword accordingly. OMEN requires [eV/c].
 
     Note
@@ -123,23 +123,20 @@ def _approximate_momentum_operator(
     midpoint = _midpoint(H_R.shape[:3])
 
     p_R = np.zeros(H_R.shape + (3,), dtype=np.complex64)
-    # Iterate over all spacial components.
-    for i in tqdm(range(p_R.shape[-1])):
+    for i in range(3):  # x, y, z.
         d_0_i = np.zeros(H_R.shape[-2:])
         if tau_ij:
-            # Trickery: Wannier center distances within cell from
-            # transposed version of the Wannier centers themselves.
             d_0_i = centers[:, i].reshape(-1, 1) - centers[:, i]
         # Construct the position operator for spacial dimension i.
         r_R_i = np.zeros_like(H_R)
         for Rs in np.ndindex(r_R_i.shape[:3]):
             R = Rs - midpoint
-            allowed = np.any(H_R[(*R,)])
+            allowed = np.any(H_R[tuple(R)])
             if Ra is not None:
                 allowed = np.any(np.all(Ra == R, axis=1))
             if not allowed:
                 continue
-            r_R_i[(*R,)] += (R @ Ai)[i] + d_0_i
+            r_R_i[tuple(R)] += (R @ Ai)[i] + d_0_i
         p_R[..., i] = r_R_i * H_R
     # Conversion to SI units [kg*m/s].
     p_R_SI = 1j * 1e-10 * m_e / hbar * p_R
@@ -252,25 +249,25 @@ def momentum_operator(
         # Iterate over all R vectors.
         for Rs in tqdm(np.ndindex(p_R_i.shape[:3])):
             R = Rs - midpoint
-            allowed = np.any(H_R[(*R,)])
+            allowed = np.any(H_R[tuple(R)])
             if Ra is not None:
                 allowed = np.any(np.all(Ra == R, axis=1))
             if not allowed:
                 continue
-            p_R_i[(*R,)] += H_R[(*R,)] * ((R @ Ai)[i] + d_0_i)
+            p_R_i[tuple(R)] += H_R[tuple(R)] * ((R @ Ai)[i] + d_0_i)
             # Iterate over all R' vectors.
             for Rps in np.ndindex(p_R_i.shape[:3]):
                 Rp = Rps - midpoint
                 out_of_bounds = np.any(np.abs(R - Rp) > 0) or np.any(np.abs(R + Rp) > 0)
-                allowed = np.any(H_R[(*Rp,)]) and np.any(H_R[(*(R - Rp),)])
+                allowed = np.any(H_R[tuple(Rp)]) and np.any(H_R[(*(R - Rp),)])
                 if Ra is not None:
                     allowed = np.any(np.all(Ra == Rp, axis=1)) and np.any(
                         np.all(Ra == (R - Rp), axis=1)
                     )
                 if out_of_bounds or not allowed:
                     continue
-                p_R_i[(*R,)] += H_R[(*Rp,)] @ r_R[(*(R - Rp),)][..., i]
-                p_R_i[(*R,)] -= r_R[(*Rp,)][..., i] @ H_R[(*(R - Rp),)]
+                p_R_i[tuple(R)] += H_R[tuple(Rp)] @ r_R[tuple(R - Rp)][..., i]
+                p_R_i[tuple(R)] -= r_R[tuple(Rp)][..., i] @ H_R[tuple(R - Rp)]
         return p_R_i
 
     # Compute the spacial dimensions in parallel.
@@ -331,7 +328,7 @@ def distance_matrix(
     for Rs in np.ndindex((N_1, N_2, N_3)):
         R = Rs - midpoint
         if np.any(np.all(Ra == R, axis=1)):
-            d_R[(*R,)] = np.linalg.norm(d_0 + (R @ Ai), axis=2)
+            d_R[tuple(R)] = np.linalg.norm(d_0 + (R @ Ai), axis=2)
 
     return d_R
 
@@ -372,7 +369,7 @@ def k_sample(
     R = list(np.ndindex(O_R.shape[:3])) - midpoint_R
     R_R = np.zeros(O_R.shape[:3] + (3,))
     for Ri in R:
-        R_R[(*Ri,)] = Ri
+        R_R[tuple(Ri)] = Ri
 
     if kpoints is not None:
         if grid_size is None:
@@ -389,7 +386,7 @@ def k_sample(
     R = list(np.ndindex(grid_size)) - midpoint_k
     k_R = np.zeros(grid_size + (3,))
     for Ri, kpoint in zip(R, kpoints):
-        k_R[(*Ri,)] = kpoint
+        k_R[tuple(Ri)] = kpoint
 
     R_dot_k = np.einsum("ijkr,uvwr->ijkuvw", R_R, k_R, optimize=einsum_optimize)
     phase = np.exp(2j * np.pi * R_dot_k)
@@ -420,7 +417,7 @@ def is_hermitian(O_R: np.ndarray) -> bool:
 
     for Rs in np.ndindex(O_R.shape[:3]):
         R = Rs - midpoint
-        if not np.all(np.equal(np.conjugate(O_R[(*R,)].T), O_R[(*-R,)])):
+        if not np.all(np.equal(np.conjugate(O_R[tuple(R)].T), O_R[tuple(-R)])):
             return False
 
     return True
@@ -449,7 +446,7 @@ def make_hermitian(O_R: np.ndarray) -> np.ndarray:
     O_R_hermitian = np.zeros_like(O_R)
     for Rs in np.ndindex(O_R.shape[:3]):
         R = Rs - midpoint
-        O_R_hermitian[(*R,)] = 0.5 * (np.conjugate(O_R[(*R,)].T) + O_R[(*-R,)])
-        O_R_hermitian[(*-R,)] = np.conjugate(O_R_hermitian[(*R,)].T)
+        O_R_hermitian[tuple(R)] = 0.5 * (np.conjugate(O_R[tuple(R)].T) + O_R[tuple(-R)])
+        O_R_hermitian[tuple(-R)] = np.conjugate(O_R_hermitian[tuple(R)].T)
 
     return O_R_hermitian

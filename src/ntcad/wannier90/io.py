@@ -536,7 +536,7 @@ def write_hr_dat(
         Ra = np.array([]).reshape(0, 3)
         for Rs in np.ndindex(O_R.shape[:3]):
             R = Rs - midpoint
-            if np.any(O_R[(*R,)]):
+            if np.any(O_R[tuple(R)]):
                 Ra = np.append(Ra, R.reshape(1, 3), axis=0)
 
     num_wann = O_R.shape[-1]

@@ -8,6 +8,7 @@ from typing import Callable
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LogNorm, Normalize
+from ntcad.wannier90.operations import _midpoint
 
 
 def plot_operator(
@@ -45,11 +46,11 @@ def plot_operator(
         raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
 
     # Midpoint of the Wigner-Seitz cell indices.
-    midpoint = np.floor_divide(np.subtract(O_R.shape[:3], 1), 2)
+    midpoint = _midpoint(O_R.shape[:3])
     # Shift the operator to the center.
     O_ = np.zeros_like(O_R)
     for R in np.ndindex(O_R.shape[:3]):
-        O_[(*R,)] = O_R[(*(R - midpoint),)]
+        O_[tuple(R)] = O_R[tuple(R - midpoint)]
 
     # Take operator blocks along one axis and apply modifier.
     O_ = np.take(mod(O_), indices=indices, axis=axis)
@@ -63,7 +64,7 @@ def plot_operator(
 
     # The extent keyword here is used to set the ticks "correctly" and
     # to compensate for the fact that ax.matshow plots the pixels *on
-    # top of* the index / coordinate.
+    # top of the index / coordinate.
     ax.matshow(O, norm=norm, extent=(0, O_.shape[0], O_.shape[1], 0), **kwargs)
 
     ax.set_xticks(np.arange(O_.shape[0]))
