@@ -8,7 +8,7 @@ import numpy as np
 from matplotlib.axes import Axes
 
 
-def plot_bands(vasprun: dict, path: list = None, ax= None, **kwargs) -> Axes:
+def plot_bands(vasprun: dict, path: list = None, ax=None, **kwargs) -> Axes:
     """Plots the band structure obtained from VASP.
 
     Parameters
