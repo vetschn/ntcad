@@ -1,22 +1,29 @@
-"""_summary_
+"""
+Utility functions for all kinds of things.
+
 """
 
 import subprocess
 
 
-def get_idle_hosts(name: str) -> list[str]:
-    """_summary_
+def get_idle_hosts(prefix: str) -> list[str]:
+    """Finds all hosts that are currently idle.
+
+    Invokes the ``cload`` command to find all hosts that are currently
+    idle.
 
     Parameters
     ----------
-    name
-        _description_
+    prefix : str
+        The prefix of the hosts to search for.
 
     Returns
     -------
-        _description_
+    list[str]
+        A list of all hosts that are currently idle.
+
     """
-    output = subprocess.check_output(["cload"] + [name]).decode()
+    output = subprocess.check_output(["cload"] + [prefix]).decode()
 
     lines = output.split("\n")[:-1]
     load_averages = [list(map(float, line.split()[-3:])) for line in lines]
