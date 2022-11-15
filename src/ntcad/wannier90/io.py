@@ -333,7 +333,7 @@ def _parse_wout_system(lines: list[str]) -> dict:
             # know how many atomic sites to expect.
             sites_start_ind = ind + 2
         elif "Grid size" in line:
-            sites_stop_ind = ind - 5
+            sites_stop_ind = ind - 6
             line = line.replace("x", " ")
             __, __, __, k_grid_x, k_grid_y, k_grid_z, *__ = line.split()
         elif "MAIN" in line:
@@ -547,7 +547,7 @@ def write_hr_dat(
     # Construct degeneracy lines.
     if deg is None:
         deg = np.zeros(nrpts, dtype=int)
-    deg_per_line = 15
+    deg_per_line = 15  # Magic number.
     deg_str = ""
     for i, val in enumerate(deg):
         deg_str += "{:5d}".format(val)
