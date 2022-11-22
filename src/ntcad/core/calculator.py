@@ -46,7 +46,7 @@ class Calculator(ABC):
     """
 
     def __init__(self, directory: os.PathLike, **kwargs: dict) -> None:
-        """_summary_
+        """Summary
 
         Parameters
         ----------
@@ -57,18 +57,21 @@ class Calculator(ABC):
         """
         ...
 
-    @abstractmethod
-    def calculate(self, command: str) -> None:
-        """_summary_
+    # @abstractmethod
+    # def calculate(self, command: str) -> None:
+    #     """Summary
 
-        Parameters
-        ----------
-        command
-            _description_
-        """
-        ...
 
-    @abstractmethod
-    def write_input(self) -> None:
-        """_summary_"""
-        ...
+    #     Parameters
+    #     ----------
+    #     command
+    #         Test
+    #     """
+    #     pass
+
+    # @abstractmethod
+    # def write_input(self) -> None:
+    #     """
+    #     _summary_
+    #     """
+    #     pass

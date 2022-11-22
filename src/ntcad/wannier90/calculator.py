@@ -1,6 +1,6 @@
 """
 This module implements a Wannier90 calculator class that can be used as
-an interface to run Wannier90 jobs and read the resulting output files.
+an interface to run Wannier90 jobs.
 
 """
 

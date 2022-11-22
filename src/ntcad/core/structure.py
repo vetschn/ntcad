@@ -5,15 +5,17 @@ atoms in a unit cell together with some useful methods.
 """
 
 from typing import Any
+import os
 
+import ase
 import ase.visualize
 import matplotlib.pyplot as plt
 import numpy as np
-from ase import Atoms
+from numpy import linalg as npla
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
-# All allowed atomic symbols including a ``None`` / "X" kind.
-_symbols = (
+# All allowed atomic symbols including a `None` / "X" kind.
+ATOMIC_SYMBOLS = (
     # --- 0 ------------------------------------------------------------
     "X "
     # --- 1 ------------------------------------------------------------
@@ -33,9 +35,9 @@ _symbols = (
 ).split()
 
 # The atomic number mapped to the corresponding atomic symbol.
-_numbers = {}
-for Z, symbol in enumerate(_symbols):
-    _numbers[symbol] = Z
+ATOMIC_NUMBERS = {}
+for i, symbol in enumerate(ATOMIC_SYMBOLS):
+    ATOMIC_NUMBERS[symbol] = i
 
 # Useful dtype to represent atomic sites.
 _sites_dtype = np.dtype(
@@ -45,6 +47,8 @@ _sites_dtype = np.dtype(
     ]
 )
 
+# The jmol colors of each atomic kind
+# https://jmol.sourceforge.net/jscolors/
 _jmol_colors = {
     "X": "#000000",
     "H": "#FFFFFF",
@@ -160,20 +164,27 @@ _jmol_colors = {
 
 
 class Structure:
-    """A configuration of atoms in some unit cell.
+    """
+    An arrangement of atoms in space.
 
     Attributes
     ----------
-    kinds
-        The atomic kinds.
-    positions
-        The atomic positions
-    sites
-        The atomic sites and positions in one structure numpy array.
-    cell
-        The structure's unit cell.
-    attr
-        Optional attributes of the structure.
+    kinds : numpy.ndarray
+        The atomic kinds of the structure. Each kind is a 2-character
+        string.
+    positions : numpy.ndarray
+        The atomic positions of the structure. Each position is a 3D
+        vector.
+    sites : numpy.ndarray
+        The atomic sites and positions in one array. Each site is a
+        2-tuple of the kind and position.
+    cell : numpy.ndarray
+        The cell vectors of the structure. Each cell vector is a 3D
+        vector.
+    attr : dict
+        A dictionary of attributes of the structure. These are
+        arbitrary key-value pairs that can be used to store
+        additional information about the structure.
 
     """
 
@@ -185,73 +196,101 @@ class Structure:
         cartesian: bool = True,
         attr: dict = None,
     ) -> None:
-        """Initializes a structure.
+        """
+        Initializes a structure.
 
         Parameters
         ----------
         kinds
-            The atomic kinds.
+            The atomic kinds as a list of 2-character strings.
         positions
-            The atomic positions.
+            The atomic positions as a list of 3D vectors.
         cell
-            The unit cell of the structure.
+            The cell vectors as a list of 3D vectors. If the cell vectors
+            span an invalid cell, an exception is raised.
         cartesian
-            Whether the positions are given in cartesian coordinates, by
-            default True.
+            Whether the positions are given in Cartesian coordinates. By
+            default, the positions are assumed to be in Cartesian
+            coordinates.
+        attr
+            A dictionary of attributes of the structure. These are
+            arbitrary key-value pairs that can be used to store
+            additional information about the structure.
 
         """
         self.kinds = np.array(kinds)
-        if not set(kinds).issubset(_symbols):
-            raise ValueError("Invalid symbol in atomic kinds.")
+        for kind in self.kinds:
+            if not isinstance(kind, str):
+                raise ValueError("Invalid atomic kind")
+            if kind not in ATOMIC_SYMBOLS:
+                raise ValueError(f"Invalid atomic symbol: {kind}")
 
         self.cell = np.array(cell)
         if np.isclose(self.volume, 0.0):
-            raise ValueError("Invalid cell volume.")
+            raise ValueError("Cell volume is zero")
 
-        self.positions = positions
+        self.positions = np.array(positions)
         if not cartesian:
-            self.positions = positions @ self.cell
+            self.positions = self.positions @ self.cell
 
         self.sites = np.array(list(zip(kinds, positions)), dtype=_sites_dtype)
         self.attr = attr
 
     def __repr__(self) -> str:
-        return f"Structure(\nsites=\n{self.sites},\ncell=\n{self.cell}\n)"
+        return f"Structure({self.kinds}, {self.positions}, {self.cell})"
 
     @property
     def volume(self) -> float:
-        """The cell volume."""
-        a_1, a_2, a_3 = self.cell
-        return np.dot(a_1, np.cross(a_2, a_3))
+        """
+        float: The volume of the structure's cell.
+        """
+        a1, a2, a3 = self.cell
+        return np.dot(a1, np.cross(a2, a3))
 
     @property
     def reciprocal_cell(self) -> float:
-        """The reciprocal unit cell."""
-        return 2 * np.pi * np.transpose(np.linalg.inv(self.cell))
+        """
+        float: The reciprocal cell vectors of the structure.
+        """
+        return 2 * np.pi * np.transpose(npla.inv(self.cell))
 
-    def view(self, **kwargs) -> Any:
-        """Visualizes the structure in ASE GUI.
+    def view(self, **kwargs: dict) -> Any:
+        """
+        Visualizes the structure using the ASE viewer.
+
+        Parameters
+        ----------
+        **kwargs
+            Additional keyword arguments to pass to the ASE viewer.
 
         Returns
         -------
-        Any
-            The viewer handle.
-
-        See Also
-        --------
-        ase.visualize.view: Interface to various visualization tools.
+        handle
+            The return value of the ASE viewer.
 
         """
-        atoms = Atoms(symbols=self.kinds, positions=self.positions, cell=self.cell)
+        atoms = ase.Atoms(symbols=self.kinds, positions=self.positions, cell=self.cell)
         return ase.visualize.view(atoms, **kwargs)
 
     def _mpl_view(self, **kwargs) -> Axes3D:
-        """Visualizes the structure in a matplotlib figure.
+        """
+        Visualizes the structure using matplotlib.
+
+        Parameters
+        ----------
+        **kwargs
+            Keyword arguments to pass to matplotlib.
 
         Returns
         -------
         Axes3D
-            The plot's axes.
+            The matplotlib axes object.
+
+        Notes
+        -----
+        The plot this produces is sort of wonky as matplotlib does not
+        have a proper 3D engine. It can still be useful for quick
+        visualizations, though.
 
         """
         ax = kwargs.get("ax")
@@ -269,7 +308,7 @@ class Structure:
             xs_0 = np.array([0, self.cell[i][0]])
             ys_0 = np.array([0, self.cell[i][1]])
             zs_0 = np.array([0, self.cell[i][2]])
-            ax.plot(xs_0, ys_0, zs_0, "k--")
+            ax.plot(xs_0, ys_0, zs_0, "k--", **kwargs)
 
             # First order vectors.
             if i == j:
@@ -277,7 +316,7 @@ class Structure:
             xs_1 = xs_0 + [self.cell[i][0], self.cell[j][0]]
             ys_1 = ys_0 + [self.cell[i][1], self.cell[j][1]]
             zs_1 = zs_0 + [self.cell[i][2], self.cell[j][2]]
-            ax.plot(xs_1, ys_1, zs_1, "k--")
+            ax.plot(xs_1, ys_1, zs_1, "k--", **kwargs)
 
             # Second order vectors.
             if k == i or k == j:
@@ -285,7 +324,7 @@ class Structure:
             xs_2 = xs_1 + [self.cell[j][0], self.cell[k][0]]
             ys_2 = ys_1 + [self.cell[j][1], self.cell[k][1]]
             zs_2 = zs_1 + [self.cell[j][2], self.cell[k][2]]
-            ax.plot(xs_2, ys_2, zs_2, "k--")
+            ax.plot(xs_2, ys_2, zs_2, "k--", **kwargs)
 
         # There is no working equivalent for ax.set_aspect("equal").
         # This is a workaround.

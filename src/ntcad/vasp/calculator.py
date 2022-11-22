@@ -1,7 +1,6 @@
 """
 This module implements a VASP calculator class that can be used as an
-interface to write VASP inputs, run VASP jobs and read the resulting
-output files.
+interface to write VASP inputs and run VASP jobs.
 
 """
 
@@ -13,24 +12,26 @@ from ntcad import Calculator, Structure, vasp
 
 
 class VASP(Calculator):
-    """Calculator interface for running VASP jobs.
+    """
+    A calculator class that can be used as an interface to write VASP
+    inputs and run VASP jobs.
 
     Attributes
     ----------
-    directory
-        _description_
-    incar_tags
-        _description_
-    structure
-        _description_
-    kpoints
-        _description_
-    shift
-        _description_, by default None
-    potentials
-        _description_, by default None
-    recommended_potentials
-        _description_, by default False
+    directory : os.PathLike
+        The directory where the VASP run is invoked.
+    incar_tags : dict
+        A dictionary of tags to be written in the INCAR file.
+    structure : Structure
+        The structure to be used in the VASP calculation.
+    kpoints : np.ndarray
+        The kpoints to be used in the VASP calculation.
+    shift : dict
+        The shift to be used in the KPOINTS file.
+    potentials : dict
+        A dictionary of potentials to be used in the POTCAR file.
+    recommended_potentials : bool
+        If True, the recommended potentials are used in the POTCAR file.
 
     """
 
@@ -44,22 +45,38 @@ class VASP(Calculator):
         recommended_potentials: bool = False,
         **incar_tags: dict,
     ) -> None:
-        """_summary_
+        """
+        Initializes a VASP calculator.
 
         Parameters
         ----------
         directory
-            _description_
+            The directory where the VASP run is to be invoked.
         structure
-            _description_
+            The structure to be used in the VASP calculation.
         kpoints
-            _description_
+            The k-points to be used in the VASP calculation. This can
+            either be the size of a Monkhorst-Pack grid (e.g. `[21, 21,
+            1]`) or a list of k-points in reciprocal space.
         shift
-            _description_, by default None
+            The shift to be used in the KPOINTS file.
         potentials
-            _description_, by default None
+            Which potentials to use in the POTCAR file. This is a
+            dictionary of the form {element: potential} where
+            potential is the name of the potential file.
         recommended_potentials
-            _description_, by default False
+            If True, the recommended potentials are used in the POTCAR
+            file. This is ignored if potentials is not None.
+        **incar_tags
+            A dictionary of tags to be written to the INCAR file.
+
+        See Also
+        --------
+        ntcad.vasp.io.write_incar : Writes an INCAR file.
+        ntcad.vasp.io.write_poscar : Writes a POSCAR file.
+        ntcad.vasp.io.write_kpoints : Writes a KPOINTS file.
+        ntcad.vasp.io.write_potcar : Writes a POTCAR file.
+        ntcad.core.structure.Structure : An atomic structure.
 
         """
         self.directory = directory
@@ -67,39 +84,63 @@ class VASP(Calculator):
         self.kpoints = kpoints
         self.shift = shift
         self.potentials = potentials
-        self.recommended_potentials = recommended_potentials
         self.incar_tags = incar_tags
+        self.recommended_potentials = recommended_potentials
 
-    def calculate(self, command: str) -> int:
-        """_summary_
+    def calculate(self, command: str, overwrite_input: bool = True) -> int:
+        """
+        Runs a VASP calculation.
 
         Parameters
         ----------
         command
-            _description_
+            The command to run VASP. This should be a command like
+            `mpirun -np 4 vasp_std`.
+        overwrite_input
+            If True, the input files are overwritten even if they are
+            already present.
 
         Returns
         -------
         int
-            _description_
+            The return code of the VASP run. A return code of `0` means
+            that the calculation was successful. If the run fails, one
+            will likely encounter a RuntimeError, but this is not
+            guaranteed and you're on your own from there.
+
+        Notes
+        -----
+        This method invokes the `subprocess.call` method with the
+        `shell=True` flag set. See the Python documentation for more
+        information.
+
+        The stdout and stderr of the VASP run are redirected to the
+        `vasp.out` and `vasp.err` files in the directory where the VASP
+        run is invoked.
 
         """
-        self.write_input()
+        self.write_input(overwrite=overwrite_input)
 
         with open(os.path.join(self.directory, "vasp.out"), "a") as vasp_out:
-            retcode = subprocess.call(
-                command, shell=True, stdout=vasp_out, cwd=self.directory
-            )
+            with open(os.path.join(self.directory, "vasp.err"), "a") as vasp_err:
+                retcode = subprocess.call(
+                    command,
+                    shell=True,
+                    stdout=vasp_out,
+                    stderr=vasp_err,
+                    cwd=self.directory,
+                )
         return retcode
 
-    def write_input(self, force: bool = False) -> None:
-        """Writes all the inputs file necessary for a VASP run.
+    def write_input(self, overwrite: bool = True) -> None:
+        """
+        Writes all the inputs file necessary for a VASP run.
 
         Parameters
         ----------
-        force
-            If force is set to True, the inputs are overwritten even if
-            they are already present.
+        overwrite
+            If overwrite is set to True, the inputs are overwritten even
+            if they are already present.
 
         """
         if not os.path.isdir(self.directory):
@@ -110,7 +151,7 @@ class VASP(Calculator):
             os.path.join(self.directory, file)
             for file in ("INCAR" "POSCAR" "KPOINTS" "POTCAR")
         ]
-        if not force and all(os.path.exists(path) for path in paths):
+        if not overwrite and all(os.path.exists(path) for path in paths):
             return
 
         vasp.io.write_incar(path=self.directory, **self.incar_tags)
@@ -126,7 +167,10 @@ class VASP(Calculator):
         )
 
     def clear(self) -> None:
-        """Clears all outputs of a VASP run."""
+        """
+        Clears all outputs of a VASP run.
+
+        """
         if not os.path.isdir(self.directory):
             raise FileNotFoundError(f"{self.directory} is not a directory.")
 
@@ -163,5 +207,3 @@ class VASP(Calculator):
             if not os.path.exists(p):
                 continue
             os.remove(p)
-
-        pass

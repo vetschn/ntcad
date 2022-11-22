@@ -171,7 +171,7 @@ def momentum_operator(
     lattice vectors ``A_i``.
 
     The momentum operator components for all spacial dimensions are
-    calculated in parallel.
+    calculated in parallel. [1]_
 
 
     Parameters
@@ -204,16 +204,17 @@ def momentum_operator(
 
     Returns
     -------
+    np.ndarray
         Momentum matrix elements (``N_1`` x ``N_2`` x ``N_3`` x
         ``num_wann`` x ``num_wann`` x 3). The indices are chosen such
         that (0, 0, 0) actually gets you the center Wigner-Seitz cell
         momentum matrix.
 
-    Notes
-    -----
+    References
+    ----------
     .. [1] C. Klinkert, "The ab initio microscope: on the performance of
-           2D materials as future field-effect transistors", Ph.D.
-           thesis, ETH Zurich, 2021.
+       2D materials as future field-effect transistors", Ph.D. thesis,
+       ETH Zurich, 2021.
 
     """
     if tau_ij and centers is None:

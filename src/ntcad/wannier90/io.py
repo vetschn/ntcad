@@ -2,14 +2,6 @@
 This module implements file I/O functions for interfacing with
 Wannier90.
 
-Currently supports the following filetypes:
-
-- ``seedname_hr.dat`` (I/O)
-- ``seedname_r.dat`` (I)
-- ``seedname_band.dat`` (I)
-- ``seedname.eig`` (I)
-- ``seedname.wout`` (I)
-
 """
 
 import os
@@ -18,41 +10,36 @@ from datetime import datetime
 import numpy as np
 
 
-def read_hr_dat(path: os.PathLike, full: bool = False) -> tuple[np.ndarray, ...]:
-    """Parses the contents of a ``seedname_hr.dat`` file.
+def read_hr_dat(path: os.PathLike, return_all: bool = False) -> tuple[np.ndarray, ...]:
+    """
+    Parses the contents of a `seedname_hr.dat` file.
 
     The first line gives the date and time at which the file was
     created. The second line states the number of Wannier functions
     num_wann. The third line gives the number of Wigner-Seitz
-    grid-points ``nrpts``.
+    grid-points.
 
-    The next block of ``nrpts`` integers gives the degeneracy of each
-    Wigner-Seitz grid point, with 15 entries per line.
+    The next block of integers gives the degeneracy of each Wigner-Seitz
+    grid point, arranged into 15 values per line.
 
-    Finally, the remaining ``num_wann**2 * nrpts`` lines each contain,
-    respectively, the components of the vector ``R`` in terms of the
-    lattice vectors ``A_i``, the indices m and n, and the real and imaginary
-    parts of the Hamiltonian matrix element ``H_R_mn`` in the WF basis.
+    Finally, the remaining lines each contain, respectively, the
+    components of the Wigner-Seitz cell index, the Wannier center
+    indices m and n, and and the real and imaginary parts of the
+    Hamiltonian matrix element `HRmn` in the localized basis.
 
     Parameters
     ----------
     path
-        Path to ``seedname_hr.dat``.
-    full
-        Switch determining nature of return value. When it is ``False``
-        (the default) just ``r_R`` is returned, when ``True``, the
-        degeneracy info and the allowed Wigner-Seitz cell indices are
-        also returned.
+        Path to a `seedname_hr.dat` file.
+    return_all
+        Whether to return all the data or just the Hamiltonian in the
+        localized basis. When `True`, the degeneracies and the Wigner-Seitz
+        cell indices are also returned. Defaults to `False`.
 
     Returns
     -------
-        The Hamiltonian elements (``N_1`` x ``N_2`` x ``N_3`` x
-        ``num_wann`` x ``num_wann``), where ``N_i`` correspond to the
-        number of Wigner-Seitz cells along the lattice vectors ``A_i``.
-        The indices are chose such that (0, 0, 0) actually gets you the
-        center Wigner-Seitz cell. Additionally, if ``full`` is ``True``,
-        the degeneracy info and the allowed Wigner-Seitz cell indices
-        ``Ra`` are also returned.
+    hr
+        The Hamiltonian matrix elements in the localized basis.
 
     """
     with open(path, "r") as f:
@@ -89,7 +76,7 @@ def read_hr_dat(path: os.PathLike, full: bool = False) -> tuple[np.ndarray, ...]
         H_R_mn_real, H_R_mn_imag = tuple(map(float, entries[5:]))
         H_R[R_1, R_2, R_3, m - 1, n - 1] = H_R_mn_real + 1j * H_R_mn_imag
 
-    if full:
+    if return_all:
         return H_R, deg, np.unique(R_mn, axis=0)
     return H_R
 

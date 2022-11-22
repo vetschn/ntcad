@@ -8,26 +8,28 @@ import numpy as np
 from matplotlib.axes import Axes
 
 
-def plot_bands(vasprun: dict, path: list = None, ax=None, **kwargs) -> Axes:
-    """Plots the band structure obtained from VASP.
+def plot_bands(vasprun: dict, path: np.ndarray = None, **kwargs) -> Axes:
+    """
+    Plots the band structure obtained from a VASP run.
 
     Parameters
     ----------
     vasprun
-        Dictionary representing the vasprun.xml file, containing the
-        eigenvalues.
+        Dictionary representing the vasprun.xml file, which contains the
+        eigenvalues for each k-point.
     path
-        Path along which to plot the bands.
+        List of k-points to be plotted. If None, the path is obtained
+        from the vasprun.xml file.
+    **kwargs
+        Keyword arguments to pass to matplotlib.
 
     Returns
     -------
-        The plot's axes.
-
-    See Also
-    --------
-    ntcad.kpoints: Functions for the creation of k-point grids/paths.
+    ax
+        The matplotlib axes object.
 
     """
+    ax = kwargs.pop("ax", None)
     if ax is None:
         fig, ax = plt.subplots()
 
@@ -55,7 +57,7 @@ def plot_bands(vasprun: dict, path: list = None, ax=None, **kwargs) -> Axes:
         kpoints = []
         d_total = 0.0
         for a, b in zip(path, path[1:]):
-            d = np.sqrt(np.sum(np.abs(np.subtract(a, b)) ** 2))
+            d = np.linalg.norm(a - b)
             kpoints.append(np.linspace(d_total, d_total + d, num, endpoint=False))
             ax.axvline(x=d_total, c="k")
             d_total += d
