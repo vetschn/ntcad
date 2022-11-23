@@ -13,6 +13,11 @@
 Welcome to ntcad's documentation!
 =================================
 
+.. warning::
+
+   This is a work in progress. The API is not stable and is subject to
+   change at any time.
+
 .. automodule:: ntcad
    :members:
    :undoc-members:

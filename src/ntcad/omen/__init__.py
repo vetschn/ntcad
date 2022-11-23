@@ -4,6 +4,11 @@ The :obj:`ntcad.omen` package contains a calculator for the OMEN code
 (:mod:`ntcad.omen.io`), and useful data processing methods
 (:mod:`ntcad.omen.operations`).
 
+.. warning::
+
+    Some of the code/functionality in this package may only be
+    half-baked.
+
 """
 
 from ntcad.omen.calculator import OMEN

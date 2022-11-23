@@ -7,8 +7,8 @@ interface to write OMEN inputs, run OMEN jobs and read the resulting
 output files.
 
 .. warning::
-    Since the code is under active development the input verification
-    should be pretty lax.
+
+    Nothing here is implemented yet.
 
 """
 
@@ -18,6 +18,13 @@ from ntcad import Calculator
 
 
 class OMEN(Calculator):
+    """OMEN calculator class.
+
+    .. warning::
+
+        Nothing here is implemented yet.
+
+    """
     def __init__(self, directory: os.PathLike, **kwargs: dict) -> None:
         pass
 

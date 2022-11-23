@@ -19,12 +19,13 @@ def read_bin(path: os.PathLike, no_header: bool = False) -> csr_matrix:
 
     Parameters
     ----------
-    path
-        Path to the binary sparse matrix.
+    path : str or Path
+        Path to the binary sparse matrix from OMEN.
 
     Returns
     -------
-        The matrix stored in the file as ``scipy.sparse.csr_matrix``.
+    matrix : csr_matrix
+        The matrix stored in the file.
 
     """
     with open(path, "rb") as f:
@@ -46,14 +47,18 @@ def read_bin(path: os.PathLike, no_header: bool = False) -> csr_matrix:
 
 
 def write_bin(path: os.PathLike, M: csr_matrix, one_indexed: bool = False) -> None:
-    """_summary_
+    """Writes a sparse matrix to a binary file.
 
     Parameters
     ----------
-    path
-        _description_
-    M
-        _description_
+    path : str or Path
+        Path to write the matrix.
+    M : csr_matrix
+        The matrix to write.
+    one_indexed : bool, optional
+        Whether the output matrix should be converted to one-indexed. If
+        True, the matrix will be converted to one-indexed before
+        writing.
 
     """
     header = np.array([M.shape[0], M.nnz, float(one_indexed)])
@@ -75,18 +80,22 @@ def write_bin(path: os.PathLike, M: csr_matrix, one_indexed: bool = False) -> No
 def write_P_bin(
     path: os.PathLike, P: np.ndarray, ph_mat_par: dict, layer_matrix: np.ndarray
 ) -> None:
-    """_summary_
+    """Writes the momentum matrix to a binary file.
+
+    Since this the matrix entries are three dimensional, the matrix
+    needs to be reshaped properly before writing.
 
     Parameters
     ----------
-    path
-        _description_
-    P_bin
-        _description_
-    ph_mat_par
-        _description_
-    layer_matrix
-        _description_
+    path : str or Path
+        Path to write the momentum matrix.
+    P : ndarray
+        The momentum matrix to write.
+    ph_mat_par : dict
+        The material parameters for the momentum matrix.
+    layer_matrix : ndarray
+        The structure's layer matrix.
+
     """
     # Extracting some useful information.
     num_orbs = ph_mat_par["orbitals"]
@@ -123,32 +132,41 @@ def write_P_bin(
 
 
 def read_dat(path: os.PathLike) -> np.ndarray:
-    """TODO
+    """Reads a dat file.
+
+    These are plain text files that can just be read via
+    :meth:`numpy.loadtxt`.
 
     Parameters
     ----------
-    path
-        _description_
+    path : str or Path
+        Path to the dat file.
 
     Returns
     -------
-        _description_
+    data : ndarray
+        The data read from the file.
+
+    See Also
+    --------
+    numpy.loadtxt : The function used to read the file.
 
     """
     return np.loadtxt(path)
 
 
 def read_lattice_dat(path: os.PathLike) -> Structure:
-    """TODO
+    """Reads a lattice.dat file.
 
     Parameters
     ----------
-    path
-        _description_
+    path : str or Path
+        Path to the lattice.dat file.
 
     Returns
     -------
-        _description_
+    structure : Structure
+        The structure read from the file.
 
     """
     with open(path) as f:
@@ -169,17 +187,31 @@ def read_lattice_dat(path: os.PathLike) -> Structure:
 
 
 def read_mat_par(path: os.PathLike) -> dict:
-    """Reads the material parameters.
+    """Reads the material parameters file.
 
     Parameters
     ----------
-    path
-        Path to a ``mat_par`` file.
+    path : str or Path
+        Path to the file.
 
     Returns
     -------
-        A dictionary containing the information parsed from the
-        ``mat_par`` file.
+    mat_par : dict
+        A dictionary containing the information parsed from the file.
+
+    Notes
+    -----
+    The material parameters file is a plain text file with the following
+    format:
+
+    .. code-block:: none
+
+        num_anions num_cations
+        Eg Ec_min Ev_max
+        [orbitals]
+        [masses]
+
+    The file contents are not checked for integrity.
 
     """
     if not os.path.basename(path).startswith("ph"):
@@ -207,16 +239,19 @@ def read_mat_par(path: os.PathLike) -> dict:
 
 
 def read_M_matrices(path: os.PathLike) -> dict:
-    """_summary_
+    """Reads all the coupling matrices from a folder.
 
     Parameters
     ----------
-    path
-        _description_
+    path : str or Path
+        Path to the folder.
 
     Returns
     -------
-        _description_
+    M : dict
+        A dictionary containing the coupling matrices for every
+        direction.
+
     """
     if not os.path.isdir(path):
         raise ValueError(f"{path} is not a directory")
@@ -235,16 +270,19 @@ def read_M_matrices(path: os.PathLike) -> dict:
 
 
 def read_H_matrices(path: os.PathLike) -> dict:
-    """_summary_
+    """Reads all the Hamiltonian matrices from a folder.
 
     Parameters
     ----------
-    path
-        _description_
+    path : str or Path
+        Path to the folder.
 
     Returns
     -------
-        _description_
+    H : dict
+        A dictionary containing the Hamiltonian matrices for every
+        layer.
+
     """
     if not os.path.isdir(path):
         raise ValueError(f"{path} is not a directory")
@@ -262,14 +300,15 @@ def read_H_matrices(path: os.PathLike) -> dict:
 
 
 def write_e_dat(path: os.PathLike, energies: np.ndarray) -> None:
-    """_summary_
+    """Writes an e.dat file.
 
     Parameters
     ----------
-    path
-        _description_
-    energies
-        _description_
+    path : str or Path
+
+    energies : ndarray
+        The energies to write to the file.
+
     """
     lines = [len(energies)]
     lines.append(("{:22.16f}" * len(energies)).format(*energies))

@@ -5,7 +5,6 @@ Routines
 This module contains common processing routines and operations for OMEN
 calculations.
 
-
 """
 
 import multiprocessing
@@ -15,21 +14,33 @@ from scipy.sparse import csr_matrix
 from tqdm import tqdm
 
 
-def _matrix_info(matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, int, int]:
-    """_summary_
+def _matrix_info(
+    matrix: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, int, int]:
+    """Calculates information about the layer/total matrices.
 
     Parameters
     ----------
-    ph_mat_par
-        _description_
-    layer_matrix
-        _description_
-    total_matrix
-        _description_
+    matrix : ndarray
+        The layer/total matrix.
 
     Returns
     -------
-        _description_
+    pos : ndarray
+        The positions of the atoms.
+    kind_inds : ndarray
+        The kind indices of the atoms.
+    nn : ndarray
+        The nearest neighbor matrix.
+    num_atoms : int
+        The number of atoms.
+    max_nn : int
+        The maximum number of nearest neighbors.
+
+    See Also
+    --------
+    max_nn : Calculates the maximum number of nearest neighbors.
+    ntcad.omen.io.read_dat : Reads the layer/total matrix.
 
     """
     pos = matrix[:, :3]
@@ -47,14 +58,20 @@ def _sum_num_orbs(num_orbs: list, matrix: np.ndarray) -> list:
 
     Parameters
     ----------
-    num_orbs
-        _description_
-    matrix
-        _description_
+    num_orbs : list
+        The number of orbitals per atom kind.
+    matrix : ndarray
+        The layer/total matrix.
 
     Returns
     -------
-        _description_
+    sum_num_orbs : list
+        The summed number of orbitals at any atom index.
+
+    See Also
+    --------
+    ntcad.omen.io.read_dat : Reads the layer/total matrix.
+
     """
     num_atoms = matrix.shape[0]
     kind_inds = matrix[:, 3].astype(int) - 1  # MATLAB indexing.
@@ -69,22 +86,29 @@ def _sum_num_orbs(num_orbs: list, matrix: np.ndarray) -> list:
 def split_H_matrices(
     ph_mat_par: dict, H: dict, layer_matrix: np.ndarray, Lz: float
 ) -> dict:
-    """_summary_
+    """Splits the Hamiltonian matrices into layers given a layer width.
 
     Parameters
     ----------
-    ph_mat_par
-        _description_
-    H
-        _description_
-    layer_matrix
-        _description_
+    ph_mat_par : dict
+        The material parameters.
+    H : dict
+        The Hamiltonian matrices for every layer.
+    layer_matrix : ndarray
+        The layer matrix.
     Lz
-        _description_
+        The layer width at which to split the Hamiltonian matrices.
 
     Returns
     -------
-        _description_
+    H : dict
+        The Hamiltonian matrices for every layer.
+
+    See Also
+    --------
+    ntcad.omen.io.read_mat_par : Reads the material parameters.
+    ntcad.omen.io.read_H_matrices : Reads the Hamiltonian matrices.
+    ntcad.omen.io.read_dat : Reads the layer/total matrix.
 
     """
     layer_pos, kind_inds, *__ = _matrix_info(layer_matrix)
@@ -149,32 +173,48 @@ def photon_scattering_matrix_large(
     l_Lz: float,
     cutoff: float = 2.75,
 ) -> np.ndarray:
-    """_summary_
+    """Constructs the photon scattering matrix for large systems.
 
     Parameters
     ----------
-    ph_mat_par
-        _description_
-    M
-        _description_
-    s_layer_matrix
-        _description_
-    s_total_matrix
-        _description_
-    s_Lz
-        _description_
-    l_layer_matrix
-        _description_
-    l_total_matrix
-        _description_
-    l_Lz
-        _description_
-    cutoff
-        _description_
+    ph_mat_par : dict
+        The material parameters.
+    M : dict
+        The scattering matrices for every direction and layer.
+    s_layer_matrix : ndarray
+        The small layer matrix.
+    s_total_matrix : ndarray
+        The small total matrix.
+    s_Lz : float
+        The small layer width.
+    l_layer_matrix : ndarray
+        The large layer matrix.
+    l_total_matrix : ndarray
+        The large total matrix.
+    l_Lz : float
+        The large layer width.
+    cutoff : float, optional
+        The cutoff distance for the scattering matrix.
 
     Returns
     -------
-        _description_
+    P : ndarray
+        The photon scattering matrix.
+
+    See Also
+    --------
+    ntcad.omen.io.read_mat_par : Reads the material parameters.
+    ntcad.omen.io.read_M_matrices : Reads the scattering matrices.
+    ntcad.omen.io.read_dat : Reads the layer/total matrix.
+
+    Notes
+    -----
+    This function is a direct translation of the MATLAB code. It is
+    likely that there are more efficient ways of doing this.
+
+    The ``multiprocessing`` module is used to speed up the calculation
+    of the scattering matrix.
+
     """
     if not (
         s_layer_matrix.shape[-1] == s_total_matrix.shape[-1]
@@ -290,24 +330,38 @@ def photon_scattering_matrix(
     total_matrix: np.ndarray,
     Lz: float,
 ) -> np.ndarray:
-    """_summary_
+    """Computes the photon scattering matrix.
 
     Parameters
     ----------
-    ph_mat_par
-        _description_
-    M
-        _description_
-    layer_matrix
-        _description_
-    total_matrix
-        _description_
-    Lz
-        _description_
+    ph_mat_par : dict
+        Material parameters.
+    M : dict
+        Electron-photon coupling matrix for every direction and layer.
+    layer_matrix : ndarray
+        Matrix with the positions of the atoms in the layer.
+    total_matrix: ndarray
+        Matrix with the positions of the atoms in the total structure.
+    Lz : float
+        Thickness of the layer.
 
     Returns
     -------
-        _description_
+    P : np.ndarray
+        Photon scattering matrix.
+
+    See Also
+    --------
+    ntcad.omen.io.read_mat_par : Reads the material parameters.
+    ntcad.omen.io.read_M_matrices : Reads the scattering matrices.
+    ntcad.omen.io.read_dat : Reads the layer/total matrix.
+
+    Notes
+    -----
+    This function is a direct translation of the Matlab code.
+
+    The ``multiprocessing`` module is used to speed up the computation.
+
     """
     if not layer_matrix.shape[-1] == total_matrix.shape[-1]:
         raise ValueError("Matrices don't contain the same number of nearest neighbors.")
@@ -397,16 +451,18 @@ def photon_scattering_matrix(
 
 
 def max_nn(nn: np.ndarray) -> int:
-    """_summary_
+    """Returns the maximum number of nearest neighbors.
 
     Parameters
     ----------
-    layer_matrix
-        _description_
+    layer_matrix : ndarray
+        Matrix with the positions of the atoms in the layer.
 
     Returns
     -------
-        _description_
+    max_nn : int
+        Maximum number of nearest neighbors.
+
     """
     if not nn.ndim == 2:
         raise ValueError(f"Inconsistent array dimension: {nn.ndim=}")
