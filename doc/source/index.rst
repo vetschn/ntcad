@@ -7,13 +7,11 @@ Welcome to ntcad's documentation!
 =================================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
    :caption: Contents:
 
 
-Indices and tables
-==================
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+.. automodule:: ntcad
+   :members:
+   :undoc-members:
+   :show-inheritance:

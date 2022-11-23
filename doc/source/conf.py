@@ -53,6 +53,17 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = "pydata_sphinx_theme"
+html_theme_options = {
+    "show_prev_next": True,
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/vetschn/ntcad",
+            "icon": "fa-brands fa-square-github",
+            "type": "fontawesome",
+        }
+   ]
+}
 html_css_files = ["ntcad.css"]  # Custom CSS file.
 html_context = {"default_mode": "light"}
 html_show_sourcelink = False
