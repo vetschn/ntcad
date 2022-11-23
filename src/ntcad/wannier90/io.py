@@ -6,7 +6,7 @@ Wannier90.
 
 import os
 from datetime import datetime
-
+import ntcad
 import numpy as np
 
 
@@ -514,7 +514,7 @@ def write_hr_dat(
     if O_R.shape[-1] != O_R.shape[-2]:
         raise ValueError(f"Operator at R must be square: {O_R.ndim=}")
 
-    lines = [f"hr.dat written by ntcad | {datetime.now()}\n"]
+    lines = [f"hr.dat written by ntcad v{ntcad.__version__} | {datetime.now()}\n"]
 
     # Find the allowed Wigner-Seitz cell indices.
     if Ra is None:

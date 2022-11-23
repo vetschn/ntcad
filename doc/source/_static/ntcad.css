@@ -17,7 +17,7 @@ pre, code {
 }
 
 h1 {
-  font-family: "Lato", sans-serif;
+  font-family: "Open Sans", sans-serif;
   color: #013243; /* warm black */
 }
 
@@ -31,6 +31,10 @@ h3 {
   letter-spacing: -.03em;
 }
 
+/* Bullets for toctree */
+.toctree-wrapper ul li {
+  list-style-type: disc;
+}
 
 /* Dark theme tweaking */
 html[data-theme=dark] .sd-card img[src*='.svg'] {

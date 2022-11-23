@@ -17,7 +17,7 @@
 {{- [pkgname, "namespace"] | join(" ") | e | heading }}
 .. Custom names for the subpackages.
 {% elif 'ntcad.core' == pkgname %}
-{{- "**core**: Core functionalities" | heading }}
+{{- "**Core functionality**" | heading }}
 {% elif 'ntcad.vasp' == pkgname %}
 {{- "**VASP**" | heading }}
 {% elif 'ntcad.wannier90' == pkgname %}

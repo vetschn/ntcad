@@ -1,10 +1,14 @@
 """
+OMEN Calculator
+===============
+
 This module implements an OMEN calculator class that can be used as an
 interface to write OMEN inputs, run OMEN jobs and read the resulting
 output files.
 
-TODO: Since the code is under active development the input verification
-should be pretty lax.
+.. warning::
+    Since the code is under active development the input verification
+    should be pretty lax.
 
 """
 

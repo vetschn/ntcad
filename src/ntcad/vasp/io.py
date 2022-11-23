@@ -14,6 +14,7 @@ from datetime import datetime
 import numpy as np
 import xmltodict
 from ntcad import Structure
+import ntcad
 
 # The minimal pseudopotentials necessary.
 _minimal_potentials = {
@@ -91,31 +92,31 @@ def read_incar(path: os.PathLike) -> dict:
 
     Parameters
     ----------
-    path: os.PathLike
-        Path to the INCAR file.
+    path : str or Path
+        Path to the INCAR file to read.
 
     Returns
     -------
-    dict
-        A dictionary of the parsed INCAR tags.
+    incar_tags : dict
+        A dictionary containing the parsed INCAR tags.
 
     See Also
     --------
-    ntcad.vasp.write_incar : Write INCAR tags in VASP format.
-    ntcad.vasp.VASP : VASP calculator interface.
+    write_incar : Write INCAR tags in VASP format.
 
     Notes
     -----
-    The INCAR file format is described in the VASP manual. The
-    ``read_incar`` function parses the file and returns a dictionary
-    of the tags and their values. The values are converted to the
-    appropriate Python types.
+    The INCAR file format is described in the `VASP wiki
+    <https://www.vasp.at/wiki/index.php/INCAR>`_. The ``read_incar``
+    function parses the file and returns a dictionary of the tags and
+    their values. The values are converted to the appropriate Python
+    types using :meth:`ast.literal_eval`.
 
     The INCAR tags are not checked for their validity against the ones
     in the VASP manual.
 
-    This function may run into problems with multi-line values, like is
-    usually the case with the `WANNIER90_WIN` tag.
+    This function may run into problems with multi-line values, for
+    example the ``WANNIER90_WIN`` tag.
 
     """
     with open("./INCAR", "r") as f:
@@ -151,19 +152,29 @@ def read_incar(path: os.PathLike) -> dict:
 
 
 def read_poscar(path: os.PathLike) -> Structure:
-    """
-    Reads a POSCAR file.
+    """Reads a POSCAR file.
 
     Parameters
     ----------
-    path
-        Path to the POSCAR file.
+    path : str or Path
+        Path to the POSCAR file to read in.
 
     Returns
     -------
-    Structure
+    structure : Structure
         A structure object containing the information read from the
         POSCAR.
+
+    See Also
+    --------
+    write_poscar : Write a POSCAR file.
+
+    Notes
+    -----
+    The POSCAR file format is described in the `VASP wiki
+    <https://www.vasp.at/wiki/index.php/POSCAR>`_.
+
+    Any comments in the POSCAR file are saved as structure attributes.
 
     """
     with open(path, "r") as f:
@@ -199,19 +210,25 @@ def read_poscar(path: os.PathLike) -> Structure:
 
 
 def read_chg(path: os.PathLike) -> tuple[Structure, np.ndarray]:
-    """
-    Reads structure and charge density data from CHG files.
+    """Reads structure and charge density data from CHG files.
 
     Parameters
     ----------
-    path
+    path : str or Path
         Path to a CHG file.
 
     Returns
     -------
-    chg
-        A tuple containing the :class:`Structure` and charge density
-        data.
+    structure : Structure
+        The structure object described in the CHG file.
+
+    data : ndarray
+        The charge density data.
+
+    Notes
+    -----
+    The CHG file format is described in the `VASP wiki
+    <https://www.vasp.at/wiki/index.php/CHGCAR>`_.
 
     """
     # POSCAR like structure header.
@@ -252,24 +269,23 @@ def read_chg(path: os.PathLike) -> tuple[Structure, np.ndarray]:
 
 
 def read_vasprun_xml(path: os.PathLike) -> dict:
-    """
-    Reads a vasprun.xml file into a dictionary.
+    """Reads a vasprun.xml file into a dictionary.
 
     Parameters
     ----------
-    path
-        Path to a vasprun.xml
+    path : str or Path
+        Path to a vasprun.xml file.
 
     Returns
     -------
-    dict
+    vasprun : dict
         A dictionary containing the vasprun.xml data.
 
     Notes
     -----
-    This uses the ``xmltodict`` package to parse the XML file. The
-    resulting dictionary is not very user friendly (highly nested), but
-    it is a good starting point for further processing.
+    This uses the :meth:`xmltodict.parse` method to parse the XML file.
+    The resulting dictionary is not very user friendly (highly nested),
+    but it is a good starting point for further processing.
 
     """
     with open(path, "r") as f:
@@ -285,16 +301,19 @@ def read_vasprun_xml(path: os.PathLike) -> dict:
 
 
 def write_incar(path: os.PathLike, **incar_tags: dict) -> None:
-    """
-    Writes an INCAR file at the given path.
+    """Writes an INCAR file at the given path.
 
     Parameters
     ----------
-    path
-        Path where to write the INCAR. If any filename is present, the
-        filename is replaced with INCAR.
-    **incar_tags
+    path : str or Path
+        Path where to write the INCAR. Any filename will be replaced by
+        "INCAR".
+    **incar_tags : dict
         INCAR tags and their values.
+
+    See Also
+    --------
+    read_incar : Read an INCAR file.
 
     Notes
     -----
@@ -302,14 +321,12 @@ def write_incar(path: os.PathLike, **incar_tags: dict) -> None:
 
     The INCAR is written in the same order as the tags are specified.
 
-    This handles the special cases of multiline strings and lists of
-    values.
+    Multiline strings and lists of values are handled.
 
-    The comment line is replaced by a note that the file was written by
-    ``ntcad`` together with the date and time of writing.
+    The comment line contains some provencance information.
 
     """
-    lines = [f"INCAR written by ntcad | {datetime.now()}\n"]
+    lines = [f"INCAR written by ntcad v{ntcad.__version__} | {datetime.now()}\n"]
     for tag, value in incar_tags.items():
         line = f"{tag.upper()} = "
         if isinstance(value, (list, tuple)):
@@ -329,8 +346,7 @@ def write_incar(path: os.PathLike, **incar_tags: dict) -> None:
 
 
 def write_poscar(path: os.PathLike, structure: Structure) -> None:
-    """
-    Writes a given structure in POSCAR format.
+    """Writes a given structure in POSCAR format.
 
     Parameters
     ----------
@@ -349,7 +365,7 @@ def write_poscar(path: os.PathLike, structure: Structure) -> None:
     currently no option to write in direct coordinates.
 
     """
-    lines = [f"POSCAR written by ntcad | {datetime.now()}\n", f"{1.0:.5f}\n"]
+    lines = [f"POSCAR written by ntcad v{ntcad.__version__} | {datetime.now()}\n", f"{1.0:.5f}\n"]
     for vec in structure.cell:
         lines.append("{:.16f} {:22.16f} {:22.16f}\n".format(*vec))
 
@@ -467,7 +483,7 @@ def write_kpoints(
     if not isinstance(kpoints, np.ndarray):
         kpoints = np.array(kpoints)
 
-    lines = [f"KPOINTS written by ntcad | {datetime.now()}\n"]
+    lines = [f"KPOINTS written by ntcad v{ntcad.__version__} | {datetime.now()}\n"]
     # TODO: Maybe properly support line-mode at some point.
     if kpoints.ndim == 1:
         # Monkhorst-Pack grid.

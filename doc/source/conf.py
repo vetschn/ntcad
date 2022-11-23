@@ -36,6 +36,7 @@ extensions = [
     "numpydoc",  # For numpy style docstrings.
     "sphinx.ext.intersphinx",  # For linking to other projects.
     "sphinx_automodapi.automodapi",  # For generating one page per function.
+    "sphinx_automodapi.smart_resolver",  # For resolving references.
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -62,7 +63,7 @@ html_theme_options = {
             "icon": "fa-brands fa-square-github",
             "type": "fontawesome",
         }
-   ]
+    ],
 }
 html_css_files = ["ntcad.css"]  # Custom CSS file.
 html_context = {"default_mode": "light"}
@@ -78,22 +79,34 @@ html_static_path = ["_static"]
 
 # -- Extension configuration -------------------------------------------------
 
+python_use_unqualified_type_names = True
+
 # Links to other projects' documentation.
 intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
+    "python": ("https://docs.python.org/3", None),
 }
+
+# -- Options for automodapi --------------------------------------------------
+
+automodapi_inheritance_diagram = False
+automodapi_writereprocessed = True
 
 
 # -- Options for autodoc -----------------------------------------------------
 
 autodoc_typehints = "none"  # For type hints in API doc.
 
-# # -- Options for numpydoc ----------------------------------------------------
+autodoc_default_options = {"autosummary-no-titles": True}
+
+# -- Options for numpydoc ----------------------------------------------------
 
 numpydoc_show_class_members = False
 numpydoc_use_plots = True
 
-# # -- Options for automodapi --------------------------------------------------
 
-automodapi_inheritance_diagram = False
+# -- Custom CSS --------------------------------------------------------------
+
+def setup(app):
+    app.add_css_file("custom.css")

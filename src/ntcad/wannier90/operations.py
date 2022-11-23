@@ -39,8 +39,8 @@ def approximate_position_operator(
 ) -> np.ndarray:
     """Approximates the position operator elements ``r_R``.
 
-    Note
-    ----
+    Notes
+    -----
     ``N_i`` correspond to the number of Wigner-Seitz cells along the
     lattice vectors ``A_i``
 
@@ -88,8 +88,8 @@ def _approximate_momentum_operator(
     to get the matrix in SI units [kg*m/s], set the ``si_units``
     keyword accordingly. OMEN requires [eV/c].
 
-    Note
-    ----
+    Notes
+    -----
     ``N_i`` correspond to the number of Wigner-Seitz cells along the
     lattice vectors ``A_i``
 

@@ -1,4 +1,10 @@
 """
+Routines
+========
+
+This module contains common processing routines and operations for OMEN
+calculations.
+
 
 """
 

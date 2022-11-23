@@ -1,6 +1,8 @@
 """
-This module abstracts reading from and writing from different file types
-for all external calculators by trying to guess file types.
+File I/O
+========
+
+This module contains functions to read and write files.
 
 """
 

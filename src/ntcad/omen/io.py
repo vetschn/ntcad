@@ -1,4 +1,7 @@
 """
+File I/O
+========
+
 This module implements file I/O functions for interfacing with OMEN.
 
 """

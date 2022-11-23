@@ -1,6 +1,7 @@
 """
-**k-points**
-============
+k-points
+========
+
 Functions for generating Monkhorst-Pack k-point grids and k-point paths.
 
 """
@@ -9,7 +10,7 @@ import numpy as np
 
 
 def monkhorst_pack(size: np.ndarray) -> np.ndarray:
-    """Generates a Monkhorst-Pack [1] k-point grid.
+    """Generates a Monkhorst-Pack [1]_ k-point grid.
 
     Parameters
     ----------

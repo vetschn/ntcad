@@ -1,11 +1,14 @@
 """
-This module is intended to implement an abstract template for all
-specific calculator implementations.
+Calculator
+==========
+
+This module provides and abstract class for a calculator. Calculators are
+used to write simulation input files and to run the simulation.
 
 """
 
 import os
-from abc import ABC, abstractmethod
+from abc import ABC
 
 
 class Calculator(ABC):

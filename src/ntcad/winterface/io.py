@@ -5,6 +5,7 @@
 import os
 
 import numpy as np
+import ntcad
 
 
 def write_winput(path: os.PathLike, **winput_tags: dict) -> None:
@@ -15,7 +16,7 @@ def write_winput(path: os.PathLike, **winput_tags: dict) -> None:
     path
         _description_
     """
-    lines = ["# winput written by ntcad\n"]
+    lines = [f"# winput written by ntcad v{ntcad.__version__} \n"]
 
     for tag, value in winput_tags.items():
         line = tag

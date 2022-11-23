@@ -1,4 +1,7 @@
 """
+VASP Calculator
+===============
+
 This module implements a VASP calculator class that can be used as an
 interface to write VASP inputs and run VASP jobs.
 

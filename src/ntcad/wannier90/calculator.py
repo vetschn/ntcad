@@ -20,10 +20,6 @@ class Wannier90(Calculator):
 
     The same should be true for other DFT codes (still have to check).
 
-
-    Attributes
-    ----------
-
     """
 
     def __init__(

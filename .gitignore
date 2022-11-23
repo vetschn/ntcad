@@ -69,6 +69,7 @@ cython_debug/
 
 # Sphinx documentation
 doc/source/api
+/doc*
 
 # System
 gmon.out
