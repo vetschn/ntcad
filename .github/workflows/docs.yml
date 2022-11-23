@@ -1,0 +1,25 @@
+name: Documentation
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  doc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - name: Install dependencies
+        run: |
+          pip install sphinx pydata-sphinx-theme numpydoc sphinx-automodapi .
+      - name: Sphinx API build
+        run: |
+          sphinx-apidoc -feE -d 5 -t doc/source/_templates/api src/ntcad -o doc/source/api
+      - name: Sphinx build
+        run: |
+          sphinx-build doc/source public/
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          force_orphan: true
