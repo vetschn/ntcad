@@ -11,6 +11,12 @@ Welcome to ntcad's documentation!
    :caption: Contents:
 
 
+Indices and tables
+==================
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
 .. automodule:: ntcad
    :members:
    :undoc-members:
