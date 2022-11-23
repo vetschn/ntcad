@@ -46,8 +46,7 @@ Subpackages
 {% endif %}
 
 {%- if submodules %}
-Submodules
-----------
+
 {% if separatemodules %}
 {{ toctree(submodules) }}
 {% else %}
@@ -61,8 +60,6 @@ Submodules
 {%- endif %}
 
 {%- if not modulefirst and not is_namespace %}
-Module contents
----------------
 
 {{ automodule(pkgname, automodule_options) }}
 {% endif %}

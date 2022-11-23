@@ -11,7 +11,7 @@ jobs:
           pip install sphinx pydata-sphinx-theme numpydoc sphinx-automodapi .
       - name: Sphinx API build
         run: |
-          sphinx-apidoc -feE -d 5 -t doc/source/_templates/api src/ntcad -o doc/source/api
+          sphinx-apidoc -feEM -d 5 -t doc/source/_templates/api src/ntcad -o doc/source/api
       - name: Sphinx build
         run: |
           sphinx-build doc/source public/
