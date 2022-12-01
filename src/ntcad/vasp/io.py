@@ -323,7 +323,7 @@ def write_incar(path: os.PathLike, **incar_tags: dict) -> None:
 
     Multiline strings and lists of values are handled.
 
-    The comment line contains some provencance information.
+    The comment line contains some provenance information.
 
     """
     lines = [f"INCAR written by ntcad v{ntcad.__version__} | {datetime.now()}\n"]
