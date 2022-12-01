@@ -22,3 +22,7 @@ Welcome to ntcad's documentation!
    :members:
    :undoc-members:
    :show-inheritance:
+
+Project index
+-------------
+* :ref:`genindex`

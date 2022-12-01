@@ -19,10 +19,8 @@ sys.path.insert(0, os.path.abspath("../../src/ntcad"))
 
 # -- Project information -----------------------------------------------------
 
-import ntcad
-
 project = "ntcad"
-version = ntcad.__version__
+version = os.open("../../VERSION", "r").read()
 copyright = "2022, Nicolas Vetsch"
 author = "Nicolas Vetsch"
 
