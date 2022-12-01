@@ -4,7 +4,7 @@
 import setuptools
 
 with open("src/ntcad/_version.py", "r") as file:
-    exec(file.read())
+    exec(file.read())  # Sets __version__.
 
 setuptools.setup(
     name="ntcad",
