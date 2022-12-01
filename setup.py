@@ -28,14 +28,14 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     install_requires=[
-        "ase",
+        "ase>=3.22.1",
         "matplotlib>=3.5.1",
-        "numpy>=1.21.2",
-        "pyvista",
-        "scipy>=1.7.3",
+        "numpy>=1.23.2",
+        "pyvista >= 0.37.0",
+        "scipy>=1.9.0",
         "tqdm>=4.64.0",
-        "vtk"
+        "vtk>=9.1.0",
         "xmltodict>=0.12.0",
     ],
-    python_requires=">=3.9",
+    python_requires=">=3.10",
 )
