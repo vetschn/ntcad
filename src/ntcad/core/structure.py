@@ -9,22 +9,12 @@ atoms in a unit cell together with some useful methods.
 
 from typing import Any
 
+import ase
 import matplotlib.pyplot as plt
 import numpy as np
+import pyvista as pv
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from numpy import linalg as npla
-
-try:
-    import pyvista as pv
-except ImportError:
-    pv = None
-
-try:
-    import ase
-    import ase.visualize
-except ImportError:
-    ase = None
-
 
 # All allowed atomic symbols including a `None` / "X" kind.
 ATOMIC_SYMBOLS = (

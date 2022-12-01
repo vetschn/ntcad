@@ -7,17 +7,13 @@ from typing import Any, Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pyvista as pv
 from matplotlib.colors import LogNorm, Normalize
 from numpy import linalg as npla
 
 from ntcad.core.structure import Structure
 from ntcad.utils import center_index
 from ntcad.wannier90.io import read_xsf
-
-try:
-    import pyvista as pv
-except ImportError:
-    pv = None
 
 
 def plot_operator(
