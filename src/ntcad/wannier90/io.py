@@ -7,12 +7,14 @@ Wannier90.
 import os
 from datetime import datetime
 import ntcad
+from ntcad.core.structure import Structure
+from ntcad.utils import ndrange
 import numpy as np
+import warnings
 
 
 def read_hr_dat(path: os.PathLike, return_all: bool = False) -> tuple[np.ndarray, ...]:
-    """
-    Parses the contents of a `seedname_hr.dat` file.
+    """Parses the contents of a `seedname_hr.dat` file.
 
     The first line gives the date and time at which the file was
     created. The second line states the number of Wannier functions
@@ -29,17 +31,22 @@ def read_hr_dat(path: os.PathLike, return_all: bool = False) -> tuple[np.ndarray
 
     Parameters
     ----------
-    path
+    path : os.PathLike
         Path to a `seedname_hr.dat` file.
-    return_all
+    return_all : bool, optional
         Whether to return all the data or just the Hamiltonian in the
-        localized basis. When `True`, the degeneracies and the Wigner-Seitz
-        cell indices are also returned. Defaults to `False`.
+        localized basis. When `True`, the degeneracies and the
+        Wigner-Seitz cell indices are also returned. Defaults to
+        `False`.
 
     Returns
     -------
-    hr
+    hr : np.ndarray
         The Hamiltonian matrix elements in the localized basis.
+    degeneracies : np.ndarray, optional
+        The degeneracies of the Wigner-Seitz grid points.
+    R : np.ndarray, optional
+        The Wigner-Seitz cell indices.
 
     """
     with open(path, "r") as f:
@@ -58,27 +65,26 @@ def read_hr_dat(path: os.PathLike, return_all: bool = False) -> tuple[np.ndarray
 
     # Preliminary pass to find number of Wigner-Seitz cells in all
     # directions.
-    R_mn = np.zeros((num_elements, 3), dtype=np.int8)
+    R = np.zeros((num_elements, 3), dtype=np.int8)
     for i in range(num_elements):
         entries = lines[3 + deg_rows + i].split()
-        R_mn[i, :] = list(map(int, entries[:3]))
+        R[i, :] = list(map(int, entries[:3]))
 
-    R_mn_s = np.subtract(R_mn, R_mn.min(axis=0))
-    N_1, N_2, N_3 = R_mn_s.max(axis=0) + 1
+    Rs = np.subtract(R, R.min(axis=0))
+    N1, N2, N3 = Rs.max(axis=0) + 1
 
     # Obtain Hamiltonian elements.
-    H_R = np.zeros((N_1, N_2, N_3, num_wann, num_wann), dtype=np.complex64)
-    # R_R = np.zeros((N_1, N_2, N_3, 3), dtype=np.int8)
+    hR = np.zeros((N1, N2, N3, num_wann, num_wann), dtype=np.complex64)
     for i in range(num_elements):
         entries = lines[3 + deg_rows + i].split()
-        R_1, R_2, R_3 = tuple(map(int, entries[:3]))
-        m, n = tuple(map(int, entries[3:5]))
-        H_R_mn_real, H_R_mn_imag = tuple(map(float, entries[5:]))
-        H_R[R_1, R_2, R_3, m - 1, n - 1] = H_R_mn_real + 1j * H_R_mn_imag
+        R1, R2, R3 = map(int, entries[:3])
+        m, n = map(int, entries[3:5])
+        hR_mn_real, hR_mn_imag = map(float, entries[5:])
+        hR[R1, R2, R3, m - 1, n - 1] = hR_mn_real + 1j * hR_mn_imag
 
     if return_all:
-        return H_R, deg, np.unique(R_mn, axis=0)
-    return H_R
+        return hR, deg, np.unique(R, axis=0)
+    return hR
 
 
 def read_r_dat(path: os.PathLike, full: bool = False) -> tuple[np.ndarray, ...]:
@@ -86,31 +92,30 @@ def read_r_dat(path: os.PathLike, full: bool = False) -> tuple[np.ndarray, ...]:
 
     The first line gives the date and time at which the file was
     created. The second line states the number of Wannier functions
-    num_wann. The third line states the number of ``R`` vectors ``nrpts``.
+    num_wann. The third line states the number of ``R`` vectors
+    ``nrpts``.
 
-    Similar to the case of the Hamiltonian matrix above, the remaining
+    Similar to the case of the Hamiltonian matrix, the remaining
     ``num_wann**2 * nrpts`` lines each contain, respectively, the
-    components of the vector ``R`` in terms of the lattice vectors ``A_i``,
-    the indices m and n, and the real and imaginary parts of the
+    components of the vector ``R`` in terms of the lattice vectors
+    ``Ai``, the indices m and n, and the real and imaginary parts of the
     position matrix element in the WF basis.
 
     Parameters
     ----------
-    path
+    path : os.PathLike
         Path to ``seedname_r.dat``.
-    full
+    full : bool, optional
         Switch determining nature of return value. When it is ``False``
-        (the default) just ``r_R`` is returned, when ``True``, the allowed
-        Wigner-Seitz cell indices are also returned.
+        (the default) just ``r_R`` is returned, when ``True``, the
+        allowed Wigner-Seitz cell indices are also returned.
 
     Returns
     -------
-        The position matrix elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann``
-        x ``num_wann`` x 3), where ``N_i`` correspond to the number of
-        Wigner-Seitz cells along the lattice vectors ``A_i``. The indices
-        are chosen such that (0, 0, 0) actually gets you the center
-        Wigner-Seitz cell. Additionally, if ``full`` is ``True``, the
-        allowed Wigner-Seitz cell indices are also returned.
+    rR : np.ndarray
+        The position matrix elements in the WF basis.
+    R : np.ndarray, optional
+        The allowed Wigner-Seitz cell indices.
 
     """
     with open(path, "r") as f:
@@ -121,35 +126,35 @@ def read_r_dat(path: os.PathLike, full: bool = False) -> tuple[np.ndarray, ...]:
     num_elements = num_wann**2 * nrpts
 
     # Preliminary pass to find number of Wigner-Seitz cells.
-    R_mn = np.zeros((num_elements, 3), dtype=np.int8)
+    R = np.zeros((num_elements, 3), dtype=np.int8)
     for i in range(num_elements):
         entries = lines[3 + i].split()
-        R_mn[i, :] = list(map(int, entries[:3]))
+        R[i, :] = list(map(int, entries[:3]))
 
-    R_mn_s = np.subtract(R_mn, R_mn.min(axis=0))
-    N_1, N_2, N_3 = R_mn_s.max(axis=0) + 1
+    Rs = np.subtract(R, R.min(axis=0))
+    N1, N2, N3 = Rs.max(axis=0) + 1
 
     # Obtain position matrix elements.
-    r_R = np.zeros((N_1, N_2, N_3, num_wann, num_wann, 3), dtype=np.complex64)
+    rR = np.zeros((N1, N2, N3, num_wann, num_wann, 3), dtype=np.complex64)
     for i in range(num_elements):
         entries = lines[3 + i].split()
-        R_1, R_2, R_3 = list(map(int, entries[:3]))
-        m, n = tuple(map(int, entries[3:5]))
-        x_R_mn_real, x_R_mn_imag = tuple(map(float, entries[5:7]))
-        y_R_mn_real, y_R_mn_imag = tuple(map(float, entries[7:9]))
-        z_R_mn_real, z_R_mn_imag = tuple(map(float, entries[9:]))
-        r_R_mn = np.array(
+        R1, R2, R3 = map(int, entries[:3])
+        m, n = map(int, entries[3:5])
+        xR_mn_real, xR_mn_imag = map(float, entries[5:7])
+        yR_mn_real, yR_mn_imag = map(float, entries[7:9])
+        zR_mn_real, zR_mn_imag = map(float, entries[9:])
+        rR_mn = np.array(
             [
-                x_R_mn_real + 1j * x_R_mn_imag,
-                y_R_mn_real + 1j * y_R_mn_imag,
-                z_R_mn_real + 1j * z_R_mn_imag,
+                xR_mn_real + 1j * xR_mn_imag,
+                yR_mn_real + 1j * yR_mn_imag,
+                zR_mn_real + 1j * zR_mn_imag,
             ]
         )
-        r_R[R_1, R_2, R_3, m - 1, n - 1, :] = r_R_mn
+        rR[R1, R2, R3, m - 1, n - 1, :] = rR_mn
 
     if full:
-        return r_R, np.unique(R_mn, axis=0)
-    return r_R
+        return rR, np.unique(R, axis=0)
+    return rR
 
 
 def read_band_dat(path: os.PathLike) -> np.ndarray:
@@ -159,13 +164,13 @@ def read_band_dat(path: os.PathLike) -> np.ndarray:
 
     Parameters
     ----------
-    path
+    path : os.PathLike
         Path to ``seedname_band.dat``
 
     Returns
     -------
-        The band structure along the ``kpoint_path`` specified in the
-        ``seedname.win`` file (``num_wann`` x ``bands_num_points``).
+    bands : np.ndarray
+        The interpolated band structure.
 
     """
     with open(path, "r") as f:
@@ -193,13 +198,13 @@ def read_band_kpt(path: os.PathLike) -> np.ndarray:
 
     Parameters
     ----------
-    path
+    path : os.PathLike
         Path to ``seedname_band.kpt``
 
     Returns
     -------
-        The k-points used for the interpolated band structure
-        (``num_kpoints`` x 3)
+    kpoints : np.ndarray
+        The k-points used for the interpolated band structure.
 
     """
     with open(path, "r") as f:
@@ -207,11 +212,11 @@ def read_band_kpt(path: os.PathLike) -> np.ndarray:
 
     num_kpoints = lines[0].strip()
 
-    kpt = np.zeros((num_kpoints, 3))
+    kpoints = np.zeros((num_kpoints, 3))
     for i, line in enumerate(lines[1:]):
-        kpt[i, :] = list(map(float, line.split()))
+        kpoints[i, :] = list(map(float, line.split()))
 
-    return kpt
+    return kpoints
 
 
 def read_eig(path: os.PathLike) -> np.ndarray:
@@ -227,13 +232,13 @@ def read_eig(path: os.PathLike) -> np.ndarray:
 
     Parameters
     ----------
-    path
+    path : os.PathLike
         Path to ``seedname.eig``.
 
     Returns
     -------
-        The Kohn-Sham eigenvalues by band number and k-point number
-        (``num_bands`` x ``num_kpoints``).
+    eigs : np.ndarray
+        The Kohn-Sham eigenvalues by band and k-point.
 
     """
     with open(path, "r") as f:
@@ -241,12 +246,12 @@ def read_eig(path: os.PathLike) -> np.ndarray:
 
     num_bands, num_kpoints = lines[-1].split()
 
-    eig = np.zeros((num_bands, num_kpoints))
+    eigs = np.zeros((num_bands, num_kpoints))
     for line in lines:
         band, kpoint, value = line.split()
-        eig[int(band) - 1, int(kpoint) - 1] = float(value)
+        eigs[int(band) - 1, int(kpoint) - 1] = float(value)
 
-    return eig
+    return eigs
 
 
 def _parse_wout_header(lines: list[str]) -> dict:
@@ -442,13 +447,14 @@ def read_wout(path: os.PathLike) -> dict:
 
     Parameters
     ----------
-    path
+    path : os.PathLike
         Path to ``seedname.wout``.
 
     Returns
     -------
-        A dictionary representing the contents of the ``seedname.wout``
-        file from a Wannier90 run.
+    wout : dict
+        Dictionary containing the parsed contents of the ``seedname.wout``
+        file.
 
     """
     with open(path, "r") as f:
@@ -483,6 +489,112 @@ def read_wout(path: os.PathLike) -> dict:
     return wout
 
 
+def _parse_xsf_crystal(lines: list[str]) -> Structure:
+    """Parses the CRYSTAL section of a ``seedname.xsf`` file."""
+    for ind, line in enumerate(lines):
+        if line.startswith("PRIMVEC"):
+            cell = np.zeros((3, 3))
+            for i in range(3):
+                cell[i] = list(map(float, lines[ind + 1 + i].split()))
+
+        elif line.startswith("PRIMCOORD"):
+            num_sites = int(lines[ind + 1].split()[0])
+            kinds = []
+            positions = np.zeros((num_sites, 3))
+            for i in range(num_sites):
+                line = lines[ind + 2 + i].split()
+                kinds.append(line[0])
+                positions[i] = list(map(float, line[1:]))
+            kinds = np.array(kinds)
+    return Structure(kinds, positions, cell)
+
+
+def _parse_xsf_datagrid(lines: list[str]) -> np.ndarray:
+    """Parses the DATAGRID_xD section of a ``seedname.xsf`` file."""
+    lines = [l.strip() for l in lines if not l.startswith("END_")]
+
+    dim = int(lines[0].split("_")[2][0])
+    shape = tuple(map(int, lines[1].strip().split()))
+    origin = np.array(list(map(float, lines[2].strip().split())))
+    cell = np.zeros((dim, 3))
+    for i in range(dim):
+        cell[i] = list(map(float, lines[3 + i].strip().split()))
+
+    data = np.array(list(map(float, " ".join(lines[3 + dim :]).split())))
+    datagrid = {
+        "shape": shape,
+        "origin": origin,
+        "cell": cell,
+        "data": data,
+    }
+    return datagrid
+
+
+def read_xsf(path: os.PathLike, data_only: bool = False) -> Structure | np.ndarray:
+    """Parses the contents of a ``seedname.xsf`` file.
+
+    Note
+    ----
+    Molecules and animations are not supported.
+
+    Parameters
+    ----------
+    path : os.PathLike
+        Path to ``seedname.xsf``.
+    data_only : bool, optional
+        If ``True``, only the data is returned. Otherwise, the data is
+        returned as a structure attribute. Default is ``False``.
+
+    Returns
+    -------
+    Structure
+        Structure object containing the parsed contents of the
+        ``seedname.xsf`` file.
+
+    Notes
+    -----
+    The ``seedname.xsf`` file is a text file containing the coordinates
+    of the atoms in the unit cell, as well as the unit cell vectors.
+
+    See the `official documentation
+    <http://www.xcrysden.org/doc/XSF.html>`_ for more information.
+
+    """
+    with open(path, "r") as f:
+        lines = f.readlines()
+
+    # Remove comment lines.
+    lines = [l for l in lines if not l.strip().startswith("#") and l.strip()]
+
+    supported = {"CRYSTAL", "BEGIN_"}  # "END" does not need to be checked.
+    unsupported = {"ATOMS", "MOLECULE", "POLYMER", "SLAB", "ANIMSTEPS"}
+    keywords = supported | unsupported
+
+    section_inds = []
+    for ind, line in enumerate(lines):
+        if any(name in line for name in keywords):
+            section_inds += [ind]
+        if any(name in line for name in unsupported):
+            raise NotImplementedError(f"{line.strip()} not supported.")
+
+    sections = [lines[i:j] for i, j in zip(section_inds, section_inds[1:] + [None])]
+
+    attr = {}
+    for ind, section in enumerate(sections):
+        if "CRYSTAL" in section[0]:
+            structure = _parse_xsf_crystal(section)
+        elif "BEGIN_BLOCK_DATAGRID" in section[0]:
+            key = section[1].strip()
+            datagrid = _parse_xsf_datagrid(sections[ind + 1])
+            attr[key] = datagrid
+
+    if data_only:
+        return attr
+
+    structure.attr = attr
+    return structure
+
+
 def write_hr_dat(
     path: os.PathLike, O_R: np.ndarray, deg: np.ndarray = None, Ra: np.ndarray = None
 ) -> None:
@@ -493,17 +605,17 @@ def write_hr_dat(
 
     Parameters
     ----------
-    path
+    path : os.PathLike
         Path where to write the ``seedname_hr.dat``
-    O_R
+    O_R : np.ndarray
         The operator elements (``N_1`` x ``N_2`` x ``N_3`` x
         ``num_wann`` x ``num_wann``), where ``N_i`` correspond to the
         number of Wigner-Seitz cells along the lattice vectors ``A_i``.
         The indices are such that (0, 0, 0) actually gets you the center
         Wigner-Seitz cell.
-    deg
+    deg : np.ndarray, optional
         Degeneracy info to write to file. If None, writes all zeros.
-    Ra
+    Ra : np.ndarray, optional
         The allowed Wigner-Seitz cell indices. If None, the function
         only writes the operator for Wigner-Seitz cell indices where the
         operator is non-zero.
@@ -518,11 +630,8 @@ def write_hr_dat(
 
     # Find the allowed Wigner-Seitz cell indices.
     if Ra is None:
-        # Midpoint of the Wigner-Seitz cell indices.
-        midpoint = np.floor_divide(np.subtract(O_R.shape[:3], 1), 2)
         Ra = np.array([]).reshape(0, 3)
-        for Rs in np.ndindex(O_R.shape[:3]):
-            R = Rs - midpoint
+        for R in ndrange(O_R.shape[:3], centered=True):
             if np.any(O_R[tuple(R)]):
                 Ra = np.append(Ra, R.reshape(1, 3), axis=0)
 
@@ -546,12 +655,12 @@ def write_hr_dat(
 
     # Construct the matrix entry lines.
     for R in Ra:
-        R_1, R_2, R_3 = tuple(map(int, R))
+        R1, R2, R3 = tuple(map(int, R))
         for n, m in np.ndindex(O_R.shape[-2:]):
-            O_R_mn = O_R[R_1, R_2, R_3, m, n]
+            O_R_mn = O_R[R1, R2, R3, m, n]
             O_R_mn_real, O_R_mn_imag = O_R_mn.real, O_R_mn.imag
             # NOTE: m and n are one-indexed in hr_dat files.
-            line = "{:d} {:5d} {:5d} {:5d} {:5d} ".format(R_1, R_2, R_3, m + 1, n + 1)
+            line = "{:d} {:5d} {:5d} {:5d} {:5d} ".format(R1, R2, R3, m + 1, n + 1)
             line += "{:22.10e} {:22.10e}\n".format(O_R_mn_real, O_R_mn_imag)
             lines.append(line)
 
