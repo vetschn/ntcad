@@ -3,12 +3,21 @@ Visualization routines for Wannier90 outputs.
 
 """
 
-from typing import Callable
+from typing import Any, Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LogNorm, Normalize
-from ntcad.wannier90.operations import _midpoint
+from numpy import linalg as npla
+
+from ntcad.core.structure import Structure
+from ntcad.utils import center_index
+from ntcad.wannier90.io import read_xsf
+
+try:
+    import pyvista as pv
+except ImportError:
+    pv = None
 
 
 def plot_operator(
@@ -24,11 +33,11 @@ def plot_operator(
     Parameters
     ----------
     O_R
-        The operator to plot (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
-        ``num_wann``), where ``N_i`` correspond to the number of
-        Wigner-Seitz cells along the lattice vectors ``A_i``. The indices
-        are chosen such that (0, 0, 0) actually gets you the center
-        Wigner-Seitz cell.
+        The operator to plot (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann``
+        x ``num_wann``), where ``N_i`` correspond to the number of
+        Wigner-Seitz cells along the lattice vectors ``A_i``. The
+        indices are chosen such that (0, 0, 0) actually gets you the
+        center Wigner-Seitz cell.
     axis
         Which Wigner-Seitz index axis to fix, by default 2, i. e. the z
         axis.
@@ -46,11 +55,11 @@ def plot_operator(
         raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
 
     # Midpoint of the Wigner-Seitz cell indices.
-    midpoint = _midpoint(O_R.shape[:3])
+    center = center_index(O_R.shape[:3])
     # Shift the operator to the center.
     O_ = np.zeros_like(O_R)
     for R in np.ndindex(O_R.shape[:3]):
-        O_[tuple(R)] = O_R[tuple(R - midpoint)]
+        O_[tuple(R)] = O_R[tuple(R - center)]
 
     # Take operator blocks along one axis and apply modifier.
     O_ = np.take(mod(O_), indices=indices, axis=axis)
@@ -69,7 +78,87 @@ def plot_operator(
 
     ax.set_xticks(np.arange(O_.shape[0]))
     ax.set_yticks(np.arange(O_.shape[0]))
-    midpoint = np.floor_divide(np.subtract(O_.shape[:2], 1), 2)
-    ax.set_xticklabels(np.arange(-midpoint[0], midpoint[0] + 1))
-    ax.set_yticklabels(np.arange(-midpoint[1], midpoint[1] + 1))
+    center = center_index(O_.shape)
+    ax.set_xticklabels(np.arange(-center[0], center[0] + 1))
+    ax.set_yticklabels(np.arange(-center[1], center[1] + 1))
     ax.grid(which="both")
+
+
+def plot_xsf(xsf: Any, **kwargs) -> pv.Plotter:
+    """Plots an XCrysDen file read from Wannier90 using PyVista.
+
+    Parameters
+    ----------
+    xsf : Any
+        The data to plot. Can be a filename, a dictionary or an
+        ``ntcad.Structure``.
+    plotter : pv.Plotter
+        The plotter to use. If ``None``, a new plotter is created.
+    datagrid_cell : bool
+        Whether to plot the datagrid cell, by default ``False``.
+
+    Returns
+    -------
+    pv.Plotter
+        The plotter object. A new plotter is created if ``plotter`` is
+        ``None``.
+
+    """
+    if pv is None:
+        raise ImportError("PyVista is not installed.")
+
+    if isinstance(xsf, str):
+        structure = read_xsf(xsf)
+    elif isinstance(xsf, Structure):
+        structure = xsf
+
+    # Read the volume data.
+    field = structure.attr.get("3D_field", None)
+    if field is None:
+        raise ValueError("No volume data found.")
+    shape = field["shape"]
+    cell = field["cell"]
+    origin = field["origin"]
+    data = field["data"]
+
+    # Create the UniformGrid.
+    grid = pv.UniformGrid()
+    grid.dimensions = shape
+    grid.spacing = [1.0 / s for s in shape]
+    grid.point_data["data"] = data
+
+    # Construct a transformation matrix to map the rectilinear grid onto
+    # the actual cell.
+    transform = np.eye(4)
+    transform[:3, :3] = cell.T
+    transform[:3, 3] = origin
+
+    grid = grid.transform(transform, inplace=False)
+
+    # Plotting.
+    pl = kwargs.pop("plotter", None)
+    if pl is None:
+        pl = pv.Plotter()
+
+    # Plot the structure.
+    structure.view(viewer="pyvista", plotter=pl)
+
+    # Plot the volume data.
+    pl.add_mesh(
+        grid.contour(kwargs.pop("isosurfaces", 250)),
+        cmap=kwargs.pop("cmap", "coolwarm"),
+        clim=kwargs.pop("clim", [-1.0, 1.0]),
+        smooth_shading=kwargs.pop("smooth_shading", True),
+        opacity=kwargs.pop("opacity", [1.0, 0.0, 1.0]),
+    )
+
+    if kwargs.pop("datagrid_cell", False):
+        pl.add_mesh(
+            grid.extract_feature_edges(),
+            style="wireframe",
+            color="black",
+            line_width=2,
+            opacity=0.5,
+        )
+
+    return pl
