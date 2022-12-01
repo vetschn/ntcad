@@ -8,14 +8,23 @@ atoms in a unit cell together with some useful methods.
 """
 
 from typing import Any
-import os
 
-import ase
-import ase.visualize
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy import linalg as npla
 from mpl_toolkits.mplot3d.axes3d import Axes3D
+from numpy import linalg as npla
+
+try:
+    import pyvista as pv
+except ImportError:
+    pv = None
+
+try:
+    import ase
+    import ase.visualize
+except ImportError:
+    ase = None
+
 
 # All allowed atomic symbols including a `None` / "X" kind.
 ATOMIC_SYMBOLS = (
@@ -257,27 +266,80 @@ class Structure:
         """
         return 2 * np.pi * np.transpose(npla.inv(self.cell))
 
-    def view(self, **kwargs: dict) -> Any:
-        """
-        Visualizes the structure using the ASE viewer.
+    def view(self, viewer="ase", **kwargs: dict) -> Any:
+        """Visualizes the structure using a number of different viewers.
+
+        Currently, the following viewers are supported:
+
+        - ASE: https://wiki.fysik.dtu.dk/ase/
+        - PyVista: https://docs.pyvista.org/
+        - A simple homebrew viewer built on matplotlib (not actually
+          3D).
 
         Parameters
         ----------
+        viewer
+            The viewer to use. By default, the ASE viewer is used.
         **kwargs
-            Additional keyword arguments to pass to the ASE viewer.
+            Keyword arguments to pass to the specified viewer.
 
         Returns
         -------
-        handle
-            The return value of the ASE viewer.
+        handle : Any
+            The viewer handle.
 
         """
-        atoms = ase.Atoms(symbols=self.kinds, positions=self.positions, cell=self.cell)
+        if viewer == "ase":
+            return self._view_ase(**kwargs)
+        elif viewer == "pyvista":
+            return self._view_pyvista(**kwargs)
+        elif viewer == "matplotlib":
+            return self._view_matplotlib(**kwargs)
+
+    def _view_ase(self, **kwargs) -> Any:
+        """Visualizes the structure using the ASE viewer."""
+        if ase is None:
+            raise ImportError("ASE is not installed.")
+        atoms = ase.Atoms(
+            symbols=self.kinds,
+            positions=self.positions,
+            cell=self.cell,
+        )
         return ase.visualize.view(atoms, **kwargs)
 
-    def _mpl_view(self, **kwargs) -> Axes3D:
-        """
-        Visualizes the structure using matplotlib.
+    def _view_pyvista(self, **kwargs) -> Any:
+        """Visualizes the structure using the PyVista viewer."""
+        if pv is None:
+            raise ImportError("PyVista is not installed.")
+
+        plotter = kwargs.pop("plotter", None)
+        if plotter is None:
+            plotter = pv.Plotter()
+
+        for kind, position in self.sites:
+            color = _jmol_colors[kind]
+            size = 15.0 + list(_jmol_colors).index(kind) * 0.25
+            plotter.add_points(position, color=color, point_size=size)
+
+        # Generate a mesh of the cell.
+        cell = pv.Cube()
+        transform = np.eye(4)
+        transform[:3, :3] = self.cell.T
+
+        cell.transform(transform)
+
+        plotter.add_mesh(
+            cell.extract_feature_edges(),
+            style="wireframe",
+            color="black",
+            line_width=2,
+            opacity=0.5,
+        )
+
+        return plotter
+
+    def _view_matplotlib(self, **kwargs) -> Axes3D:
+        """Visualizes the structure using matplotlib.
 
         Parameters
         ----------
@@ -296,15 +358,15 @@ class Structure:
         visualizations, though.
 
         """
-        ax = kwargs.get("ax")
+        ax = kwargs.pop("ax", None)
         if ax is None:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection="3d")
 
-        for site in self.sites:
-            color = _jmol_colors[site["kind"]]
-            size = 50 + list(_jmol_colors).index(site["kind"])
-            ax.scatter(*site["position"], c=color, s=size, edgecolors="black")
+        for kind, position in self.sites:
+            color = _jmol_colors[kind]
+            size = 50 + list(_jmol_colors).index(kind)
+            ax.scatter(*position, c=color, s=size, edgecolors="black")
 
         for i, j, k in np.ndindex((3, 3, 3)):
             # Base lattice vectors.
