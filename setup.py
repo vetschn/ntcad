@@ -34,6 +34,7 @@ setuptools.setup(
         "pyvista",
         "scipy>=1.7.3",
         "tqdm>=4.64.0",
+        "vtk"
         "xmltodict>=0.12.0",
     ],
     python_requires=">=3.9",
