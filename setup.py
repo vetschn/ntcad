@@ -3,9 +3,12 @@
 
 import setuptools
 
+with open("src/ntcad/_version.py", "r") as file:
+    exec(file.read())
+
 setuptools.setup(
     name="ntcad",
-    version=open("VERSION").read(),
+    version=__version__,
     author="Nicolas Vetsch",
     author_email="vetschn@iis.ee.ethz.ch",
     description="Useful Nano-TCAD tools.",
