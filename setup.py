@@ -36,6 +36,8 @@ setuptools.setup(
         "tqdm>=4.64.0",
         "vtk>=9.1.0",
         "xmltodict>=0.12.0",
+        "pre-commit",
+        "black>=22.10.0",
     ],
     python_requires=">=3.10",
 )
