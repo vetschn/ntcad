@@ -235,7 +235,7 @@ class Structure:
         if not cartesian:
             self.positions = self.positions @ self.cell
 
-        self.sites = np.array(list(zip(kinds, positions)), dtype=_sites_dtype)
+        self.sites = np.array(list(zip(self.kinds, self.positions)), dtype=_sites_dtype)
         self.attr = attr
 
     def __repr__(self) -> str:
@@ -312,7 +312,12 @@ class Structure:
             plotter.add_points(position, color=color, point_size=size)
 
         # Generate a mesh of the cell.
-        cell = pv.Cube()
+        cell = pv.Cube(
+            center=(0.5, 0.5, 0.5),
+            x_length=1.0,
+            y_length=1.0,
+            z_length=1.0,
+        )
         transform = np.eye(4)
         transform[:3, :3] = self.cell.T
 

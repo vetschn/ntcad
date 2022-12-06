@@ -10,7 +10,7 @@ import ntcad
 from ntcad.core.structure import Structure
 from ntcad.utils import ndrange
 import numpy as np
-import warnings
+from typing import Any
 
 
 def read_hr_dat(path: os.PathLike, return_all: bool = False) -> tuple[np.ndarray, ...]:
@@ -530,7 +530,7 @@ def _parse_xsf_datagrid(lines: list[str]) -> np.ndarray:
     return datagrid
 
 
-def read_xsf(path: os.PathLike, data_only: bool = False) -> Structure | np.ndarray:
+def read_xsf(path: os.PathLike, data_only: bool = False) -> Any:
     """Parses the contents of a ``seedname.xsf`` file.
 
     Note
