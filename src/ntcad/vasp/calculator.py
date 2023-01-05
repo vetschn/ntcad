@@ -1,7 +1,4 @@
 """
-VASP Calculator
-===============
-
 This module implements a VASP calculator class that can be used as an
 interface to write VASP inputs and run VASP jobs.
 
@@ -11,7 +8,10 @@ import os
 import subprocess
 
 import numpy as np
-from ntcad import Calculator, Structure, vasp
+
+from ntcad import vasp
+from ntcad.calculator import Calculator
+from ntcad.structure import Structure
 
 
 class VASP(Calculator):

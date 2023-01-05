@@ -1,7 +1,4 @@
 """
-Visualization
-=============
-
 This module contains functions for visualizing the results of the
 calculations.
 

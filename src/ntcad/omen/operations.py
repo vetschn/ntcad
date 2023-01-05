@@ -1,7 +1,4 @@
 """
-Routines
-========
-
 This module contains common processing routines and operations for OMEN
 calculations.
 
@@ -230,7 +227,7 @@ def photon_scattering_matrix_large(
     l_total_pos, __, *__ = _matrix_info(l_total_matrix)
 
     num_orbs = ph_mat_par["orbitals"]
-    s_sum_num_orbs = _sum_num_orbs(num_orbs, s_layer_matrix)
+    # s_sum_num_orbs = _sum_num_orbs(num_orbs, s_layer_matrix)
     l_sum_num_orbs = _sum_num_orbs(num_orbs, l_layer_matrix)
 
     P = np.zeros((num_atoms, 1 + num_nn, 3, max(num_orbs), max(num_orbs)))

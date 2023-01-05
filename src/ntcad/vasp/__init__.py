@@ -1,5 +1,4 @@
-
-
-from ntcad.vasp import io
+from ntcad.vasp import io, visualization
 from ntcad.vasp.calculator import VASP
-from ntcad.vasp.visualization import plot_bands
+
+__all__ = ["io", "visualization", "VASP"]

@@ -6,11 +6,13 @@ Wannier90.
 
 import os
 from datetime import datetime
-import ntcad
-from ntcad.core.structure import Structure
-from ntcad.utils import ndrange
-import numpy as np
 from typing import Any
+
+import numpy as np
+
+from ntcad.__about__ import __version__
+from ntcad.structure import Structure
+from ntcad.utils import ndrange
 
 
 def read_hr_dat(path: os.PathLike, return_all: bool = False) -> tuple[np.ndarray, ...]:
@@ -533,9 +535,9 @@ def _parse_xsf_datagrid(lines: list[str]) -> np.ndarray:
 def read_xsf(path: os.PathLike, data_only: bool = False) -> Any:
     """Parses the contents of a ``seedname.xsf`` file.
 
-    Note
-    ----
-    Molecules and animations are not supported.
+    .. note::
+
+        Molecules and animations are not supported.
 
     Parameters
     ----------
@@ -626,7 +628,7 @@ def write_hr_dat(
     if O_R.shape[-1] != O_R.shape[-2]:
         raise ValueError(f"Operator at R must be square: {O_R.ndim=}")
 
-    lines = [f"hr.dat written by ntcad v{ntcad.__version__} | {datetime.now()}\n"]
+    lines = [f"hr.dat written by ntcad v{__version__} | {datetime.now()}\n"]
 
     # Find the allowed Wigner-Seitz cell indices.
     if Ra is None:

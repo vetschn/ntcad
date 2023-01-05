@@ -1,7 +1,4 @@
 """
-Structure
-=========
-
 This module implements the structure class, defining a configuration of
 atoms in a unit cell together with some useful methods.
 

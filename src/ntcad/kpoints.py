@@ -1,7 +1,4 @@
 """
-k-points
-========
-
 Functions for generating Monkhorst-Pack k-point grids and k-point paths.
 
 """
@@ -28,7 +25,7 @@ def monkhorst_pack(size: np.ndarray) -> np.ndarray:
     References
     ----------
     .. [1] Monkhorst, H. J., & Pack, J. D. (1976). *Special points for
-           Brillouin-zone integrations*, Phys. Rev. B, 13(12), 5188-5192
+       Brillouin-zone integrations*, Phys. Rev. B, 13(12), 5188-5192
 
     """
     if len(size) != 3:

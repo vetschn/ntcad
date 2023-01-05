@@ -1,9 +1,6 @@
 """
-Calculator
-==========
-
-This module provides and abstract class for a calculator. Calculators are
-used to write simulation input files and to run the simulation.
+This module provides and abstract class for a calculator. Calculators
+are used to write simulation input files and to run the simulation.
 
 """
 
@@ -63,7 +60,6 @@ class Calculator(ABC):
     # @abstractmethod
     # def calculate(self, command: str) -> None:
     #     """Summary
-
 
     #     Parameters
     #     ----------

@@ -1,11 +1,13 @@
-""" TODO: Docstrings.
+"""
+Docstring.
 
 """
 
 import os
 
 import numpy as np
-import ntcad
+
+from ntcad.__about__ import __version__
 
 
 def write_winput(path: os.PathLike, **winput_tags: dict) -> None:
@@ -16,7 +18,8 @@ def write_winput(path: os.PathLike, **winput_tags: dict) -> None:
     path
         _description_
     """
-    lines = [f"# winput written by ntcad v{ntcad.__version__} \n"]
+
+    lines = [f"# winput written by ntcad v{__version__} \n"]
 
     for tag, value in winput_tags.items():
         line = tag

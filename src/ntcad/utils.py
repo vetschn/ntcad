@@ -1,14 +1,11 @@
 """
-**utils**
-=========
 Utility functions for all kinds of things.
 
 """
 
-import warnings
 import subprocess
+import warnings
 from itertools import product, starmap
-import numpy as np
 
 
 def get_idle_hosts(prefix: str) -> list[str]:

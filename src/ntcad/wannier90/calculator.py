@@ -7,7 +7,8 @@ an interface to run Wannier90 jobs.
 
 import os
 
-from ntcad import Calculator, Structure
+from ntcad.calculator import Calculator
+from ntcad.structure import Structure
 
 
 class Wannier90(Calculator):

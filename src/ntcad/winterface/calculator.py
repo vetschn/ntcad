@@ -7,7 +7,7 @@ an interface to run Winterface jobs.
 import os
 import subprocess
 
-from ntcad import Calculator
+from ntcad.calculator import Calculator
 from ntcad.winterface.io import write_winput
 
 
@@ -61,9 +61,7 @@ class Winterface(Calculator):
         write_winput(path=self.directory, **self.winput_tags)
 
     def read_output(self) -> None:
-        """_summary_
-
-        """
+        """_summary_"""
         ...
 
     pass

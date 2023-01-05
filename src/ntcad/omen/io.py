@@ -1,7 +1,4 @@
 """
-File I/O
-========
-
 This module implements file I/O functions for interfacing with OMEN.
 
 """
@@ -10,8 +7,10 @@ import glob
 import os
 
 import numpy as np
-from ntcad import Structure, omen
 from scipy.sparse import csr_matrix
+
+from ntcad import omen
+from ntcad.structure import Structure
 
 
 def read_bin(path: os.PathLike, no_header: bool = False) -> csr_matrix:

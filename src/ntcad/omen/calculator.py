@@ -1,7 +1,4 @@
 """
-OMEN Calculator
-===============
-
 This module implements an OMEN calculator class that can be used as an
 interface to write OMEN inputs, run OMEN jobs and read the resulting
 output files.
@@ -14,7 +11,7 @@ output files.
 
 import os
 
-from ntcad import Calculator
+from ntcad.calculator import Calculator
 
 
 class OMEN(Calculator):
@@ -25,6 +22,7 @@ class OMEN(Calculator):
         Nothing here is implemented yet.
 
     """
+
     def __init__(self, directory: os.PathLike, **kwargs: dict) -> None:
         pass
 

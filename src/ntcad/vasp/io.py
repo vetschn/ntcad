@@ -1,7 +1,4 @@
 """
-VASP I/O
-========
-
 This module implements file I/O functions for interfacing with VASP.
 
 """
@@ -13,8 +10,9 @@ from datetime import datetime
 
 import numpy as np
 import xmltodict
-from ntcad import Structure
-import ntcad
+
+from ntcad.__about__ import __version__
+from ntcad.structure import Structure
 
 # The minimal pseudopotentials necessary.
 _minimal_potentials = {
@@ -145,7 +143,7 @@ def read_incar(path: os.PathLike) -> dict:
     for tag, value in zip(tags, values):
         try:
             incar_tags[tag] = ast.literal_eval(value)
-        except:
+        except ValueError:
             incar_tags[tag] = value
 
     return incar_tags
@@ -326,7 +324,7 @@ def write_incar(path: os.PathLike, **incar_tags: dict) -> None:
     The comment line contains some provenance information.
 
     """
-    lines = [f"INCAR written by ntcad v{ntcad.__version__} | {datetime.now()}\n"]
+    lines = [f"INCAR written by ntcad v{__version__} | {datetime.now()}\n"]
     for tag, value in incar_tags.items():
         line = f"{tag.upper()} = "
         if isinstance(value, (list, tuple)):
@@ -365,7 +363,10 @@ def write_poscar(path: os.PathLike, structure: Structure) -> None:
     currently no option to write in direct coordinates.
 
     """
-    lines = [f"POSCAR written by ntcad v{ntcad.__version__} | {datetime.now()}\n", f"{1.0:.5f}\n"]
+    lines = [
+        f"POSCAR written by ntcad v{__version__} | {datetime.now()}\n",
+        f"{1.0:.5f}\n",
+    ]
     for vec in structure.cell:
         lines.append("{:.16f} {:22.16f} {:22.16f}\n".format(*vec))
 
@@ -483,7 +484,7 @@ def write_kpoints(
     if not isinstance(kpoints, np.ndarray):
         kpoints = np.array(kpoints)
 
-    lines = [f"KPOINTS written by ntcad v{ntcad.__version__} | {datetime.now()}\n"]
+    lines = [f"KPOINTS written by ntcad v{__version__} | {datetime.now()}\n"]
     # TODO: Maybe properly support line-mode at some point.
     if kpoints.ndim == 1:
         # Monkhorst-Pack grid.

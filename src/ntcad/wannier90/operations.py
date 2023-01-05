@@ -7,11 +7,11 @@ import multiprocessing
 from typing import Any
 
 import numpy as np
-from ntcad.core.kpoints import monkhorst_pack
-from scipy import constants
-from ntcad.utils import ndrange
 import scipy.linalg as spla
-from tqdm import tqdm
+from scipy import constants
+
+from ntcad.kpoints import monkhorst_pack
+from ntcad.utils import ndrange
 
 c, *__ = constants.physical_constants["speed of light in vacuum"]
 e, *__ = constants.physical_constants["elementary charge"]

@@ -1,7 +1,4 @@
 """
-File I/O
-========
-
 This module contains functions to read and write files.
 
 """
@@ -9,7 +6,7 @@ This module contains functions to read and write files.
 import os
 from typing import Any
 
-from ntcad import omen, vasp, wannier90, winterface
+from ntcad import omen, vasp, wannier90
 
 
 def read(path: os.PathLike, filetype: str = None, **kwargs: dict) -> Any:
