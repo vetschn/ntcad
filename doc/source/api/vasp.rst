@@ -9,5 +9,5 @@ VASP
     :toctree: generated/
 
     io
-    visualization
+    plot
     VASP

@@ -9,6 +9,6 @@ Wannier90
     :toctree: generated/
 
     io
-    operations
-    visualization
+    routines
+    plot
     Wannier90
