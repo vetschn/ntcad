@@ -9,7 +9,7 @@ import numpy as np
 from matplotlib.axes import Axes
 
 
-def plot_nearest_neighbors(matrix: np.ndarray, **kwargs: dict) -> Axes:
+def nearest_neighbors(matrix: np.ndarray, **kwargs: dict) -> Axes:
     """Plots the nearest neighbors of the given matrix.
 
     Parameters

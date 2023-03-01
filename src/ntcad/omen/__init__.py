@@ -1,4 +1,4 @@
-from ntcad.omen import io, operations, visualization
+from ntcad.omen import io, plot, routines
 from ntcad.omen.calculator import OMEN
 
-__all__ = ["io", "operations", "visualization", "OMEN"]
+__all__ = ["io", "routines", "plot", "OMEN"]

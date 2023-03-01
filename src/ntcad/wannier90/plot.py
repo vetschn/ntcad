@@ -15,7 +15,7 @@ from ntcad.utils import center_index
 from ntcad.wannier90.io import read_xsf
 
 
-def plot_operator(
+def operator(
     O_R: np.ndarray,
     axis: int = 2,
     indices: int = 0,
@@ -79,7 +79,7 @@ def plot_operator(
     ax.grid(which="both")
 
 
-def plot_xsf(xsf: Any, **kwargs) -> pv.Plotter:
+def xsf(xsf: Any, **kwargs) -> pv.Plotter:
     """Plots an XCrysDen file read from Wannier90 using PyVista.
 
     Parameters
