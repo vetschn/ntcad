@@ -1,4 +1,4 @@
-from ntcad.wannier90 import io, operations, visualization
+from ntcad.wannier90 import io, plot, routines
 from ntcad.wannier90.calculator import Wannier90
 
-__all__ = ["io", "operations", "visualization", "Wannier90"]
+__all__ = ["io", "routines", "plot", "Wannier90"]

@@ -15,7 +15,7 @@ from ntcad.utils import center_index
 from ntcad.wannier90.io import read_xsf
 
 
-def plot_operator(
+def operator(
     O_R: np.ndarray,
     axis: int = 2,
     indices: int = 0,
@@ -54,7 +54,7 @@ def plot_operator(
     # Shift the operator to the center.
     O_ = np.zeros_like(O_R)
     for R in np.ndindex(O_R.shape[:3]):
-        O_[tuple(R)] = O_R[tuple(R - center)]
+        O_[tuple(R)] = O_R[tuple(np.subtract(R, center))]
 
     # Take operator blocks along one axis and apply modifier.
     O_ = np.take(mod(O_), indices=indices, axis=axis)
@@ -79,7 +79,7 @@ def plot_operator(
     ax.grid(which="both")
 
 
-def plot_xsf(xsf: Any, **kwargs) -> pv.Plotter:
+def xsf(xsf: Any, **kwargs) -> pv.Plotter:
     """Plots an XCrysDen file read from Wannier90 using PyVista.
 
     Parameters

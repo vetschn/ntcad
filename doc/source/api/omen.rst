@@ -9,6 +9,6 @@ OMEN
     :toctree: generated/
 
     io
-    operations
-    visualization
+    routines
+    plot
     OMEN
