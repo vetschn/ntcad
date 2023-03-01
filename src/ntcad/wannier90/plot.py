@@ -54,7 +54,7 @@ def operator(
     # Shift the operator to the center.
     O_ = np.zeros_like(O_R)
     for R in np.ndindex(O_R.shape[:3]):
-        O_[tuple(R)] = O_R[tuple(R - center)]
+        O_[tuple(R)] = O_R[tuple(np.subtract(R, center))]
 
     # Take operator blocks along one axis and apply modifier.
     O_ = np.take(mod(O_), indices=indices, axis=axis)
