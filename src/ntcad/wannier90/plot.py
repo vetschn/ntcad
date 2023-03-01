@@ -63,13 +63,15 @@ def operator(
 
     # Plotting.
     ax = kwargs.pop("ax", None)
-    if ax is None:
-        __, ax = plt.subplots()
+    fig = kwargs.pop("fig", None)
+    if ax is None or fig is None:
+        fig, ax = plt.subplots()
 
     # The extent keyword here is used to set the ticks "correctly" and
     # to compensate for the fact that ax.matshow plots the pixels *on
     # top of the index / coordinate.
-    ax.matshow(O, norm=norm, extent=(0, O_.shape[0], O_.shape[1], 0), **kwargs)
+    qm = ax.matshow(O, norm=norm, extent=(0, O_.shape[0], O_.shape[1], 0), **kwargs)
+    fig.colorbar(qm, ax=ax)
 
     ax.set_xticks(np.arange(O_.shape[0]))
     ax.set_yticks(np.arange(O_.shape[0]))
