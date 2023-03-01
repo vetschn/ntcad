@@ -327,7 +327,7 @@ def _parse_wout_system(lines: list[str]) -> dict:
             # know how many atomic sites to expect.
             sites_start_ind = ind + 2
         elif "Grid size" in line:
-            sites_stop_ind = ind - 6
+            sites_stop_ind = ind - 5
             line = line.replace("x", " ")
             __, __, __, k_grid_x, k_grid_y, k_grid_z, *__ = line.split()
         elif "MAIN" in line:
