@@ -56,12 +56,13 @@ def bands(vasprun: dict, path: np.ndarray = None, **kwargs) -> Axes:
         num = int(num_kpoints / (len(path) - 1))
         kpoints = []
         d_total = 0.0
+
         for a, b in zip(path, path[1:]):
             d = np.linalg.norm(a - b)
             kpoints.append(np.linspace(d_total, d_total + d, num, endpoint=False))
-            ax.axvline(x=d_total, c="k")
+            ax.axvline(x=d_total, c="k", lw=0.5)
             d_total += d
-        ax.axvline(x=d_total, c="k")
+        ax.axvline(x=d_total, c="k", lw=0.5)
 
         kpoints = np.array(kpoints).flatten()
 
