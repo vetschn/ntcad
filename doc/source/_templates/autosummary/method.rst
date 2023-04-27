@@ -4,8 +4,6 @@
 
 .. currentmodule:: {{ module }}
 
-method
-
 .. auto{{ objtype }}:: {{ fullname | replace("ntcad.", "ntcad::") }}
 
 {# In the fullname (e.g. `ntcad.omen.operations.methodname`), the module name
