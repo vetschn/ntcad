@@ -4,6 +4,7 @@ atoms in a unit cell together with some useful methods.
 
 """
 
+from collections import defaultdict
 from typing import Any
 
 import ase
@@ -13,6 +14,7 @@ import numpy as np
 import pyvista as pv
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from numpy import linalg as npla
+from numpy.typing import ArrayLike
 
 # All allowed atomic symbols including a `None` / "X" kind.
 ATOMIC_SYMBOLS = (
@@ -33,19 +35,6 @@ ATOMIC_SYMBOLS = (
     # --- 7 ------------------------------------------------------------
     "Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og "
 ).split()
-
-# The atomic number mapped to the corresponding atomic symbol.
-ATOMIC_NUMBERS = {}
-for i, symbol in enumerate(ATOMIC_SYMBOLS):
-    ATOMIC_NUMBERS[symbol] = i
-
-# Useful dtype to represent atomic sites.
-_sites_dtype = np.dtype(
-    [
-        ("kind", np.unicode_, 2),
-        ("position", np.float64, 3),
-    ]
-)
 
 # The jmol colors of each atomic kind
 # https://jmol.sourceforge.net/jscolors/
@@ -169,16 +158,15 @@ class Structure:
 
     Attributes
     ----------
-    kinds : numpy.ndarray
+    kinds : np.ndarray
         The atomic kinds of the structure. Each kind is a 2-character
         string.
-    positions : numpy.ndarray
+    positions : np.ndarray
         The atomic positions of the structure. Each position is a 3D
         vector.
-    sites : numpy.ndarray
-        The atomic sites and positions in one array. Each site is a
-        2-tuple of the kind and position.
-    cell : numpy.ndarray
+    sites : dict
+        The atomic sites and positions as key-value pairs.
+    cell : np.ndarray
         The cell vectors of the structure. Each cell vector is a 3D
         vector.
     attr : dict
@@ -190,9 +178,9 @@ class Structure:
 
     def __init__(
         self,
-        kinds: np.ndarray,
-        positions: np.ndarray,
-        cell: np.ndarray,
+        kinds: ArrayLike,
+        positions: ArrayLike,
+        cell: ArrayLike,
         cartesian: bool = True,
         attr: dict = None,
     ) -> None:
@@ -202,7 +190,7 @@ class Structure:
         Parameters
         ----------
         kinds
-            The atomic kinds as a list of 2-character strings.
+            The atomic kinds as a list of strings.
         positions
             The atomic positions as a list of 3D vectors.
         cell
@@ -233,7 +221,13 @@ class Structure:
         if not cartesian:
             self.positions = self.positions @ self.cell
 
-        self.sites = np.array(list(zip(self.kinds, self.positions)), dtype=_sites_dtype)
+        self.sites = defaultdict(list)
+        for kind, position in zip(self.kinds, self.positions):
+            self.sites[kind].append(position)
+
+        for kind in self.sites:
+            self.sites[kind] = np.array(self.sites[kind])
+
         self.attr = attr
 
     def __repr__(self) -> str:
@@ -244,8 +238,7 @@ class Structure:
         """
         float: The volume of the structure's cell.
         """
-        a1, a2, a3 = self.cell
-        return np.dot(a1, np.cross(a2, a3))
+        return npla.det(self.cell)
 
     @property
     def reciprocal_cell(self) -> float:
@@ -253,6 +246,69 @@ class Structure:
         float: The reciprocal cell vectors of the structure.
         """
         return 2 * np.pi * np.transpose(npla.inv(self.cell))
+
+    @property
+    def scaled_positions(self) -> np.ndarray:
+        """
+        numpy.ndarray: The scaled positions of the structure.
+        """
+        return self.positions @ npla.inv(self.cell)
+
+    def _find_orthorhombic_transform(
+        self,
+        max_cells: ArrayLike = None,
+        **isclose_kwargs: dict,
+    ) -> np.ndarray:
+        """Finds an orthorhombic transformation matrix for the cell.
+
+        This is accomplished by brute force, i.e. by searching for the
+        combination of cell vectors that are closest to the Cartesian
+        axes.
+
+        Parameters
+        ----------
+        max_cells
+            The maximum number of cells to search in each direction. If
+            not given, the default is (5, 5, 5).
+        isclose_kwargs
+            Keyword arguments to pass to :func:`numpy.isclose`.
+
+        Returns
+        -------
+        numpy.ndarray
+            The transformation matrix.
+
+        """
+        if max_cells is None:
+            max_cells = (5, 5, 5)
+        max_cells = np.asarray(max_cells, dtype=int)
+
+        pm = [1, -1]
+        perm = np.array([[a, b, c] for a in pm for b in pm for c in pm])
+
+        transform = np.zeros((3, 3))
+        for e, unit_vector in enumerate(np.eye(3)):
+            for i, j, k in np.ndindex(tuple(max_cells)):
+                if i == j == k == 0:
+                    continue
+                for a, b, c in perm:
+                    scaled = (
+                        a * i * self.cell[0]
+                        + b * j * self.cell[1]
+                        + c * k * self.cell[2]
+                    )
+                    if np.isclose(
+                        scaled / npla.norm(scaled), unit_vector, **isclose_kwargs
+                    ).all():
+                        transform[e] = np.array([a * i, b * j, c * k])
+                        break
+                else:  # No break, so no transform found for (i,j,k).
+                    continue
+                break  # Break out of the permutation loop.
+            else:  # No break, so no transform at all found.
+                raise ValueError("No orthorhombic transform found.")
+
+        return transform
 
     def view(self, viewer="ase", **kwargs: dict) -> Any:
         """Visualizes the structure using a number of different viewers.
@@ -304,10 +360,15 @@ class Structure:
         if plotter is None:
             plotter = pv.Plotter()
 
-        for kind, position in self.sites:
+        for kind, positions in self.sites.items():
             color = _jmol_colors[kind]
             size = 15.0 + list(_jmol_colors).index(kind) * 0.25
-            plotter.add_points(position, color=color, point_size=size)
+            plotter.add_points(
+                positions,
+                color=color,
+                point_size=size,
+                render_points_as_spheres=True,
+            )
 
         # Generate a mesh of the cell.
         cell = pv.Cube(
@@ -356,7 +417,7 @@ class Structure:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection="3d")
 
-        for kind, position in self.sites:
+        for kind, position in self.sites.items():
             color = _jmol_colors[kind]
             size = 50 + list(_jmol_colors).index(kind)
             ax.scatter(*position, c=color, s=size, edgecolors="black")
