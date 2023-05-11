@@ -6,3 +6,7 @@ the Nano-TCAD group.
 
 Check out [the documentation](https://vetschn.github.io/ntcad/) to see what's
 currently available.
+
+---
+
+🏗️ Lots of unfinished, changing, and not properly documented stuff here. Use at your own risk.
