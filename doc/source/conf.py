@@ -58,7 +58,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "ntcad"
-copyright = "2023, Nicolas Vetsch"
+copyright = "2024, Nicolas Vetsch"
 author = "Nicolas Vetsch"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -156,6 +156,8 @@ html_context = {"default_mode": "light"}
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
+html_css_files = ["css/ntcad.css"]
+
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
 # directly to the root of the documentation.
@@ -170,7 +172,9 @@ html_static_path = ["_static"]
 # html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-# html_sidebars = {}
+html_sidebars = {
+    "index": [],
+}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
