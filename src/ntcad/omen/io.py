@@ -134,7 +134,7 @@ def read_dat(path: os.PathLike) -> np.ndarray:
     """Reads a dat file.
 
     These are plain text files that can just be read via
-    :meth:`numpy.loadtxt`.
+    `numpy.loadtxt`.
 
     Parameters
     ----------

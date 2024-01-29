@@ -9,29 +9,33 @@ from matplotlib.axes import Axes
 
 
 def bands(vasprun: dict, path: np.ndarray = None, **kwargs) -> Axes:
-    """
-    Plots the band structure obtained from a VASP run.
+    """Plots the band structure obtained from a VASP run.
 
     Parameters
     ----------
-    vasprun
+    vasprun : dict
         Dictionary representing the vasprun.xml file, which contains the
-        eigenvalues for each k-point.
-    path
+        eigenvalues for each k-point. This dictionary can be obtained
+        from the function ntcad.vasp.io.read_vasprun_xml.
+    path : ndarray
         List of k-points to be plotted. If None, the path is obtained
         from the vasprun.xml file.
     **kwargs
         Keyword arguments to pass to matplotlib.
 
+    See Also
+    --------
+    ntcad.vasp.io.read_vasprun_xml : Read vasprun.xml file.
+
     Returns
     -------
-    ax
+    ax : Axes
         The matplotlib axes object.
 
     """
     ax = kwargs.pop("ax", None)
     if ax is None:
-        fig, ax = plt.subplots()
+        __, ax = plt.subplots()
 
     eigenvalues_section = vasprun["modeling"]["calculation"]["eigenvalues"]
     eigenvalues = eigenvalues_section["array"]["set"]["set"]["set"]

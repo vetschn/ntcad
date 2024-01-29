@@ -120,7 +120,7 @@ def read_incar(path: os.PathLike) -> dict:
     with open("./INCAR", "r") as f:
         lines = f.readlines()
 
-    # Get rid of any gobbledygook.
+    # Get rid of any comments or other nonsense.
     lines = [line for line in lines if "=" in line]
     lines = [line.split("#")[0].split("!")[0] for line in lines]
 
@@ -218,7 +218,7 @@ def read_chg(path: os.PathLike) -> tuple[Structure, np.ndarray]:
     Returns
     -------
     structure : Structure
-        The structure object described in the CHG file.
+        The `Structure` object described in the CHG file.
 
     data : ndarray
         The charge density data.
@@ -315,11 +315,9 @@ def write_incar(path: os.PathLike, **incar_tags: dict) -> None:
 
     Notes
     -----
-    The INCAR tags are not validated.
-
-    The INCAR is written in the same order as the tags are specified.
-
-    Multiline strings and lists of values are handled.
+    The INCAR tags are not validated. The INCAR is written in the same
+    order as the tags are specified. Multiline strings and lists of
+    values are handled.
 
     The comment line contains some provenance information.
 
@@ -348,16 +346,16 @@ def write_poscar(path: os.PathLike, structure: Structure) -> None:
 
     Parameters
     ----------
-    path
+    path : str or Path
         Path where to write the POSCAR. If any filename is present, the
         filename is replaced with POSCAR.
     structure
-        The class:`Structure` to write to file.
+        The `Structure` to write to file.
 
     Notes
     -----
     The comment line is replaced by a note that the file was written by
-    ``ntcad`` together with the date and time of writing.
+    `ntcad` together with the date and time of writing.
 
     The structure is written in Cartesian coordinates. There is
     currently no option to write in direct coordinates.
@@ -398,28 +396,26 @@ def write_potcar(
 
     Parameters
     ----------
-    path
+    path : str or Path
         Path where to write the POTCAR. If any filename is present, the
         filename is replaced with POTCAR.
-    structure
+    structure : Structure
         The class:`Structure` instance from which the atomic kinds are
         determined.
-    potentials
+    potentials : dict
         A dictionary containing custom potentials that should be used
         instead of the recommended ones. The keys are the atomic kinds
         and the values are the appendices of the POTCAR file names.
-    recommended_potentials
-        Whether to use the recommended potentials. If ``True``, the
-        recommended potentials are used. If ``False``, the custom
+    recommended_potentials : bool
+        Whether to use the recommended potentials. If `True`, the
+        recommended potentials are used. If `False`, the custom
         potentials are used. By default, only the minimal set of
         pseudopotentials is used.
 
     Notes
     -----
     The available and recommended potentials can be found on the `VASP
-    wiki`_.
-
-    .. _VASP wiki: https://www.vasp.at/wiki/index.php/Available_PAW_potentials
+    wiki <https://www.vasp.at/wiki/index.php/Available_PAW_potentials>`_.
 
     The environment variable ``VASP_PP_PATH`` is used to determine the
     location of the pseudopotential files. If the variable is not set,
@@ -456,29 +452,28 @@ def write_potcar(
 def write_kpoints(
     path: os.PathLike, kpoints: np.ndarray, shift: np.ndarray = None
 ) -> None:
-    """
-    Writes a KPOINTS file.
+    """Writes a KPOINTS file.
 
     Parameters
     ----------
-    path
+    path : str or Path
         Path at which to write the KPOINTS file. If any filename is present, the
         filename is replaced with KPOINTS.
-    kpoints
+    kpoints : ndarray
         Either the dimensions of a Monkhorst-Pack grid or a list of
         k-points to be written to file.
-    shift
+    shift : ndarray
         An optional amount to shift the kpoints by. Only applies for
         Monkhorst-Pack grids.
 
     See Also
     --------
-    ntcad.core.kpoints : Functions for the creation of k-point grids/paths.
+    ntcad.kpoints : Functions for the creation of k-point grids/paths.
 
     Notes
     -----
     The comment line is replaced by a note that the file was written by
-    ``ntcad`` together with the date and time of writing.
+    `ntcad` together with the date and time of writing.
 
     """
     if not isinstance(kpoints, np.ndarray):

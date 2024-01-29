@@ -22,16 +22,16 @@ m_e, *__ = constants.physical_constants["electron mass"]
 def approximate_position_operator(
     Ai: np.ndarray, centers: np.ndarray, Ra: np.ndarray
 ) -> np.ndarray:
-    """Approximates the position operator elements ``rR``.
+    """Approximates the position operator elements `rR`.
 
     Parameters
     ----------
-    Ai : np.ndarray
+    Ai : ndarray
         Real-Space lattice vectors (3 x 3).
-    centers : np.ndarray
-        Wannier centers (``num_wann`` x 3). Needed to include the
-        ``tau_ij`` contributions.
-    Ra : np.ndarray
+    centers : ndarray
+        Wannier centers (`num_wann` x 3). Needed to include the
+        `tau_ij` contributions.
+    Ra : ndarray
         Allowed Wigner-Seitz cell indices.
 
     Returns
@@ -41,8 +41,8 @@ def approximate_position_operator(
 
     Notes
     -----
-    ``Ni`` correspond to the number of Wigner-Seitz cells along the
-    lattice vectors ``Ai``.
+    `Ni` correspond to the number of Wigner-Seitz cells along the
+    lattice vectors `Ai`.
 
     """
     Ras = np.subtract(Ra, np.min(Ra, axis=0))
@@ -65,39 +65,39 @@ def _approximate_momentum_operator(
     centers: np.ndarray = None,
     si_units=False,
 ) -> np.ndarray:
-    """Approximates the momentum operator elements ``pR``.
+    """Approximates the momentum operator elements `pR`.
 
     The resulting momentum matrix is in [eV/c] per default. If you wish
-    to get the matrix in SI units [kg*m/s], set the ``si_units``
+    to get the matrix in SI units [kg*m/s], set the `si_units`
     keyword accordingly. OMEN requires [eV/c].
 
     Parameters
     ----------
-    hR : np.ndarray
+    hR : ndarray
         Hamiltonian in position basis.
-    Ai : np.ndarray
+    Ai : ndarray
         Real-Space lattice vectors (3 x 3).
-    Ra : np.ndarray
+    Ra : ndarray
         Allowed Wigner-Seitz cell indices. If not given, this assumes
         that all completely zero Hamiltonian blocks are not allowed.
     tau_ij : bool
         Whether to include the contributions between Wannier centers.
-    centers : np.ndarray
-        Wannier centers (``num_wann`` x 3). Needed to include the
-        ``tau_ij`` contributions.
+    centers : ndarray
+        Wannier centers (`num_wann` x 3). Needed to include the
+        `tau_ij` contributions.
     si_units : bool
         Whether to return the momentum operator in SI units [kg*m/s].
-        Defaults to ``False``.
+        Defaults to `False`.
 
     Returns
     -------
-    np.ndarray
+    pR : ndarray
         The approximated momentum operator.
 
     Notes
     -----
-    ``Ni`` correspond to the number of Wigner-Seitz cells along the
-    lattice vectors ``Ai``.
+    `Ni` correspond to the number of Wigner-Seitz cells along the
+    lattice vectors `Ai`.
 
     """
     pR = np.zeros(hR.shape + (3,), dtype=np.complex64)
@@ -133,65 +133,65 @@ def momentum_operator(
     centers: np.ndarray = None,
     si_units=False,
 ) -> np.ndarray:
-    """Calculates the momentum operator elements ``pR``.
+    """Calculates the momentum operator elements `pR`.
 
-    The momentum operator ``pR`` is the commutator between Hamiltonian
-    ``H_R`` and position operator ``rR`` in the same Wannier basis.
+    The momentum operator `pR` is the commutator between Hamiltonian
+    `H_R` and position operator `rR` in the same Wannier basis.
 
     The resulting momentum matrix is in [eV/c] per default. If you wish
-    to get the matrix in SI units [kg*m/s], set the ``in_si_units``
+    to get the matrix in SI units [kg*m/s], set the `in_si_units`
     keyword accordingly. OMEN requires [eV/c].
 
     Parameters
     ----------
-    hR : np.ndarray
-        Hamiltonian elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann``
-        x ``num_wann``).
-    Ai : np.ndarray
+    hR : ndarray
+        Hamiltonian elements (`N_1` x `N_2` x `N_3` x `num_wann`
+        x `num_wann`).
+    Ai : ndarray
         Real-Space lattice vectors (3 x 3).
-    rR : np.ndarray
-        Position matrix elements (``N_1`` x ``N_2`` x ``N_3`` x
-        ``num_wann`` x ``num_wann`` x 3). Not needed if the momentum
+    rR : ndarray
+        Position matrix elements (`N_1` x `N_2` x `N_3` x
+        `num_wann` x `num_wann` x 3). Not needed if the momentum
         operator should merely be approximated.
     approximate : bool
         Whether to approximate the momentum operator. Defaults to
-        ``False``.
-    Ra : np.ndarray
+        `False`.
+    Ra : ndarray
         Allowed Wigner-Seitz Cell indices. If not given, this assumes
         that all completely zero Hamiltonian blocks are not allowed.
     tau_ij : bool
         Whether to include the contributions between Wannier centers
         when approximating the momentum operator.
-    centers : np.ndarray
-        Wannier centers (``num_wann`` x 3). Needed to include the
-        ``tau_ij`` contributions.
+    centers : ndarray
+        Wannier centers (`num_wann` x 3). Needed to include the
+        `tau_ij` contributions.
     si_units : bool
         Whether to return the momentum operator in SI units [kg*m/s].
-        Defaults to ``False``.
+        Defaults to `False`.
 
 
     Returns
     -------
-    np.ndarray
+    pR : ndarray
         Momentum matrix.
 
     Notes
     -----
-    ``N_i`` correspond to the number of Wigner-Seitz cells along the
-    lattice vectors ``A_i``.
+    `N_i` correspond to the number of Wigner-Seitz cells along the
+    lattice vectors `A_i`.
 
     The momentum operator components for all spacial dimensions are
     calculated in parallel. [1]_
 
     References
     ----------
-    .. [1] C. Klinkert, "The ab initio microscope: on the performance of
-       2D materials as future field-effect transistors", Ph.D. thesis,
-       ETH Zurich, 2021.
+    .. [1] C. Klinkert, *"The ab initio microscope: on the performance
+       of 2D materials as future field-effect transistors"*, Ph.D.
+       thesis, ETH Zurich, 2021.
 
     """
     if tau_ij and centers is None:
-        raise ValueError("Wannier centers needed if ``tau_ij`` is ``True``.")
+        raise ValueError("Wannier centers needed if `tau_ij` is `True`.")
     if approximate:
         pR_approximate = _approximate_momentum_operator(
             hR=hR,
@@ -203,14 +203,14 @@ def momentum_operator(
         )
         return pR_approximate
     elif rR is None:
-        raise ValueError("Position Matrix elements needed if ``approx`` is ``False``.")
+        raise ValueError("Position Matrix elements needed if `approx` is `False`.")
 
     # NOTE: https://docs.python.org/3/library/pickle.html
     global _compute_pR_i
 
     # Spacial dimensions are treated in parallel.
     def _compute_pR_i(i: int) -> np.ndarray:
-        """Computes the i-th spacial contribution to ``p_R``."""
+        """Computes the i-th spacial contribution to `p_R`."""
         pR_i = np.zeros(hR.shape, dtype=np.complex64)
         d0_i = np.zeros(hR.shape[-2:])
         if tau_ij:
@@ -265,20 +265,20 @@ def distance_matrix(
 
     Parameters
     ----------
-    Ai : np.ndarray
+    Ai : ndarray
         Real-Space lattice vectors (3 x 3).
-    centers : np.ndarray
-        List of ``num_wann`` Wannier centers (``num_wann`` x 3) in real
+    centers : ndarray
+        List of `num_wann` Wannier centers (`num_wann` x 3) in real
         space.
-    Ra : np.ndarray
+    Ra : ndarray
         The allowed Wigner-Seitz cells to calculate the distance matrix
-        for (``R_1``, ``R_2``, ``R_3``).
+        for (`R_1`, `R_2`, `R_3`).
 
     Returns
     -------
-    np.ndarray
-        Matrix (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
-        ``num_wann``) containing distances between Wannier centers for
+    d_R : ndarray
+        Matrix (`N_1` x `N_2` x `N_3` x `num_wann` x
+        `num_wann`) containing distances between Wannier centers for
         all the requested Wigner Seitz cells. The indices are chosen
         such that (0, 0, 0) actually gets you the center Wigner-Seitz
         cell distance matrix.
@@ -307,27 +307,27 @@ def k_sample(
     grid_size: tuple = None,
     einsum_optimize: Any = "optimal",
 ) -> np.ndarray:
-    """Samples the given operator ``OR`` at given ``kpoints``.
+    """Samples the given operator `OR` at given `kpoints`.
 
     Parameters
     ----------
-    OR : np.ndarray
-        Operator elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
-        ``num_wann``).
-    kpoints : np.ndarray, optional
-        Reciprocal-space points in fractional coordinates (``N_k`` x 3).
-        Used if ``monkhorst_pack`` is ``None``. This is ideal for path
+    OR : ndarray
+        Operator elements (`N_1` x `N_2` x `N_3` x `num_wann` x
+        `num_wann`).
+    kpoints : ndarray, optional
+        Reciprocal-space points in fractional coordinates (`N_k` x 3).
+        Used if `monkhorst_pack` is `None`. This is ideal for path
         sampling.
     grid_size : tuple, optional
-        Monkhorst-Pack grid size (``N_1``, ``N_2``, ``N_3``). Used if
-        ``kpoints`` is ``None``.
+        Monkhorst-Pack grid size (`N_1`, `N_2`, `N_3`). Used if
+        `kpoints` is `None`.
     optimize : bool, optional
-        Whether to optimize the einsum call. See ``np.einsum`` for more
+        Whether to optimize the einsum call. See `np.einsum` for more
         information.
 
     Returns
     -------
-        Operator at the specified ``kpoints``.
+        Operator at the specified `kpoints`.
 
     """
     if OR.ndim != 5:
@@ -364,10 +364,10 @@ def is_hermitian(OR: np.ndarray) -> bool:
     Parameters
     ----------
     O_R
-        Operator elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
-        ``num_wann``).
+        Operator elements (`N_1` x `N_2` x `N_3` x `num_wann` x
+        `num_wann`).
     Ra
-        The allowed Wigner-Seitz cells (``R_1``, ``R_2``, ``R_3``).
+        The allowed Wigner-Seitz cells (`R_1`, `R_2`, `R_3`).
 
     Returns
     -------
@@ -390,13 +390,13 @@ def make_hermitian(OR: np.ndarray) -> np.ndarray:
     Parameters
     ----------
     O_R
-        Operator elements (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
-        ``num_wann``).
+        Operator elements (`N_1` x `N_2` x `N_3` x `num_wann` x
+        `num_wann`).
 
     Returns
     -------
-        The now hermitian operator (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann`` x
-        ``num_wann``).
+        The now hermitian operator (`N_1` x `N_2` x `N_3` x `num_wann` x
+        `num_wann`).
 
     """
     if OR.ndim != 5:

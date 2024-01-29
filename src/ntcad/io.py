@@ -14,7 +14,7 @@ def read(path: os.PathLike, filetype: str = None, **kwargs: dict) -> Any:
 
     Parameters
     ----------
-    path
+    path : os.PathLike
         Path to the file to be read in.
     filetype
         Specify this keyword to explicitly set the filetype. If None,
@@ -32,10 +32,10 @@ def read(path: os.PathLike, filetype: str = None, **kwargs: dict) -> Any:
 
     """
     filename = str(os.path.basename(path))
-    __, filext = os.path.splitext(filename)
+    __, extension = os.path.splitext(filename)
 
     # --- TODO: OMEN filetypes. ----------------------------------------
-    if filext == ".bin" or filetype == "bin":
+    if extension == ".bin" or filetype == "bin":
         return omen.io.read_bin(path)
 
     if filename == "Layer_Matrix.dat" or filetype == "layer_matrix":
@@ -67,10 +67,10 @@ def read(path: os.PathLike, filetype: str = None, **kwargs: dict) -> Any:
     if filename.endswith("_band.kpt") or filetype == "band_kpt":
         return wannier90.io.read_band_kpt(path)
 
-    if filext == ".eig" or filetype == "eig":
+    if extension == ".eig" or filetype == "eig":
         return wannier90.io.read_eig(path)
 
-    if filext == ".wout" or filetype == "wout":
+    if extension == ".wout" or filetype == "wout":
         return wannier90.io.read_wout(path)
 
     # --- TODO: Winterface filetypes -----------------------------------

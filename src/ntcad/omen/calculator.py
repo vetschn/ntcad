@@ -19,7 +19,7 @@ class OMEN(Calculator):
 
     .. warning::
 
-        Nothing here is implemented yet.
+        This is not implemented yet.
 
     """
 

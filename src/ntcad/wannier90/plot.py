@@ -27,22 +27,22 @@ def operator(
 
     Parameters
     ----------
-    O_R
+    O_R : ndarray
         The operator to plot (``N_1`` x ``N_2`` x ``N_3`` x ``num_wann``
         x ``num_wann``), where ``N_i`` correspond to the number of
         Wigner-Seitz cells along the lattice vectors ``A_i``. The
         indices are chosen such that (0, 0, 0) actually gets you the
         center Wigner-Seitz cell.
-    axis
+    axis : int
         Which Wigner-Seitz index axis to fix, by default 2, i. e. the z
         axis.
-    indices
+    indices : int
         At which index to fix the selected Wigner-Seitz index axis, by
         default 0.
-    mod
+    mod : Callable
         A modifier to be applied to the matrix elements before plotting,
         by default np.abs.
-    norm
+    norm : Normalize
         A normalizing function to be applied during plotting.
 
     """
@@ -86,19 +86,19 @@ def xsf(xsf: Any, **kwargs) -> pv.Plotter:
 
     Parameters
     ----------
-    xsf : Any
+    xsf : str or dict or Structure
         The data to plot. Can be a filename, a dictionary or an
-        ``ntcad.Structure``.
+        `ntcad.Structure`.
     plotter : pv.Plotter
-        The plotter to use. If ``None``, a new plotter is created.
-    datagrid_cell : bool
-        Whether to plot the datagrid cell, by default ``False``.
+        The plotter to use. If `None`, a new plotter is created.
+    datagrid_cell : bool, optional
+        Whether to plot the datagrid cell, by default `False`.
 
     Returns
     -------
-    pv.Plotter
-        The plotter object. A new plotter is created if ``plotter`` is
-        ``None``.
+    pl : pv.Plotter
+        The plotter object. A new plotter is created if `plotter` is
+        `None`.
 
     """
     if pv is None:
@@ -142,7 +142,7 @@ def xsf(xsf: Any, **kwargs) -> pv.Plotter:
 
     # Plot the volume data.
     pl.add_mesh(
-        grid.contour(kwargs.pop("isosurfaces", 250)),
+        grid.contour(kwargs.pop("isosurfaces", 100)),
         cmap=kwargs.pop("cmap", "coolwarm"),
         clim=kwargs.pop("clim", [-1.0, 1.0]),
         smooth_shading=kwargs.pop("smooth_shading", True),
