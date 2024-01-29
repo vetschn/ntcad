@@ -344,7 +344,7 @@ def photon_scattering_matrix(
 
     Returns
     -------
-    P : np.ndarray
+    P : ndarray
         Photon scattering matrix.
 
     See Also

@@ -20,7 +20,7 @@ def read_hr_dat(path: os.PathLike, return_all: bool = False) -> tuple[np.ndarray
 
     The first line gives the date and time at which the file was
     created. The second line states the number of Wannier functions
-    num_wann. The third line gives the number of Wigner-Seitz
+    `num_wann`. The third line gives the number of Wigner-Seitz
     grid-points.
 
     The next block of integers gives the degeneracy of each Wigner-Seitz
@@ -43,11 +43,11 @@ def read_hr_dat(path: os.PathLike, return_all: bool = False) -> tuple[np.ndarray
 
     Returns
     -------
-    hr : np.ndarray
+    hr : ndarray
         The Hamiltonian matrix elements in the localized basis.
-    degeneracies : np.ndarray, optional
+    degeneracies : ndarray, optional
         The degeneracies of the Wigner-Seitz grid points.
-    R : np.ndarray, optional
+    R : ndarray, optional
         The Wigner-Seitz cell indices.
 
     """
@@ -90,33 +90,33 @@ def read_hr_dat(path: os.PathLike, return_all: bool = False) -> tuple[np.ndarray
 
 
 def read_r_dat(path: os.PathLike, full: bool = False) -> tuple[np.ndarray, ...]:
-    """Parses the contents of a ``seedname_r.dat`` file.
+    """Parses the contents of a `seedname_r.dat` file.
 
     The first line gives the date and time at which the file was
     created. The second line states the number of Wannier functions
-    num_wann. The third line states the number of ``R`` vectors
-    ``nrpts``.
+    `num_wann`. The third line states the number of `R` vectors,
+    `nrpts`.
 
     Similar to the case of the Hamiltonian matrix, the remaining
     ``num_wann**2 * nrpts`` lines each contain, respectively, the
-    components of the vector ``R`` in terms of the lattice vectors
-    ``Ai``, the indices m and n, and the real and imaginary parts of the
+    components of the vector `R` in terms of the lattice vectors
+    `Ai`, the indices m and n, and the real and imaginary parts of the
     position matrix element in the WF basis.
 
     Parameters
     ----------
     path : os.PathLike
-        Path to ``seedname_r.dat``.
+        Path to `seedname_r.dat`.
     full : bool, optional
-        Switch determining nature of return value. When it is ``False``
-        (the default) just ``r_R`` is returned, when ``True``, the
+        Switch determining nature of return value. When it is `False`
+        (the default) just `r_R` is returned, when `True`, the
         allowed Wigner-Seitz cell indices are also returned.
 
     Returns
     -------
-    rR : np.ndarray
+    rR : ndarray
         The position matrix elements in the WF basis.
-    R : np.ndarray, optional
+    R : ndarray, optional
         The allowed Wigner-Seitz cell indices.
 
     """
@@ -160,18 +160,18 @@ def read_r_dat(path: os.PathLike, full: bool = False) -> tuple[np.ndarray, ...]:
 
 
 def read_band_dat(path: os.PathLike) -> np.ndarray:
-    """Parses the contents of a ``seedname_band.dat`` file.
+    """Parses the contents of a `seedname_band.dat` file.
 
     This file contains the raw data for the interpolated band structure.
 
     Parameters
     ----------
     path : os.PathLike
-        Path to ``seedname_band.dat``
+        Path to `seedname_band.dat`
 
     Returns
     -------
-    bands : np.ndarray
+    bands : ndarray
         The interpolated band structure.
 
     """
@@ -192,7 +192,7 @@ def read_band_dat(path: os.PathLike) -> np.ndarray:
 
 
 def read_band_kpt(path: os.PathLike) -> np.ndarray:
-    """Parses the contents of a ``seedname_band.kpt`` file.
+    """Parses the contents of a `seedname_band.kpt` file.
 
     The k-points used for the interpolated band structure, in units of
     the reciprocal lattice vectors. This file can be used to generate a
@@ -201,11 +201,11 @@ def read_band_kpt(path: os.PathLike) -> np.ndarray:
     Parameters
     ----------
     path : os.PathLike
-        Path to ``seedname_band.kpt``
+        Path to `seedname_band.kpt`
 
     Returns
     -------
-    kpoints : np.ndarray
+    kpoints : ndarray
         The k-points used for the interpolated band structure.
 
     """
@@ -222,7 +222,7 @@ def read_band_kpt(path: os.PathLike) -> np.ndarray:
 
 
 def read_eig(path: os.PathLike) -> np.ndarray:
-    """Parses the contents of a ``seedname.eig`` file.
+    """Parses the contents of a `seedname.eig` file.
 
     The file ``seedname.eig`` contains the Kohn-Sham eigenvalues [eV] at
     each point in the Monkhorst-Pack mesh.
@@ -230,16 +230,16 @@ def read_eig(path: os.PathLike) -> np.ndarray:
     Each line consist of two integers and a real number. The first
     integer is the band index, the second integer gives the ordinal
     corresponding to the k-point in the list of k-points in
-    ``seedname.win``, and the real number is the eigenvalue.
+    `seedname.win`, and the real number is the eigenvalue.
 
     Parameters
     ----------
     path : os.PathLike
-        Path to ``seedname.eig``.
+        Path to `seedname.eig`.
 
     Returns
     -------
-    eigs : np.ndarray
+    eigs : ndarray
         The Kohn-Sham eigenvalues by band and k-point.
 
     """
@@ -257,7 +257,7 @@ def read_eig(path: os.PathLike) -> np.ndarray:
 
 
 def _parse_wout_header(lines: list[str]) -> dict:
-    """Parses the header section of a ``seedname.wout`` file.
+    """Parses the header section of a `seedname.wout` file.
 
     The header provides some basic information about wannier90, the
     authors, the code version and release, and the execution time of the
@@ -265,11 +265,12 @@ def _parse_wout_header(lines: list[str]) -> dict:
 
     Parameters
     ----------
-    lines
-        Lines of the ``seedname.wout`` file.
+    lines : list[str]
+        Lines of the `seedname.wout` file.
 
     Returns
     -------
+    header : dict
         Dictionary containing version, version release date and
         Wannier90 run POSIX timestamp.
 
@@ -290,7 +291,7 @@ def _parse_wout_header(lines: list[str]) -> dict:
 
 
 def _parse_wout_system(lines: list[str]) -> dict:
-    """Parses the system information section of a ``seedname.wout`` file.
+    """Parses the system information section of a `seedname.wout` file.
 
     This section includes real and reciprocal lattice vectors, atomic
     positions, k-points, parameters for job control, disentanglement,
@@ -298,11 +299,12 @@ def _parse_wout_system(lines: list[str]) -> dict:
 
     Parameters
     ----------
-    lines
-        Lines of the ``seedname.wout`` file.
+    lines : list[str]
+        Lines of the `seedname.wout` file.
 
     Returns
     -------
+    system : dict
         Dictionary containing the lattice vectors in real and reciprocal
         space, the atomic sites, the utilized k-grid, the number of
         bands and the number of Wannier functions, as well as the
@@ -364,17 +366,18 @@ def _parse_wout_k_mesh(lines: list) -> dict:
 
 
 def _parse_wout_disentangle(lines: list[str]) -> dict:
-    """Parses the disentanglement section of a ``seedname.wout`` file.
+    """Parses the disentanglement section of a `seedname.wout` file.
 
     Parameters
     ----------
-    lines
-        Lines of the ``seedname.wout`` file.
+    lines : list[str]
+        Lines of the `seedname.wout` file.
 
     Returns
     -------
+    disentangle : dict
         Dictionary containing information on disentanglement windows and
-        the final ``Omega_I``.
+        the final `Omega_I`.
 
     """
     for line in lines:
@@ -396,15 +399,16 @@ def _parse_wout_disentangle(lines: list[str]) -> dict:
 
 
 def _parse_wout_wannierise(lines: list[str]) -> dict:
-    """Parses the wannierisation section of a ``seedname.wout`` file.
+    """Parses the wannierisation section of a `seedname.wout` file.
 
     Parameters
     ----------
-    lines
-        Lines of the ``seedname.wout`` file.
+    lines : list[str]
+        Lines of the `seedname.wout` file.
 
     Returns
     -------
+    wannierise : dict
         Dictionary containing the number of iterations, as well as the
         centers and spreads at each iteration.
 
@@ -485,14 +489,14 @@ def read_wout(path: os.PathLike) -> dict:
         # TODO: "k_mesh": _parse_wout_k_mesh(sections[2]),
         "disentangle": _parse_wout_disentangle(sections[3]),
         "wannierise": _parse_wout_wannierise(sections[4]),
-        # TODO: "plotting": _parse_wout_plotting(sections[5]), todo
+        # TODO: "plotting": _parse_wout_plotting(sections[5]),
         # TODO: "timing": _parse_wout_timing(sections[6]),
     }
     return wout
 
 
 def _parse_xsf_crystal(lines: list[str]) -> Structure:
-    """Parses the CRYSTAL section of a ``seedname.xsf`` file."""
+    """Parses the CRYSTAL section of a `seedname.xsf` file."""
     for ind, line in enumerate(lines):
         if line.startswith("PRIMVEC"):
             cell = np.zeros((3, 3))
@@ -512,7 +516,7 @@ def _parse_xsf_crystal(lines: list[str]) -> Structure:
 
 
 def _parse_xsf_datagrid(lines: list[str]) -> np.ndarray:
-    """Parses the DATAGRID_xD section of a ``seedname.xsf`` file."""
+    """Parses the DATAGRID_xD section of a `seedname.xsf` file."""
     lines = [l.strip() for l in lines if not l.startswith("END_")]
 
     dim = int(lines[0].split("_")[2][0])
@@ -533,7 +537,7 @@ def _parse_xsf_datagrid(lines: list[str]) -> np.ndarray:
 
 
 def read_xsf(path: os.PathLike, data_only: bool = False) -> Any:
-    """Parses the contents of a ``seedname.xsf`` file.
+    """Parses the contents of a `seedname.xsf` file.
 
     .. note::
 
@@ -542,20 +546,20 @@ def read_xsf(path: os.PathLike, data_only: bool = False) -> Any:
     Parameters
     ----------
     path : os.PathLike
-        Path to ``seedname.xsf``.
+        Path to `seedname.xsf`.
     data_only : bool, optional
-        If ``True``, only the data is returned. Otherwise, the data is
+        If `True`, only the data is returned. Otherwise, the data is
         returned as a structure attribute. Default is ``False``.
 
     Returns
     -------
-    Structure
+    structure : Structure
         Structure object containing the parsed contents of the
-        ``seedname.xsf`` file.
+        `seedname.xsf` file.
 
     Notes
     -----
-    The ``seedname.xsf`` file is a text file containing the coordinates
+    The `seedname.xsf` file is a text file containing the coordinates
     of the atoms in the unit cell, as well as the unit cell vectors.
 
     See the `official documentation
@@ -600,7 +604,7 @@ def read_xsf(path: os.PathLike, data_only: bool = False) -> Any:
 def write_hr_dat(
     path: os.PathLike, O_R: np.ndarray, deg: np.ndarray = None, Ra: np.ndarray = None
 ) -> None:
-    """Writes an operator to a ``seedname_hr.dat`` file.
+    """Writes an operator to a `seedname_hr.dat` file.
 
     This function is useful to write a momentum operator that should be
     transformed by winterface for use in OMEN for instance.
@@ -608,25 +612,25 @@ def write_hr_dat(
     Parameters
     ----------
     path : os.PathLike
-        Path where to write the ``seedname_hr.dat``
-    O_R : np.ndarray
-        The operator elements (``N_1`` x ``N_2`` x ``N_3`` x
+        Path where to write the `seedname_hr.dat`.
+    O_R : ndarray
+        The operator elements (``N_1` x ``N_2`` x ``N_3`` x
         ``num_wann`` x ``num_wann``), where ``N_i`` correspond to the
-        number of Wigner-Seitz cells along the lattice vectors ``A_i``.
+        number of Wigner-Seitz cells along the lattice vectors `A_i`.
         The indices are such that (0, 0, 0) actually gets you the center
         Wigner-Seitz cell.
-    deg : np.ndarray, optional
-        Degeneracy info to write to file. If None, writes all zeros.
-    Ra : np.ndarray, optional
+    deg : ndarray, optional
+        Degeneracy info to write to file. If `None`, writes all zeros.
+    Ra : ndarray, optional
         The allowed Wigner-Seitz cell indices. If None, the function
         only writes the operator for Wigner-Seitz cell indices where the
         operator is non-zero.
 
     """
     if O_R.ndim != 5:
-        raise ValueError(f"Inconsistent operator dimension: {O_R.ndim=}")
+        raise ValueError(f"inconsistent operator dimension: {O_R.ndim=}")
     if O_R.shape[-1] != O_R.shape[-2]:
-        raise ValueError(f"Operator at R must be square: {O_R.ndim=}")
+        raise ValueError(f"operator at R must be square: {O_R.ndim=}")
 
     lines = [f"hr.dat written by ntcad v{__version__} | {datetime.now()}\n"]
 

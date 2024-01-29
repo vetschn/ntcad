@@ -133,6 +133,7 @@ html_theme_options = {
     "github_url": "https://github.com/vetschn/ntcad",
     "collapse_navigation": True,
     "icon_links": [],  # See https://github.com/pydata/pydata-sphinx-theme/issues/1220
+    "secondary_sidebar_items": [],
 }
 
 html_context = {"default_mode": "light"}

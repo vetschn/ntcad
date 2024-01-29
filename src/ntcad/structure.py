@@ -7,11 +7,8 @@ atoms in a unit cell together with some useful methods.
 from collections import defaultdict
 from typing import Any
 
-import ase
-import ase.visualize
 import matplotlib.pyplot as plt
 import numpy as np
-import pyvista as pv
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from numpy import linalg as npla
 from numpy.typing import ArrayLike
@@ -36,7 +33,7 @@ ATOMIC_SYMBOLS = (
     "Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og "
 ).split()
 
-# The jmol colors of each atomic kind
+# The jmol colors of each atomic kind.
 # https://jmol.sourceforge.net/jscolors/
 _jmol_colors = {
     "X": "#000000",
@@ -153,26 +150,89 @@ _jmol_colors = {
 
 
 class Structure:
-    """
-    An arrangement of atoms in space.
+    """A spatial arrangement of atoms in some bounding cell.
+
+    Parameters
+    ----------
+    kinds : array_like
+        The atomic kinds as a list of strings.
+    positions : array_like
+        The atomic positions as a list of 3D vectors.
+    cell : array_like
+        The cell vectors as a list of 3D vectors. If the cell vectors
+        span an invalid cell, an exception is raised.
+    cartesian : bool, optional
+        Whether the positions are given in Cartesian coordinates. By
+        default, the positions are assumed to be in Cartesian
+        coordinates.
+    attr : dict, optional
+        A dictionary of attributes of the structure. These are
+        arbitrary key-value pairs that can be used to store
+        additional information about the structure.
 
     Attributes
     ----------
-    kinds : np.ndarray
+    kinds : ndarray
         The atomic kinds of the structure. Each kind is a 2-character
         string.
-    positions : np.ndarray
+    positions : ndarray
         The atomic positions of the structure. Each position is a 3D
         vector.
     sites : dict
         The atomic sites and positions as key-value pairs.
-    cell : np.ndarray
+    cell : ndarray
         The cell vectors of the structure. Each cell vector is a 3D
         vector.
     attr : dict
         A dictionary of attributes of the structure. These are
         arbitrary key-value pairs that can be used to store
         additional information about the structure.
+    volume : float
+        The volume of the structure's cell.
+    reciprocal_cell : ndarray
+        The reciprocal cell vectors of the structure.
+    scaled_positions : ndarray
+        The scaled positions of the structure.
+    chemical_formula : str
+        The chemical formula of the structure.
+
+    Examples
+    --------
+    Create an :math:`\\mathrm{MoS}_2` unit cell:
+
+    >>> cell = [
+    ...     [ 3.1867374979,  0.0000000000,  0.0000000000],
+    ...     [-1.5933687489,  2.7597956285,  0.0000000000],
+    ...     [ 0.00000000000, 0.0000000000, 23.1892369035],
+    ... ]
+    >>> kinds = ["Mo", "S", "S"]
+    >>> positions = [
+    ...     [0.0000000000, 1.8398637524, 11.5946151394],
+    ...     [0.0000000000, 0.0000000000, 13.1833034026],
+    ...     [1.5933687489, 0.9199318762, 10.0059368132],
+    ... ]
+    >>> structure = Structure(kinds, positions, cell)
+    >>> structure
+    Structure(MoS2)
+
+    The structure's attributes can now be accessed as follows:
+
+    >>> structure.kinds
+    array(['Mo', 'S', 'S'], dtype='<U2')
+    >>> structure.positions
+    array([[ 0.        ,  1.83986375, 11.59461514],
+           [ 0.        ,  0.        , 13.1833034 ],
+           [ 1.59336875,  0.91993188, 10.00593681]])
+    >>> structure.cell
+    array([[ 3.1867375 ,  0.        ,  0.        ],
+           [-1.59336875,  2.75979563,  0.        ],
+           [ 0.        ,  0.        , 23.1892369 ]])
+    >>> structure.volume
+    203.94340712776122
+    >>> structure.reciprocal_cell
+    array([[1.97166705, 1.1383425 , 0.        ],
+           [0.        , 2.276685  , 0.        ],
+           [0.        , 0.        , 0.27095266]])
 
     """
 
@@ -184,28 +244,7 @@ class Structure:
         cartesian: bool = True,
         attr: dict = None,
     ) -> None:
-        """
-        Initializes a structure.
-
-        Parameters
-        ----------
-        kinds
-            The atomic kinds as a list of strings.
-        positions
-            The atomic positions as a list of 3D vectors.
-        cell
-            The cell vectors as a list of 3D vectors. If the cell vectors
-            span an invalid cell, an exception is raised.
-        cartesian
-            Whether the positions are given in Cartesian coordinates. By
-            default, the positions are assumed to be in Cartesian
-            coordinates.
-        attr
-            A dictionary of attributes of the structure. These are
-            arbitrary key-value pairs that can be used to store
-            additional information about the structure.
-
-        """
+        """Initializes a structure."""
         self.kinds = np.array(kinds)
         for kind in self.kinds:
             if not isinstance(kind, str):
@@ -231,30 +270,35 @@ class Structure:
         self.attr = attr
 
     def __repr__(self) -> str:
-        return f"Structure({self.kinds}, {self.positions}, {self.cell})"
+        """Returns a string representation of the structure."""
+        return f"Structure({self.chemical_formula})"
 
     @property
     def volume(self) -> float:
-        """
-        float: The volume of the structure's cell.
-        """
+        """The volume of the structure's cell."""
         return npla.det(self.cell)
 
     @property
     def reciprocal_cell(self) -> float:
-        """
-        float: The reciprocal cell vectors of the structure.
-        """
+        """The reciprocal cell vectors of the structure."""
         return 2 * np.pi * np.transpose(npla.inv(self.cell))
 
     @property
     def scaled_positions(self) -> np.ndarray:
-        """
-        numpy.ndarray: The scaled positions of the structure.
-        """
+        """The scaled positions of the structure."""
         return self.positions @ npla.inv(self.cell)
 
-    def _find_orthorhombic_transform(
+    @property
+    def chemical_formula(self) -> str:
+        """The chemical formula of the structure."""
+        return "".join(
+            f"{kind}{len(positions)}"
+            if kind != "X" and len(positions) > 1
+            else f"{kind}"
+            for kind, positions in self.sites.items()
+        )
+
+    def find_orthorhombic_transform(
         self,
         max_cells: ArrayLike = None,
         **isclose_kwargs: dict,
@@ -267,15 +311,15 @@ class Structure:
 
         Parameters
         ----------
-        max_cells
+        max_cells : array_like, optional
             The maximum number of cells to search in each direction. If
             not given, the default is (5, 5, 5).
-        isclose_kwargs
+        **isclose_kwargs : dict, optional
             Keyword arguments to pass to :func:`numpy.isclose`.
 
         Returns
         -------
-        numpy.ndarray
+        transform : ndarray
             The transformation matrix.
 
         """
@@ -315,10 +359,9 @@ class Structure:
 
         Currently, the following viewers are supported:
 
-        - ASE: https://wiki.fysik.dtu.dk/ase/
-        - PyVista: https://docs.pyvista.org/
-        - A simple homebrew viewer built on matplotlib (not actually
-          3D).
+        - `Atomic Simulation Environment <https://wiki.fysik.dtu.dk/ase/>`_
+        - `PyVista <https://docs.pyvista.org/>`_
+        - A simple homebrew viewer built on matplotlib (not actually 3D).
 
         Parameters
         ----------
@@ -342,18 +385,19 @@ class Structure:
 
     def _view_ase(self, **kwargs) -> Any:
         """Visualizes the structure using the ASE viewer."""
-        if ase is None:
+        try:
+            import ase
+            import ase.visualize
+        except ImportError:
             raise ImportError("ASE is not installed.")
-        atoms = ase.Atoms(
-            symbols=self.kinds,
-            positions=self.positions,
-            cell=self.cell,
-        )
-        return ase.visualize.view(atoms, **kwargs)
+
+        return ase.visualize.view(self.to_ase_atoms(), **kwargs)
 
     def _view_pyvista(self, **kwargs) -> Any:
         """Visualizes the structure using the PyVista viewer."""
-        if pv is None:
+        try:
+            import pyvista as pv
+        except ImportError:
             raise ImportError("PyVista is not installed.")
 
         plotter = kwargs.pop("plotter", None)
@@ -402,7 +446,7 @@ class Structure:
 
         Returns
         -------
-        Axes3D
+        ax : Axes3D
             The matplotlib axes object.
 
         Notes
@@ -452,3 +496,25 @@ class Structure:
             [ub - lb for lb, ub in (getattr(ax, f"get_{a}lim")() for a in "xyz")]
         )
         return ax
+
+    def to_ase_atoms(self) -> Any:
+        """Converts the structure to an ASE atoms object.
+
+        For this to work, ASE must be installed.
+
+        Returns
+        -------
+        atoms : Any
+            The ASE atoms object.
+
+        """
+        try:
+            import ase
+        except ImportError:
+            raise ImportError("ASE is not installed.")
+        atoms = ase.Atoms(
+            symbols=self.kinds,
+            positions=self.positions,
+            cell=self.cell,
+        )
+        return atoms

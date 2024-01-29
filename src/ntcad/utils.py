@@ -14,6 +14,9 @@ def get_idle_hosts(prefix: str) -> list[str]:
     Invokes the ``cload`` command to find all hosts that are currently
     idle.
 
+    A host is considered idle if all three load averages are
+    below 0.5.
+
     Parameters
     ----------
     prefix : str
@@ -21,8 +24,15 @@ def get_idle_hosts(prefix: str) -> list[str]:
 
     Returns
     -------
-    list[str]
+    idle_hosts : list[str]
         A list of all hosts that are currently idle.
+
+    Examples
+    --------
+    Check which nodes are currently idle:
+
+    >>> get_idle_hosts("node") # doctest: +SKIP
+    ["node1", "node2", "node3"] # NOTE: This may take a while.
 
     """
     output = subprocess.check_output(["cload"] + [prefix]).decode()
@@ -40,7 +50,7 @@ def get_idle_hosts(prefix: str) -> list[str]:
 
 
 def ndrange(start, stop=None, step=None, centered=False):
-    """A n-dimensional version of the built-in ``range`` function.
+    """A n-dimensional version of the built-in `range` function.
 
     Parameters
     ----------
@@ -55,11 +65,11 @@ def ndrange(start, stop=None, step=None, centered=False):
         n-dimensional.
     centered : bool, optional
         Whether the range should be centered around the origin. If
-        ``True``, ``start`` and ``step`` are ignored.
+        `True`, `start` and `step` are ignored.
 
     Yields
     ------
-    tuple[int]
+    element : tuple[int]
         The next element in the range.
 
     See Also
@@ -70,6 +80,27 @@ def ndrange(start, stop=None, step=None, centered=False):
     -----
     This is taken from `this StackOverflow answer
     <https://stackoverflow.com/a/46332920>`_.
+
+    Examples
+    --------
+    Create a 2D range generator and convert it to a list:
+
+    >>> it = ndrange((2, 3))
+    >>> list(it)
+    [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]
+
+    One can also use the `start` and `step` arguments:
+
+    >>> it = ndrange((-1, -1), (5, 5), (2, 2))
+    >>> list(it)
+    [(-1, -1), (-1, 1), (-1, 3), (1, -1), (1, 1), (1, 3), (3, -1), (3, 1), (3, 3)]
+
+    The `centered` argument can be used to create a range centered
+    around the origin:
+
+    >>> it = ndrange((3, 3), centered=True)
+    >>> list(it)
+    [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1)]
 
     """
 
@@ -102,13 +133,20 @@ def center_index(shape: tuple) -> tuple:
 
     Returns
     -------
-    tuple
+    center_index : tuple
         The center index of the object.
+
+    Examples
+    --------
+    Find the center index of an object with shape (3, 5, 7):
+
+    >>> center_index(shape=(3, 5, 7))
+    (1, 2, 3)
 
     """
     is_even = [s % 2 == 0 for s in shape]
     if any(is_even):
         warnings.warn(
-            "Even number of elements in one dimension. " "Center index is rounded down."
+            "Even number of elements in one dimension. Center index is rounded down."
         )
     return tuple((s - 1) // 2 for s in shape)

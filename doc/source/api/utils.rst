@@ -3,6 +3,8 @@
 Utility functions
 =================
 
+Utility functions for all kinds of things.
+
 .. currentmodule:: ntcad.utils
 
 .. autosummary::

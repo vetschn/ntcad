@@ -1,7 +1,7 @@
 .. _ntcad_docs_mainpage:
 
-`ntcad`
-=======
+ntcad
+=====
 
 .. toctree::
    :maxdepth: 1

@@ -17,7 +17,7 @@ def nearest_neighbors(matrix: np.ndarray, **kwargs: dict) -> Axes:
     matrix : ndarray
         The matrix to plot the nearest neighbors of.
     **kwargs : dict
-        Additional keyword arguments to pass to the plot function.
+        Additional keyword arguments to pass to the `spy` function.
 
     Returns
     -------
@@ -31,7 +31,7 @@ def nearest_neighbors(matrix: np.ndarray, **kwargs: dict) -> Axes:
     """
     ax = kwargs.pop("ax")
     if ax is None:
-        fig, ax = plt.subplots()
+        __, ax = plt.subplots()
 
     num_atoms = matrix.shape[0]
     neighbors = matrix[:, 3:].astype(int) - 1
