@@ -1,0 +1,9 @@
+:orphan:
+
+ntcad.wannier90.Wannier90.write\_input
+======================================
+
+.. currentmodule:: ntcad.wannier90
+
+.. automethod:: ntcad::wannier90.Wannier90.write_input
+

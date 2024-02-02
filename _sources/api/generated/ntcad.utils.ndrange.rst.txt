@@ -1,0 +1,11 @@
+﻿
+
+ntcad.utils.ndrange
+===================
+
+.. currentmodule:: ntcad.utils
+
+
+
+.. autofunction:: ntcad::utils.ndrange
+

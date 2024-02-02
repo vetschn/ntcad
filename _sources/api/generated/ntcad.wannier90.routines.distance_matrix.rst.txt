@@ -1,0 +1,11 @@
+
+
+ntcad.wannier90.routines.distance\_matrix
+=========================================
+
+.. currentmodule:: ntcad.wannier90.routines
+
+
+
+.. autofunction:: ntcad::wannier90.routines.distance_matrix
+

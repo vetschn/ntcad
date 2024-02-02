@@ -1,0 +1,11 @@
+
+
+ntcad.wannier90.plot.operator
+=============================
+
+.. currentmodule:: ntcad.wannier90.plot
+
+
+
+.. autofunction:: ntcad::wannier90.plot.operator
+

@@ -1,0 +1,15 @@
+
+:orphan:
+
+
+ntcad.structure.Structure.volume
+================================
+
+.. currentmodule:: ntcad.structure
+
+
+property
+
+
+.. autoproperty:: ntcad::structure.Structure.volume
+

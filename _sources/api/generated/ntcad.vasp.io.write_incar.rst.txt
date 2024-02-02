@@ -1,0 +1,11 @@
+
+
+ntcad.vasp.io.write\_incar
+==========================
+
+.. currentmodule:: ntcad.vasp.io
+
+
+
+.. autofunction:: ntcad::vasp.io.write_incar
+

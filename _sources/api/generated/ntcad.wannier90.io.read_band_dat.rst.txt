@@ -1,0 +1,11 @@
+
+
+ntcad.wannier90.io.read\_band\_dat
+==================================
+
+.. currentmodule:: ntcad.wannier90.io
+
+
+
+.. autofunction:: ntcad::wannier90.io.read_band_dat
+

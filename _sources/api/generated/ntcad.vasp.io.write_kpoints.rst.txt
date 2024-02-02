@@ -1,0 +1,11 @@
+
+
+ntcad.vasp.io.write\_kpoints
+============================
+
+.. currentmodule:: ntcad.vasp.io
+
+
+
+.. autofunction:: ntcad::vasp.io.write_kpoints
+

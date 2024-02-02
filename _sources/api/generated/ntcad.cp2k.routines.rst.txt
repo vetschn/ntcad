@@ -1,0 +1,35 @@
+﻿ntcad.cp2k.routines
+===================
+
+.. automodule:: ntcad.cp2k.routines
+
+   
+
+
+
+   
+
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      cart_to_pure_coeff
+      contracted_gto
+      extract_basis_functions
+      normalized_gto
+      primitive_gto
+      pure_sph_harm_gto
+
+
+
+   
+
+
+
+   
+   
+   
+
+
+

@@ -1,0 +1,11 @@
+
+
+ntcad.wannier90.routines.approximate\_position\_operator
+========================================================
+
+.. currentmodule:: ntcad.wannier90.routines
+
+
+
+.. autofunction:: ntcad::wannier90.routines.approximate_position_operator
+

@@ -1,0 +1,11 @@
+
+
+ntcad.wannier90.routines.k\_sample
+==================================
+
+.. currentmodule:: ntcad.wannier90.routines
+
+
+
+.. autofunction:: ntcad::wannier90.routines.k_sample
+

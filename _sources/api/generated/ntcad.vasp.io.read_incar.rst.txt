@@ -1,0 +1,11 @@
+
+
+ntcad.vasp.io.read\_incar
+=========================
+
+.. currentmodule:: ntcad.vasp.io
+
+
+
+.. autofunction:: ntcad::vasp.io.read_incar
+

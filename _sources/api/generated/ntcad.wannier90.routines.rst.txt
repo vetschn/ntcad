@@ -1,0 +1,35 @@
+﻿ntcad.wannier90.routines
+========================
+
+.. automodule:: ntcad.wannier90.routines
+
+   
+
+
+
+   
+
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      approximate_position_operator
+      distance_matrix
+      is_hermitian
+      k_sample
+      make_hermitian
+      momentum_operator
+
+
+
+   
+
+
+
+   
+   
+   
+
+
+

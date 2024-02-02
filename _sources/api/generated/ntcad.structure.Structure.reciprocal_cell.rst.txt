@@ -1,0 +1,15 @@
+
+:orphan:
+
+
+ntcad.structure.Structure.reciprocal\_cell
+==========================================
+
+.. currentmodule:: ntcad.structure
+
+
+property
+
+
+.. autoproperty:: ntcad::structure.Structure.reciprocal_cell
+

@@ -1,0 +1,11 @@
+
+
+ntcad.omen.io.read\_H\_matrices
+===============================
+
+.. currentmodule:: ntcad.omen.io
+
+
+
+.. autofunction:: ntcad::omen.io.read_H_matrices
+

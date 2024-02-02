@@ -1,0 +1,11 @@
+﻿
+
+ntcad.utils.center\_index
+=========================
+
+.. currentmodule:: ntcad.utils
+
+
+
+.. autofunction:: ntcad::utils.center_index
+

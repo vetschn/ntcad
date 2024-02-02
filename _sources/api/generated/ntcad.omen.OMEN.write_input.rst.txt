@@ -1,0 +1,9 @@
+:orphan:
+
+ntcad.omen.OMEN.write\_input
+============================
+
+.. currentmodule:: ntcad.omen
+
+.. automethod:: ntcad::omen.OMEN.write_input
+

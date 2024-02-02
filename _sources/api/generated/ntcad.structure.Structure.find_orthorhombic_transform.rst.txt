@@ -1,0 +1,9 @@
+:orphan:
+
+ntcad.structure.Structure.find\_orthorhombic\_transform
+=======================================================
+
+.. currentmodule:: ntcad.structure
+
+.. automethod:: ntcad::structure.Structure.find_orthorhombic_transform
+

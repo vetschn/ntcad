@@ -1,0 +1,11 @@
+
+
+ntcad.omen.routines.split\_H\_matrices
+======================================
+
+.. currentmodule:: ntcad.omen.routines
+
+
+
+.. autofunction:: ntcad::omen.routines.split_H_matrices
+

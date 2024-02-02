@@ -1,0 +1,11 @@
+
+
+ntcad.omen.routines.max\_nn
+===========================
+
+.. currentmodule:: ntcad.omen.routines
+
+
+
+.. autofunction:: ntcad::omen.routines.max_nn
+

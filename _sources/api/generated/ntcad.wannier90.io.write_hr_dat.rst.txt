@@ -1,0 +1,11 @@
+
+
+ntcad.wannier90.io.write\_hr\_dat
+=================================
+
+.. currentmodule:: ntcad.wannier90.io
+
+
+
+.. autofunction:: ntcad::wannier90.io.write_hr_dat
+

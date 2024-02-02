@@ -1,0 +1,11 @@
+
+
+ntcad.cp2k.io.read\_basis\_set\_database
+========================================
+
+.. currentmodule:: ntcad.cp2k.io
+
+
+
+.. autofunction:: ntcad::cp2k.io.read_basis_set_database
+

@@ -1,0 +1,11 @@
+
+
+ntcad.cp2k.routines.pure\_sph\_harm\_gto
+========================================
+
+.. currentmodule:: ntcad.cp2k.routines
+
+
+
+.. autofunction:: ntcad::cp2k.routines.pure_sph_harm_gto
+

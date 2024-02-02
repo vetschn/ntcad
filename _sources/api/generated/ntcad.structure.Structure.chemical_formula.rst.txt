@@ -1,0 +1,15 @@
+
+:orphan:
+
+
+ntcad.structure.Structure.chemical\_formula
+===========================================
+
+.. currentmodule:: ntcad.structure
+
+
+property
+
+
+.. autoproperty:: ntcad::structure.Structure.chemical_formula
+

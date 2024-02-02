@@ -1,0 +1,9 @@
+:orphan:
+
+ntcad.winterface.Winterface.write\_input
+========================================
+
+.. currentmodule:: ntcad.winterface
+
+.. automethod:: ntcad::winterface.Winterface.write_input
+

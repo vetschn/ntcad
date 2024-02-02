@@ -1,0 +1,30 @@
+﻿ntcad.structure.Structure
+=========================
+
+.. currentmodule:: ntcad.structure
+
+.. autoclass:: Structure
+
+   
+
+   .. HACK -- the point here is that we don't want this to appear in the output, but the autosummary should still generate the pages.
+      .. autosummary::
+         :toctree:
+      
+         Structure.find_orthorhombic_transform
+         Structure.to_ase_atoms
+         Structure.view
+
+
+
+   
+
+   .. HACK -- the point here is that we don't want this to appear in the output, but the autosummary should still generate the pages.
+      .. autosummary::
+         :toctree:
+      
+         Structure.chemical_formula
+         Structure.reciprocal_cell
+         Structure.scaled_positions
+         Structure.volume
+

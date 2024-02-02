@@ -1,0 +1,30 @@
+﻿ntcad.winterface.io
+===================
+
+.. automodule:: ntcad.winterface.io
+
+   
+
+
+
+   
+
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      write_winput
+
+
+
+   
+
+
+
+   
+   
+   
+
+
+

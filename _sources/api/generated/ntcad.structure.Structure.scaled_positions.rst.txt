@@ -1,0 +1,15 @@
+
+:orphan:
+
+
+ntcad.structure.Structure.scaled\_positions
+===========================================
+
+.. currentmodule:: ntcad.structure
+
+
+property
+
+
+.. autoproperty:: ntcad::structure.Structure.scaled_positions
+
