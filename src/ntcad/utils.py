@@ -150,3 +150,29 @@ def center_index(shape: tuple) -> tuple:
             "Even number of elements in one dimension. Center index is rounded down."
         )
     return tuple((s - 1) // 2 for s in shape)
+
+
+def get_tuples_summing_to(total: int):
+    """Generates all tuples of 3 integers summing to a given total.
+
+    Parameters
+    ----------
+    total : int
+        The sum for which to generate the tuples.
+
+    Yields
+    ------
+    tuple : tuple[int]
+        The next tuple summing to `total`.
+
+    Examples
+    --------
+    Generate all tuples summing to 2:
+    >>> list(get_tuples_summing_to(2))
+    [(0, 0, 2), (0, 1, 1), (0, 2, 0), (1, 0, 1), (1, 1, 0), (2, 0, 0)]
+
+    """
+
+    for i in range(total + 1):
+        for j in range(total - i + 1):
+            yield i, j, total - i - j

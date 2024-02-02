@@ -15,4 +15,5 @@ API Reference
     wannier90
     winterface
     omen
+    cp2k
     utils
