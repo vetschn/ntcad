@@ -1,0 +1,11 @@
+
+
+ntcad.vasp.io.read\_chg
+=======================
+
+.. currentmodule:: ntcad.vasp.io
+
+
+
+.. autofunction:: ntcad::vasp.io.read_chg
+

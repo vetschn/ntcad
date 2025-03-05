@@ -1,0 +1,11 @@
+
+
+ntcad.vasp.io.read\_poscar
+==========================
+
+.. currentmodule:: ntcad.vasp.io
+
+
+
+.. autofunction:: ntcad::vasp.io.read_poscar
+

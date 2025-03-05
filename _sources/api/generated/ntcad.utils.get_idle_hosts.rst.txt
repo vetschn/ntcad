@@ -1,0 +1,11 @@
+﻿
+
+ntcad.utils.get\_idle\_hosts
+============================
+
+.. currentmodule:: ntcad.utils
+
+
+
+.. autofunction:: ntcad::utils.get_idle_hosts
+

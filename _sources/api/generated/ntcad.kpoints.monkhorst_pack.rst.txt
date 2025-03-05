@@ -1,0 +1,11 @@
+﻿
+
+ntcad.kpoints.monkhorst\_pack
+=============================
+
+.. currentmodule:: ntcad.kpoints
+
+
+
+.. autofunction:: ntcad::kpoints.monkhorst_pack
+

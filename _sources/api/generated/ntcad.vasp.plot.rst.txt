@@ -1,0 +1,30 @@
+﻿ntcad.vasp.plot
+===============
+
+.. automodule:: ntcad.vasp.plot
+
+   
+
+
+
+   
+
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      bands
+
+
+
+   
+
+
+
+   
+   
+   
+
+
+

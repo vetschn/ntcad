@@ -1,0 +1,11 @@
+
+
+ntcad.omen.io.read\_mat\_par
+============================
+
+.. currentmodule:: ntcad.omen.io
+
+
+
+.. autofunction:: ntcad::omen.io.read_mat_par
+

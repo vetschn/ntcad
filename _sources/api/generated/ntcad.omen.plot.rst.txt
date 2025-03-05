@@ -1,0 +1,30 @@
+﻿ntcad.omen.plot
+===============
+
+.. automodule:: ntcad.omen.plot
+
+   
+
+
+
+   
+
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      nearest_neighbors
+
+
+
+   
+
+
+
+   
+   
+   
+
+
+

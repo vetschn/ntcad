@@ -1,0 +1,9 @@
+:orphan:
+
+ntcad.winterface.Winterface.read\_output
+========================================
+
+.. currentmodule:: ntcad.winterface
+
+.. automethod:: ntcad::winterface.Winterface.read_output
+

@@ -1,0 +1,9 @@
+:orphan:
+
+ntcad.structure.Structure.view
+==============================
+
+.. currentmodule:: ntcad.structure
+
+.. automethod:: ntcad::structure.Structure.view
+

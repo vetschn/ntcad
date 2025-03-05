@@ -1,0 +1,9 @@
+:orphan:
+
+ntcad.winterface.Winterface.calculate
+=====================================
+
+.. currentmodule:: ntcad.winterface
+
+.. automethod:: ntcad::winterface.Winterface.calculate
+

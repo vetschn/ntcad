@@ -1,0 +1,9 @@
+:orphan:
+
+ntcad.vasp.VASP.write\_input
+============================
+
+.. currentmodule:: ntcad.vasp
+
+.. automethod:: ntcad::vasp.VASP.write_input
+

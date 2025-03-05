@@ -1,0 +1,31 @@
+﻿ntcad.cp2k.io
+=============
+
+.. automodule:: ntcad.cp2k.io
+
+   
+
+
+
+   
+
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      read_basis_set
+      read_basis_set_database
+
+
+
+   
+
+
+
+   
+   
+   
+
+
+

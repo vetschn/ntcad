@@ -1,0 +1,11 @@
+
+
+ntcad.cp2k.routines.extract\_basis\_functions
+=============================================
+
+.. currentmodule:: ntcad.cp2k.routines
+
+
+
+.. autofunction:: ntcad::cp2k.routines.extract_basis_functions
+

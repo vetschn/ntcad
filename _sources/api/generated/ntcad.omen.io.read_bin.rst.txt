@@ -1,0 +1,11 @@
+
+
+ntcad.omen.io.read\_bin
+=======================
+
+.. currentmodule:: ntcad.omen.io
+
+
+
+.. autofunction:: ntcad::omen.io.read_bin
+

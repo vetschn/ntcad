@@ -1,0 +1,11 @@
+
+
+ntcad.winterface.io.write\_winput
+=================================
+
+.. currentmodule:: ntcad.winterface.io
+
+
+
+.. autofunction:: ntcad::winterface.io.write_winput
+

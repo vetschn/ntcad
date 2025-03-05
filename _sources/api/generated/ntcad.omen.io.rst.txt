@@ -1,0 +1,38 @@
+﻿ntcad.omen.io
+=============
+
+.. automodule:: ntcad.omen.io
+
+   
+
+
+
+   
+
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      read_H_matrices
+      read_M_matrices
+      read_bin
+      read_dat
+      read_lattice_dat
+      read_mat_par
+      write_P_bin
+      write_bin
+      write_e_dat
+
+
+
+   
+
+
+
+   
+   
+   
+
+
+

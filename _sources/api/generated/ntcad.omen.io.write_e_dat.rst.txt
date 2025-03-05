@@ -1,0 +1,11 @@
+
+
+ntcad.omen.io.write\_e\_dat
+===========================
+
+.. currentmodule:: ntcad.omen.io
+
+
+
+.. autofunction:: ntcad::omen.io.write_e_dat
+

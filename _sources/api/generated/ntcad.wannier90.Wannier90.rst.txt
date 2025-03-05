@@ -1,0 +1,21 @@
+﻿ntcad.wannier90.Wannier90
+=========================
+
+.. currentmodule:: ntcad.wannier90
+
+.. autoclass:: Wannier90
+
+   
+
+   .. HACK -- the point here is that we don't want this to appear in the output, but the autosummary should still generate the pages.
+      .. autosummary::
+         :toctree:
+      
+         Wannier90.calculate
+         Wannier90.read_output
+         Wannier90.write_input
+
+
+
+   
+

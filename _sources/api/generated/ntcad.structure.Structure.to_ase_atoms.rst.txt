@@ -1,0 +1,9 @@
+:orphan:
+
+ntcad.structure.Structure.to\_ase\_atoms
+========================================
+
+.. currentmodule:: ntcad.structure
+
+.. automethod:: ntcad::structure.Structure.to_ase_atoms
+

@@ -1,0 +1,11 @@
+
+
+ntcad.cp2k.routines.primitive\_gto
+==================================
+
+.. currentmodule:: ntcad.cp2k.routines
+
+
+
+.. autofunction:: ntcad::cp2k.routines.primitive_gto
+

@@ -1,0 +1,9 @@
+:orphan:
+
+ntcad.vasp.VASP.calculate
+=========================
+
+.. currentmodule:: ntcad.vasp
+
+.. automethod:: ntcad::vasp.VASP.calculate
+

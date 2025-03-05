@@ -1,0 +1,37 @@
+﻿ntcad.vasp.io
+=============
+
+.. automodule:: ntcad.vasp.io
+
+   
+
+
+
+   
+
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      read_chg
+      read_incar
+      read_poscar
+      read_vasprun_xml
+      write_incar
+      write_kpoints
+      write_poscar
+      write_potcar
+
+
+
+   
+
+
+
+   
+   
+   
+
+
+

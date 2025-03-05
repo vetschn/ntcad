@@ -1,0 +1,9 @@
+:orphan:
+
+ntcad.omen.OMEN.calculate
+=========================
+
+.. currentmodule:: ntcad.omen
+
+.. automethod:: ntcad::omen.OMEN.calculate
+

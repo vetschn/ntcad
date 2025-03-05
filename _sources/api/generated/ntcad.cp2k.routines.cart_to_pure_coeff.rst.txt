@@ -1,0 +1,11 @@
+
+
+ntcad.cp2k.routines.cart\_to\_pure\_coeff
+=========================================
+
+.. currentmodule:: ntcad.cp2k.routines
+
+
+
+.. autofunction:: ntcad::cp2k.routines.cart_to_pure_coeff
+

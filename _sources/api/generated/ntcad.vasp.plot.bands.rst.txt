@@ -1,0 +1,11 @@
+
+
+ntcad.vasp.plot.bands
+=====================
+
+.. currentmodule:: ntcad.vasp.plot
+
+
+
+.. autofunction:: ntcad::vasp.plot.bands
+

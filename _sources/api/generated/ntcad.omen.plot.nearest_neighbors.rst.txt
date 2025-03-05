@@ -1,0 +1,11 @@
+
+
+ntcad.omen.plot.nearest\_neighbors
+==================================
+
+.. currentmodule:: ntcad.omen.plot
+
+
+
+.. autofunction:: ntcad::omen.plot.nearest_neighbors
+

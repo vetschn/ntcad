@@ -1,0 +1,11 @@
+
+
+ntcad.wannier90.routines.make\_hermitian
+========================================
+
+.. currentmodule:: ntcad.wannier90.routines
+
+
+
+.. autofunction:: ntcad::wannier90.routines.make_hermitian
+

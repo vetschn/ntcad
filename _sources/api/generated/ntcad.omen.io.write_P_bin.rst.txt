@@ -1,0 +1,11 @@
+
+
+ntcad.omen.io.write\_P\_bin
+===========================
+
+.. currentmodule:: ntcad.omen.io
+
+
+
+.. autofunction:: ntcad::omen.io.write_P_bin
+

@@ -1,0 +1,11 @@
+
+
+ntcad.omen.routines.photon\_scattering\_matrix\_large
+=====================================================
+
+.. currentmodule:: ntcad.omen.routines
+
+
+
+.. autofunction:: ntcad::omen.routines.photon_scattering_matrix_large
+

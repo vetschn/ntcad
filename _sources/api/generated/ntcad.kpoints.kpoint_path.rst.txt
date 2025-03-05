@@ -1,0 +1,11 @@
+﻿
+
+ntcad.kpoints.kpoint\_path
+==========================
+
+.. currentmodule:: ntcad.kpoints
+
+
+
+.. autofunction:: ntcad::kpoints.kpoint_path
+

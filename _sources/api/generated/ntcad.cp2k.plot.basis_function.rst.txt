@@ -1,0 +1,11 @@
+
+
+ntcad.cp2k.plot.basis\_function
+===============================
+
+.. currentmodule:: ntcad.cp2k.plot
+
+
+
+.. autofunction:: ntcad::cp2k.plot.basis_function
+

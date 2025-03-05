@@ -1,0 +1,9 @@
+:orphan:
+
+ntcad.vasp.VASP.clear
+=====================
+
+.. currentmodule:: ntcad.vasp
+
+.. automethod:: ntcad::vasp.VASP.clear
+
