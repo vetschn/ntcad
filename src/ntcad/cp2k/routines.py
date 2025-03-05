@@ -3,11 +3,13 @@ Useful processing routines and operations for CP2K data.
 
 """
 
+from functools import partial
+from math import factorial
 from typing import Callable
 
 import numpy as np
 from numpy.typing import ArrayLike
-from scipy.special import comb, factorial
+from scipy.special import comb
 
 from ntcad.utils import get_tuples_summing_to
 
@@ -207,16 +209,16 @@ def cart_to_pure_coeff(l: int, m: int, l_x: int, l_y: int, l_z: int) -> complex:
     for i in range((l - abs(m)) // 2 + 1):
         temp_0 = comb(l, i) * comb(i, j)
         temp_1 = (-1) ** i * factorial(2 * l - 2 * i) / factorial(l - abs(m) - 2 * i)
-        temp_sum = sum(
-            (comb(j, k) * comb(abs(m), l_x - 2 * k))
-            * np.emath.sqrt((-1) ** float(np.sign(m) * (abs(m) - l_x + 2 * k)))
-            for k in range(j + 1)
-        )
-        second_term_sum += temp_0 * temp_1 * temp_sum
-
+        second_term_sum += temp_0 * temp_1
     second_term = second_term_prefactor * second_term_sum
 
-    return first_term * second_term
+    third_term = sum(
+        (comb(j, k) * comb(abs(m), l_x - 2 * k))
+        * (-1) ** float(np.sign(m) * (abs(m) - l_x + 2 * k) / 2)
+        for k in range(j + 1)
+    )
+
+    return first_term * second_term * third_term
 
 
 def pure_sph_harm_gto(
@@ -278,9 +280,9 @@ def pure_sph_harm_gto(
         axis=0,
     )
     if m > 0:
-        return (psi + psi_m) / np.sqrt(2)
+        return (psi_m + psi) / np.sqrt(2)
 
-    return (psi - psi_m) / np.sqrt(2)
+    return (psi_m - psi) / np.sqrt(2)
 
 
 def extract_basis_functions(basis_set: dict) -> list[Callable]:
@@ -308,7 +310,7 @@ def extract_basis_functions(basis_set: dict) -> list[Callable]:
             for m in range(-l, l + 1):
                 for c in param_set["c"][l].T:
                     basis_functions.append(
-                        lambda x, y, z: pure_sph_harm_gto(x, y, z, l, m, a, c)
+                        partial(pure_sph_harm_gto, l=l, m=m, a=a, c=c)
                     )
 
     return basis_functions

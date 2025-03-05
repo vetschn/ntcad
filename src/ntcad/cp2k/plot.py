@@ -3,6 +3,7 @@ Visualization routines for CP2K data.
 
 """
 
+import warnings
 from typing import Callable
 
 import numpy as np
@@ -11,12 +12,12 @@ import pyvista as pv
 
 def basis_function(
     psi: Callable,
-    n: int,
     plotter=None,
     square_modulus=False,
     grid_size=50,
-    zoom=1.0,
+    spacing=0.1,
     isosurfaces=100,
+    origin=None,
 ):
     """Plots a basis function in 3D.
 
@@ -49,13 +50,15 @@ def basis_function(
         `plotter.show()` to actually display the plot.
 
     """
-    origin = (1.5 * n**2 + 10.0) / zoom
-    sp = (origin * 2) / (grid_size - 1)
+    if origin is None:
+        origin = [0] * 3
 
-    grid = pv.UniformGrid(
+    origin = [component - grid_size * spacing / 2 for component in origin]
+
+    grid = pv.ImageData(
         dimensions=(grid_size, grid_size, grid_size),
-        spacing=(sp, sp, sp),
-        origin=(-origin, -origin, -origin),
+        spacing=(spacing, spacing, spacing),
+        origin=origin,
     )
 
     wfc = psi(grid.x, grid.y, grid.z).reshape(grid.dimensions)
@@ -63,19 +66,27 @@ def basis_function(
     if plotter is None:
         plotter = pv.Plotter(notebook=False)
 
+    grid["wave_function"] = wfc.ravel().real + wfc.ravel().imag
+    grid["square_modulus"] = np.abs(wfc.ravel()) ** 2
     if square_modulus:
-        grid["square_modulus"] = np.abs(wfc.ravel()) ** 2
+        integral = np.sum(grid["square_modulus"]) * spacing**3
+        if not np.isclose(integral, 1.0, atol=1e-3):
+            warnings.warn(
+                f"Integral of the square modulus is not 1.0 (it is {integral:.3f})."
+            )
+
         plotter.add_mesh(
             grid.contour(isosurfaces=isosurfaces, scalars="square_modulus"),
             cmap="plasma",
+            clim=[0, np.max(grid["square_modulus"])],
             smooth_shading=True,
             opacity=[0, 1],
         )
         return plotter
 
-    grid["wave_function"] = wfc.ravel()
     plotter.add_mesh(
         grid.contour(isosurfaces=isosurfaces, scalars="wave_function"),
+        clim=[-np.max(grid["wave_function"]), np.max(grid["wave_function"])],
         cmap="bwr",
         smooth_shading=True,
         opacity=[1, 0, 1],
